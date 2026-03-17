@@ -1,0 +1,149 @@
+import { Router } from 'express'
+import passport from 'passport'
+
+import { AppError } from '../../common/errors/AppError'
+import { authenticateUser } from '../../common/middlewares/auth'
+import { validateRequest } from '../../common/middlewares/validateRequest'
+import { config } from '../../config'
+import {
+  changeMyPassword,
+  forgotPassword,
+  getMe,
+  getMyLoginHistory,
+  login,
+  logout,
+  register,
+  resendVerification,
+  resetPassword,
+  socialCallback,
+  updateMe,
+  updateMyNotificationPreferences,
+  verifyEmail,
+} from './auth.controller'
+import { authValidation } from './auth.validation'
+
+const router = Router()
+
+const ensureGoogleConfigured = (): void => {
+  if (
+    !config.oauth.googleClientId ||
+    !config.oauth.googleClientSecret ||
+    !config.oauth.googleCallbackUrl
+  ) {
+    throw new AppError('Google authentication is not configured.', 503)
+  }
+}
+
+const ensureFacebookConfigured = (): void => {
+  if (
+    !config.oauth.facebookAppId ||
+    !config.oauth.facebookAppSecret ||
+    !config.oauth.facebookCallbackUrl
+  ) {
+    throw new AppError('Facebook authentication is not configured.', 503)
+  }
+}
+
+router.post(
+  '/register',
+  validateRequest({ body: authValidation.registerBody }),
+  register,
+)
+router.post(
+  '/login',
+  validateRequest({ body: authValidation.loginBody }),
+  login,
+)
+
+router.get(
+  '/google',
+  (_request, _response, next) => {
+    ensureGoogleConfigured()
+    next()
+  },
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    session: false,
+  }),
+)
+router.get(
+  '/google/callback',
+  (_request, _response, next) => {
+    ensureGoogleConfigured()
+    next()
+  },
+  passport.authenticate('google', {
+    session: false,
+    failWithError: true,
+  }),
+  socialCallback,
+)
+
+router.get(
+  '/facebook',
+  (_request, _response, next) => {
+    ensureFacebookConfigured()
+    next()
+  },
+  passport.authenticate('facebook', {
+    scope: ['email'],
+    session: false,
+  }),
+)
+router.get(
+  '/facebook/callback',
+  (_request, _response, next) => {
+    ensureFacebookConfigured()
+    next()
+  },
+  passport.authenticate('facebook', {
+    session: false,
+    failWithError: true,
+  }),
+  socialCallback,
+)
+
+router.post('/logout', logout)
+router.post(
+  '/verify-email',
+  validateRequest({ body: authValidation.verifyEmailBody }),
+  verifyEmail,
+)
+router.post(
+  '/resend-verification',
+  validateRequest({ body: authValidation.resendVerificationBody }),
+  resendVerification,
+)
+router.post(
+  '/forgot-password',
+  validateRequest({ body: authValidation.forgotPasswordBody }),
+  forgotPassword,
+)
+router.post(
+  '/reset-password',
+  validateRequest({ body: authValidation.resetPasswordBody }),
+  resetPassword,
+)
+
+router.get('/me', authenticateUser, getMe)
+router.get('/me/login-history', authenticateUser, getMyLoginHistory)
+router.patch(
+  '/me',
+  authenticateUser,
+  validateRequest({ body: authValidation.updateMeBody }),
+  updateMe,
+)
+router.patch(
+  '/me/password',
+  authenticateUser,
+  validateRequest({ body: authValidation.changePasswordBody }),
+  changeMyPassword,
+)
+router.patch(
+  '/me/notification-prefs',
+  authenticateUser,
+  validateRequest({ body: authValidation.updateNotificationPreferencesBody }),
+  updateMyNotificationPreferences,
+)
+
+export const authRouter = router

@@ -3,6 +3,7 @@ import http from 'node:http'
 import { config } from '../config'
 import { connectToDatabase, disconnectFromDatabase } from '../config/db'
 import { logger } from '../config/logger'
+import { rbacService } from '../modules/rbac'
 import { app } from './app'
 
 let server: http.Server | undefined
@@ -43,6 +44,7 @@ const shutdown = async (signal: string, exitCode = 0): Promise<void> => {
 
 const startServer = async (): Promise<void> => {
   await connectToDatabase()
+  await rbacService.ensurePermissionSeed()
 
   server = app.listen(config.port, () => {
     logger.info(`Server is running on port ${config.port}`, {
