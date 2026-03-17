@@ -1,6 +1,6 @@
 import type { RequestHandler } from 'express'
 
-export const responseTime: RequestHandler = (request, response, next) => {
+export const responseTime: RequestHandler = (_request, response, next) => {
   const start = process.hrtime.bigint()
   const originalEnd = response.end.bind(response)
 

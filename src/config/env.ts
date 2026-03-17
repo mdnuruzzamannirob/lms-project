@@ -21,6 +21,51 @@ const envSchema = z.object({
     .positive()
     .default(15 * 60 * 1000),
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(200),
+  JWT_USER_SECRET: z.string().trim().min(1, 'JWT_USER_SECRET is required'),
+  JWT_STAFF_SECRET: z.string().trim().min(1, 'JWT_STAFF_SECRET is required'),
+  JWT_ACCESS_EXPIRES_IN: z.string().trim().default('1d'),
+  JWT_ISSUER: z.string().trim().default('lms-backend'),
+  EMAIL_PROVIDER: z.enum(['console', 'resend']).default('console'),
+  EMAIL_FROM: z.string().trim().default('noreply@example.com'),
+  RESEND_API_KEY: z.string().trim().optional(),
+  SMS_PROVIDER: z.enum(['console', 'twilio']).default('console'),
+  TWILIO_ACCOUNT_SID: z.string().trim().optional(),
+  TWILIO_AUTH_TOKEN: z.string().trim().optional(),
+  TWILIO_FROM: z.string().trim().optional(),
+  PUSH_PROVIDER: z.enum(['console', 'fcm']).default('console'),
+  FCM_SERVER_KEY: z.string().trim().optional(),
+  STORAGE_PROVIDER: z.enum(['local', 'cloudinary']).default('local'),
+  LOCAL_STORAGE_PATH: z.string().trim().default('uploads'),
+  LOCAL_STORAGE_BASE_URL: z
+    .string()
+    .trim()
+    .default('http://localhost:5000/uploads'),
+  CLOUDINARY_CLOUD_NAME: z.string().trim().optional(),
+  CLOUDINARY_API_KEY: z.string().trim().optional(),
+  CLOUDINARY_API_SECRET: z.string().trim().optional(),
+  PAYMENT_PROVIDER: z.enum(['mock', 'sslcommerz', 'paypal']).default('mock'),
+  SSLCOMMERZ_STORE_ID: z.string().trim().optional(),
+  SSLCOMMERZ_STORE_PASSWORD: z.string().trim().optional(),
+  SSLCOMMERZ_IS_LIVE: z
+    .preprocess((value) => {
+      if (typeof value === 'string') {
+        return value.toLowerCase() === 'true'
+      }
+      return value
+    }, z.boolean())
+    .default(false),
+  PAYPAL_CLIENT_ID: z.string().trim().optional(),
+  PAYPAL_CLIENT_SECRET: z.string().trim().optional(),
+  PAYPAL_MODE: z.enum(['sandbox', 'live']).default('sandbox'),
+  WORKER_ENABLED: z
+    .preprocess((value) => {
+      if (typeof value === 'string') {
+        return value.toLowerCase() === 'true'
+      }
+      return value
+    }, z.boolean())
+    .default(true),
+  WORKER_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(30000),
 })
 
 const parsedEnv = envSchema.safeParse(process.env)
@@ -50,6 +95,40 @@ export const env = {
   logDir: rawEnv.LOG_DIR,
   rateLimitWindowMs: rawEnv.RATE_LIMIT_WINDOW_MS,
   rateLimitMax: rawEnv.RATE_LIMIT_MAX,
+  jwt: {
+    userSecret: rawEnv.JWT_USER_SECRET,
+    staffSecret: rawEnv.JWT_STAFF_SECRET,
+    accessExpiresIn: rawEnv.JWT_ACCESS_EXPIRES_IN,
+    issuer: rawEnv.JWT_ISSUER,
+  },
+  providers: {
+    email: rawEnv.EMAIL_PROVIDER,
+    emailFrom: rawEnv.EMAIL_FROM,
+    resendApiKey: rawEnv.RESEND_API_KEY,
+    sms: rawEnv.SMS_PROVIDER,
+    twilioAccountSid: rawEnv.TWILIO_ACCOUNT_SID,
+    twilioAuthToken: rawEnv.TWILIO_AUTH_TOKEN,
+    twilioFrom: rawEnv.TWILIO_FROM,
+    push: rawEnv.PUSH_PROVIDER,
+    fcmServerKey: rawEnv.FCM_SERVER_KEY,
+    storage: rawEnv.STORAGE_PROVIDER,
+    localStoragePath: rawEnv.LOCAL_STORAGE_PATH,
+    localStorageBaseUrl: rawEnv.LOCAL_STORAGE_BASE_URL,
+    cloudinaryCloudName: rawEnv.CLOUDINARY_CLOUD_NAME,
+    cloudinaryApiKey: rawEnv.CLOUDINARY_API_KEY,
+    cloudinaryApiSecret: rawEnv.CLOUDINARY_API_SECRET,
+    payment: rawEnv.PAYMENT_PROVIDER,
+    sslCommerzStoreId: rawEnv.SSLCOMMERZ_STORE_ID,
+    sslCommerzStorePassword: rawEnv.SSLCOMMERZ_STORE_PASSWORD,
+    sslCommerzIsLive: rawEnv.SSLCOMMERZ_IS_LIVE,
+    paypalClientId: rawEnv.PAYPAL_CLIENT_ID,
+    paypalClientSecret: rawEnv.PAYPAL_CLIENT_SECRET,
+    paypalMode: rawEnv.PAYPAL_MODE,
+  },
+  worker: {
+    enabled: rawEnv.WORKER_ENABLED,
+    pollIntervalMs: rawEnv.WORKER_POLL_INTERVAL_MS,
+  },
 } as const
 
 export type Env = typeof env
