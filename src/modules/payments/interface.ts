@@ -52,4 +52,3 @@ export interface IWebhookLog {
   createdAt: Date
   updatedAt: Date
 }
-

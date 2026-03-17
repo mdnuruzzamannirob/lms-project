@@ -50,7 +50,9 @@ const envSchema = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().trim().optional(),
   CLOUDINARY_API_KEY: z.string().trim().optional(),
   CLOUDINARY_API_SECRET: z.string().trim().optional(),
-  PAYMENT_PROVIDER: z.enum(['sslcommerz', 'stripe', 'paypal']).default('sslcommerz'),
+  PAYMENT_PROVIDER: z
+    .enum(['sslcommerz', 'stripe', 'paypal'])
+    .default('sslcommerz'),
   SSLCOMMERZ_STORE_ID: z.string().trim().optional(),
   SSLCOMMERZ_STORE_PASSWORD: z.string().trim().optional(),
   SSLCOMMERZ_IS_LIVE: z

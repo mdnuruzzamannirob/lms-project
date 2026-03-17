@@ -289,4 +289,3 @@ export const paymentProviderService = {
     return getProvider().verifyWebhook(payload, signature)
   },
 }
-

@@ -33,4 +33,3 @@ export const paymentsValidation = {
   // body schema enforcement is skipped on the route — adapters own this responsibility.
   webhookBody: z.record(z.unknown()),
 }
-
