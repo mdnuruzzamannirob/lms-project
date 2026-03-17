@@ -1,13 +1,14 @@
 {
   "name": "library-management-system-backend",
   "version": "1.0.0",
-  "description": "Library Management System Backend built with Node.js, Express, and MongoDB.",
-  "main": "index.js",
+  "description": "Library Management System Backend — Node.js + Express + TypeScript + MongoDB",
+  "main": "dist/server.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "seed:permissions": "node seeds/permissions.js",
-    "seed:plans": "node seeds/plans.js"
+    "dev": "ts-node-dev --respawn --transpile-only server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "seed:permissions": "ts-node seeds/permissions.ts",
+    "seed:plans": "ts-node seeds/plans.ts"
   },
   "keywords": [],
   "author": "Md. Nuruzzaman",
@@ -32,6 +33,18 @@
     "passport-jwt": "^4.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/morgan": "^1.9.9",
+    "@types/nodemailer": "^6.4.17",
+    "@types/node": "^22.10.7",
+    "@types/passport": "^1.0.17",
+    "@types/passport-jwt": "^4.0.1",
+    "@types/express": "^4.17.21",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.7.3"
   }
 }
