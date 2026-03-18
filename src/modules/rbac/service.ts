@@ -159,6 +159,36 @@ export const defaultPermissionSeeds: PermissionSeed[] = [
     description: 'Moderate review visibility',
     module: 'reviews',
   },
+  {
+    key: 'notifications.view',
+    name: 'View Notifications',
+    description: 'View notification records and logs',
+    module: 'notifications',
+  },
+  {
+    key: 'notifications.manage',
+    name: 'Manage Notifications',
+    description: 'Send bulk notifications',
+    module: 'notifications',
+  },
+  {
+    key: 'search.view',
+    name: 'View Search',
+    description: 'View search logs and analytics',
+    module: 'search',
+  },
+  {
+    key: 'members.view',
+    name: 'View Members',
+    description: 'View user and member information',
+    module: 'members',
+  },
+  {
+    key: 'members.manage',
+    name: 'Manage Members',
+    description: 'Suspend, unsuspend, and manage user accounts',
+    module: 'members',
+  },
 ]
 
 export const rbacService = {
