@@ -1,9 +1,11 @@
+import { apiReference } from '@scalar/express-api-reference'
 import cors from 'cors'
 import type { Request, Response } from 'express'
 import express from 'express'
 import mongoSanitize from 'express-mongo-sanitize'
 import helmet from 'helmet'
 import morgan from 'morgan'
+import path from 'node:path'
 import responseTime from 'response-time'
 
 import { globalErrorHandler } from '../common/errors/globalErrorHandler'
@@ -30,6 +32,27 @@ morgan.token('response-time-ms', (_request: Request, response: Response) =>
 )
 
 app.disable('x-powered-by')
+
+if (config.isDevelopment) {
+  app.get('/api/docs/openapi.json', (_req, res) => {
+    res.sendFile(path.join(process.cwd(), 'documentation', 'OpenAPI_v1.json'))
+  })
+
+  app.use(
+    '/api/docs',
+    apiReference({
+      spec: {
+        url: '/api/docs/openapi.json',
+      },
+      theme: 'purple',
+      layout: 'modern',
+      defaultHttpClient: {
+        targetKey: 'javascript',
+        clientKey: 'fetch',
+      },
+    }),
+  )
+}
 
 app.use(requestContext)
 app.use(
