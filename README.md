@@ -411,11 +411,41 @@ pnpm dev:worker
 
 ## 8. 📚 API Documentation
 
-### OpenAPI
+### Interactive API Reference (Scalar) — Development Mode
+
+A modern, interactive API reference is available during development.
+
+**Access the documentation:**
+
+```text
+http://localhost:5000/api/docs
+```
+
+**Available in development mode only** (`NODE_ENV=development`)
+
+Features:
+
+- 📚 Full OpenAPI 3.0.3 specification with 170+ endpoints
+- 🎨 Modern purple theme and intuitive layout
+- 🧪 Try-it-out requests with live sandbox (JavaScript/fetch default client)
+- 💾 Copy request/response snippets for multiple languages
+- 🔍 Search across all endpoints and parameters
+- ⚡ Real-time validation and schema inspection
+- 🔐 Bearer token authentication helpers
+
+**Raw OpenAPI JSON endpoint:**
+
+```text
+GET http://localhost:5000/api/docs/openapi.json
+```
+
+### OpenAPI Specification
 
 - File: `documentation/OpenAPI_v1.json`
+- Auto-generated from module routers and validation schemas
 - Rebuild command: `pnpm docs:rebuild`
-- Recommended viewer: Swagger Editor (import file) or Stoplight Studio
+- Covers all 170+ routes across 25 modules
+- Compatible with SwaggerUI, Stoplight Studio, and other OpenAPI viewers
 
 ### Postman Collection
 
@@ -424,6 +454,7 @@ pnpm dev:worker
   - `baseUrl` (default: `http://localhost:5000`)
   - `userToken`
   - `staffToken`
+- Contains 170+ requests with auth token helpers and pre-request scripts
 
 ### Base URL
 
@@ -435,7 +466,7 @@ http://localhost:5000/api/v1
 
 - Protected endpoints require **Bearer token** in `Authorization` header.
 - User and staff tokens are separated at auth boundaries.
-- Postman collection contains token capture and prerequest checks.
+- Postman collection and Scalar UI both provide token capture and authentication helpers.
 
 ### Standard Response Format
 
