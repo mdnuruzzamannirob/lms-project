@@ -10,7 +10,7 @@ import {
   hashWithScrypt,
 } from '../../common/utils/crypto'
 import { signAccessToken } from '../../common/utils/token'
-import { authConstants } from './auth.constants'
+import { authConstants } from './constants'
 import type {
   AuthTokens,
   IUser,
@@ -19,14 +19,14 @@ import type {
   SanitizedUser,
   SocialProfile,
   UserNotificationPreferences,
-} from './auth.interface'
+} from './interface'
 import {
   UserEmailVerificationTokenModel,
   UserLoginHistoryModel,
   UserModel,
   UserPasswordResetTokenModel,
-} from './auth.model'
-import { buildUserJwtPayload, sanitizeUser } from './auth.utils'
+} from './model'
+import { buildUserJwtPayload, sanitizeUser } from './utils'
 
 const computeExpiryDate = (minutes: number): Date => {
   return new Date(Date.now() + minutes * 60 * 1000)

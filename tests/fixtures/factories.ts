@@ -1,7 +1,7 @@
 import { Types } from 'mongoose'
 
 import { AuditLogModel } from '../../src/modules/audit/model'
-import { UserModel } from '../../src/modules/auth/auth.model'
+import { UserModel } from '../../src/modules/auth/model'
 import { AuthorModel } from '../../src/modules/authors/model'
 import { BookModel } from '../../src/modules/books/model'
 import { BorrowModel } from '../../src/modules/borrows/model'

@@ -4,7 +4,7 @@ import type {
   IUser,
   UserAuthProvider,
   UserNotificationPreferences,
-} from './auth.interface'
+} from './interface'
 
 type UserDocument = IUser
 

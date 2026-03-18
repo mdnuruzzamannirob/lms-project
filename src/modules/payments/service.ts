@@ -7,7 +7,7 @@ import Stripe from 'stripe'
 
 import { AppError } from '../../common/errors/AppError'
 import { config } from '../../config'
-import { UserModel } from '../auth/auth.model'
+import { UserModel } from '../auth/model'
 import { PlanModel } from '../plans/model'
 import { promotionsService } from '../promotions/service'
 import { subscriptionsService } from '../subscriptions/service'

@@ -5,7 +5,7 @@ import {
   createPaginationMeta,
   getPaginationState,
 } from '../../common/utils/pagination'
-import { UserModel } from '../auth/auth.model'
+import { UserModel } from '../auth/model'
 import { PaymentModel } from '../payments/model'
 import { ReadingProgressModel } from '../reading/model'
 import { SubscriptionModel } from '../subscriptions/model'

@@ -3,7 +3,7 @@ import http from 'node:http'
 import { config } from '../config'
 import { connectToDatabase, disconnectFromDatabase } from '../config/db'
 import { logger } from '../config/logger'
-import { getReadinessReport } from '../modules/health/health.service'
+import { getReadinessReport } from '../modules/health/service'
 import { rbacService } from '../modules/rbac'
 import { app } from './app'
 

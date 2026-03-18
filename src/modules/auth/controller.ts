@@ -3,7 +3,7 @@ import type { RequestHandler } from 'express'
 import { AppError } from '../../common/errors/AppError'
 import { catchAsync } from '../../common/utils/catchAsync'
 import { sendResponse } from '../../common/utils/sendResponse'
-import { authService } from './auth.service'
+import { authService } from './service'
 
 const ensureAuthenticatedUser = (
   request: Parameters<RequestHandler>[0],

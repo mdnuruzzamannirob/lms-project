@@ -1,8 +1,8 @@
 import { Router } from 'express'
 
 import { validateRequest } from '../../common/middlewares/validateRequest'
-import { getHealth, getLiveness, getReadiness } from './health.controller'
-import { healthValidation } from './health.validation'
+import { getHealth, getLiveness, getReadiness } from './controller'
+import { healthValidation } from './validation'
 
 const router = Router()
 

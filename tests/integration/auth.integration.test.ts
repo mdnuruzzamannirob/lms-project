@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { authService } from '../../src/modules/auth/auth.service'
+import { authService } from '../../src/modules/auth/service'
 
 describe('Auth integration flow', () => {
   it('registers and logs in a user', async () => {

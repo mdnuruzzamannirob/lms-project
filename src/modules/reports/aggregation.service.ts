@@ -1,6 +1,6 @@
 import { Types } from 'mongoose'
 
-import { UserModel } from '../auth/auth.model'
+import { UserModel } from '../auth/model'
 import { BookModel } from '../books/model'
 import { BorrowModel } from '../borrows/model'
 import { PaymentModel } from '../payments/model'

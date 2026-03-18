@@ -19,8 +19,8 @@ import {
   updateMe,
   updateMyNotificationPreferences,
   verifyEmail,
-} from './auth.controller'
-import { authValidation } from './auth.validation'
+} from './controller'
+import { authValidation } from './validation'
 
 const router = Router()
 

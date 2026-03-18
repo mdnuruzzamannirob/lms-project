@@ -1,5 +1,5 @@
 import type { BaseJwtPayload } from '../../types/express'
-import type { IUser, SanitizedUser } from './auth.interface'
+import type { IUser, SanitizedUser } from './interface'
 
 export const buildUserJwtPayload = (user: IUser): BaseJwtPayload => {
   return {

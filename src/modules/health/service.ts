@@ -1,6 +1,6 @@
 import { config } from '../../config'
 import { getDatabaseState } from '../../config/db'
-import type { HealthData, HealthQuery, ReadinessData } from './health.interface'
+import type { HealthData, HealthQuery, ReadinessData } from './interface'
 
 export const getHealthReport = (
   query: HealthQuery,

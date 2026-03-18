@@ -1,4 +1,4 @@
-import { UserModel } from '../modules/auth/auth.model'
+import { UserModel } from '../modules/auth/model'
 import { CouponModel } from '../modules/promotions/model'
 
 const sameMonthDay = (left: Date, right: Date): boolean => {
