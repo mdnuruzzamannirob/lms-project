@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
-import fs from 'node:fs/promises'
-import path from 'node:path'
+
+import { v2 as cloudinary, type UploadApiResponse } from 'cloudinary'
 
 import { config } from '../../config'
 import { AppError } from '../errors/AppError'
@@ -24,83 +24,56 @@ interface StorageProvider {
 }
 
 class LocalStorageProvider implements StorageProvider {
-  async upload(payload: UploadPayload): Promise<UploadResult> {
-    const extension = path.extname(payload.fileName)
-    const safeFolder = payload.folder
-      ? payload.folder.replace(/[^a-zA-Z0-9/_-]/g, '')
-      : ''
-    const key = path.posix.join(
-      safeFolder,
-      `${crypto.randomUUID()}${extension}`,
-    )
-    const absoluteRoot = path.resolve(
-      process.cwd(),
-      config.providers.localStoragePath,
-    )
-    const absoluteFilePath = path.join(absoluteRoot, key)
-    const absoluteDir = path.dirname(absoluteFilePath)
-
-    await fs.mkdir(absoluteDir, { recursive: true })
-    await fs.writeFile(absoluteFilePath, payload.buffer)
-
-    return {
-      url: `${config.providers.localStorageBaseUrl}/${key}`,
-      key,
-      contentType: payload.contentType,
-      size: payload.buffer.byteLength,
-    }
+  async upload(_payload: UploadPayload): Promise<UploadResult> {
+    throw new AppError('Local storage is disabled in this deployment.', 500)
   }
 }
 
 class CloudinaryStorageProvider implements StorageProvider {
-  async upload(payload: UploadPayload): Promise<UploadResult> {
+  constructor() {
     const cloudName = config.providers.cloudinaryCloudName
     const apiKey = config.providers.cloudinaryApiKey
     const apiSecret = config.providers.cloudinaryApiSecret
 
     if (!cloudName || !apiKey || !apiSecret) {
       throw new AppError(
-        'CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET are required for cloudinary storage provider',
+        'CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET are required for storage.',
       )
     }
 
-    const timestamp = Math.floor(Date.now() / 1000)
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret,
+      secure: true,
+    })
+  }
+
+  async upload(payload: UploadPayload): Promise<UploadResult> {
     const folder = payload.folder ?? 'uploads'
     const publicId = `${folder}/${crypto.randomUUID()}`
-    const signatureBase = `public_id=${publicId}&timestamp=${timestamp}${apiSecret}`
-    const signature = crypto
-      .createHash('sha1')
-      .update(signatureBase)
-      .digest('hex')
 
-    const formData = new FormData()
-    const blob = new Blob([payload.buffer], { type: payload.contentType })
+    const result = await new Promise<UploadApiResponse>((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          public_id: publicId,
+          folder,
+          resource_type: 'auto',
+          overwrite: false,
+          unique_filename: false,
+          use_filename: false,
+        },
+        (error, uploaded) => {
+          if (error || !uploaded) {
+            reject(error ?? new Error('Cloudinary upload failed.'))
+            return
+          }
+          resolve(uploaded)
+        },
+      )
 
-    formData.append('file', blob, payload.fileName)
-    formData.append('api_key', apiKey)
-    formData.append('timestamp', String(timestamp))
-    formData.append('public_id', publicId)
-    formData.append('signature', signature)
-
-    const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
-      {
-        method: 'POST',
-        body: formData,
-      },
-    )
-
-    if (!response.ok) {
-      const body = await response.text()
-      throw new AppError(`Cloudinary upload failed: ${body}`, response.status)
-    }
-
-    const result = (await response.json()) as {
-      secure_url: string
-      public_id: string
-      bytes: number
-      resource_type: string
-    }
+      stream.end(payload.buffer)
+    })
 
     return {
       url: result.secure_url,
@@ -112,17 +85,20 @@ class CloudinaryStorageProvider implements StorageProvider {
 }
 
 const createStorageProvider = (): StorageProvider => {
-  if (config.providers.storage === 'cloudinary') {
-    return new CloudinaryStorageProvider()
-  }
-
-  return new LocalStorageProvider()
+  void LocalStorageProvider
+  return new CloudinaryStorageProvider()
 }
 
-const provider = createStorageProvider()
+let provider: StorageProvider | null = null
+const getProvider = (): StorageProvider => {
+  if (!provider) {
+    provider = createStorageProvider()
+  }
+  return provider
+}
 
 export const storageService = {
   uploadFile: async (payload: UploadPayload): Promise<UploadResult> => {
-    return provider.upload(payload)
+    return getProvider().upload(payload)
   },
 }

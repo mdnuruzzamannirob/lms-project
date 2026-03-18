@@ -11,7 +11,7 @@ export const reportsValidation = {
       'popular_books',
       'borrow_stats',
     ]),
-    format: z.enum(['json', 'csv']).default('csv'),
+    format: z.enum(['json', 'csv', 'pdf', 'excel']).default('csv'),
     filters: z.record(z.unknown()).optional(),
   }),
   listQuery: paginationSchema.extend({

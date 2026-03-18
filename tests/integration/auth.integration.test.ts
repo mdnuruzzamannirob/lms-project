@@ -11,6 +11,7 @@ describe('Auth integration flow', () => {
       name: 'Auth User',
       email,
       password,
+      countryCode: 'BD',
     })
 
     expect(registered.user.email).toBe(email)

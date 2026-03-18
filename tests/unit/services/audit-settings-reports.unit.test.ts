@@ -30,7 +30,7 @@ describe('Audit/Settings/Reports unit behavior', () => {
     const staff = await createStaff()
 
     const current = await settingsService.getGlobalSettings()
-    expect(current.providers.email.provider).toBeDefined()
+    expect(current.providers.email.from).toBeDefined()
 
     const updated = await settingsService.updateGlobalSettings(
       staff._id.toString(),

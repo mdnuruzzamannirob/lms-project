@@ -6,26 +6,17 @@ const defaultSettingsSeed = {
   singletonKey: 'global' as const,
   providers: {
     email: {
-      provider: 'console' as const,
       from: 'noreply@example.com',
       enabled: true,
     },
-    sms: {
-      provider: 'console' as const,
-      from: undefined,
-      enabled: false,
-    },
     push: {
-      provider: 'console' as const,
       enabled: true,
     },
     storage: {
-      provider: 'local' as const,
       enabled: true,
       basePath: 'uploads',
     },
     payment: {
-      provider: 'sslcommerz' as const,
       enabled: true,
       currency: 'BDT',
     },
@@ -35,10 +26,6 @@ const defaultSettingsSeed = {
       welcome: 'Welcome to LMS!',
       subscriptionRenewalReminder: 'Your subscription will renew soon.',
       reportReady: 'Your report is ready for download.',
-    },
-    sms: {
-      otp: 'Your OTP is {{otp}}',
-      borrowExpiryReminder: 'Your borrowed book is due soon.',
     },
     push: {
       reservationReady: 'Your reserved book is now claimable.',

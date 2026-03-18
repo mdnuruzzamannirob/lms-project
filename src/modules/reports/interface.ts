@@ -6,7 +6,7 @@ export type ReportType =
   | 'popular_books'
   | 'borrow_stats'
 
-export type ReportFormat = 'json' | 'csv'
+export type ReportFormat = 'json' | 'csv' | 'pdf' | 'excel'
 
 export type ReportStatus =
   | 'queued'

@@ -29,7 +29,7 @@ const reportJobSchema = new Schema<IReportJob>(
     },
     format: {
       type: String,
-      enum: ['json', 'csv'] satisfies ReportFormat[],
+      enum: ['json', 'csv', 'pdf', 'excel'] satisfies ReportFormat[],
       required: true,
       default: 'csv',
     },

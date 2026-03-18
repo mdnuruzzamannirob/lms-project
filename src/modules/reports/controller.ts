@@ -23,7 +23,7 @@ export const reportsController: Record<string, RequestHandler> = {
         | 'revenue_summary'
         | 'popular_books'
         | 'borrow_stats'
-      format: 'json' | 'csv'
+      format: 'json' | 'csv' | 'pdf' | 'excel'
       filters?: Record<string, unknown>
     }
 

@@ -1,5 +1,7 @@
+import { cert, getApps, initializeApp } from 'firebase-admin/app'
+import { getMessaging } from 'firebase-admin/messaging'
+
 import { config } from '../../config'
-import { logger } from '../../config/logger'
 import { AppError } from '../errors/AppError'
 
 export type PushPayload = {
@@ -13,62 +15,62 @@ interface PushProvider {
   send(payload: PushPayload): Promise<void>
 }
 
-class ConsolePushProvider implements PushProvider {
+class FirebasePushProvider implements PushProvider {
+  constructor() {
+    if (
+      !config.providers.firebaseProjectId ||
+      !config.providers.firebaseClientEmail ||
+      !config.providers.firebasePrivateKey
+    ) {
+      throw new AppError(
+        'FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY are required for push delivery.',
+      )
+    }
+
+    if (!getApps().length) {
+      initializeApp({
+        credential: cert({
+          projectId: config.providers.firebaseProjectId,
+          clientEmail: config.providers.firebaseClientEmail,
+          privateKey: config.providers.firebasePrivateKey.replace(/\\n/g, '\n'),
+        }),
+      })
+    }
+  }
+
   async send(payload: PushPayload): Promise<void> {
-    logger.info('Console push provider dispatched notification', {
+    await getMessaging().send({
       token: payload.token,
-      title: payload.title,
-    })
-  }
-}
-
-class FcmPushProvider implements PushProvider {
-  private readonly serverKey: string
-
-  constructor(serverKey?: string) {
-    if (!serverKey) {
-      throw new AppError('FCM_SERVER_KEY is required for fcm push provider')
-    }
-
-    this.serverKey = serverKey
-  }
-
-  async send(payload: PushPayload): Promise<void> {
-    const response = await fetch('https://fcm.googleapis.com/fcm/send', {
-      method: 'POST',
-      headers: {
-        Authorization: `key=${this.serverKey}`,
-        'Content-Type': 'application/json',
+      notification: {
+        title: payload.title,
+        body: payload.body,
       },
-      body: JSON.stringify({
-        to: payload.token,
-        notification: {
-          title: payload.title,
-          body: payload.body,
-        },
-        data: payload.data,
-      }),
+      ...(payload.data ? { data: payload.data } : {}),
     })
-
-    if (!response.ok) {
-      const body = await response.text()
-      throw new AppError(`FCM push send failed: ${body}`, response.status)
-    }
   }
 }
 
 const createPushProvider = (): PushProvider => {
-  if (config.providers.push === 'fcm') {
-    return new FcmPushProvider(config.providers.fcmServerKey)
-  }
-
-  return new ConsolePushProvider()
+  return new FirebasePushProvider()
 }
 
-const provider = createPushProvider()
+let provider: PushProvider | null = null
+const getProvider = (): PushProvider => {
+  if (!provider) {
+    provider = createPushProvider()
+  }
+  return provider
+}
 
 export const pushService = {
   sendPush: async (payload: PushPayload): Promise<void> => {
-    await provider.send(payload)
+    try {
+      await getProvider().send(payload)
+    } catch (error) {
+      throw new AppError(
+        `Failed to deliver push notification: ${error instanceof Error ? error.message : String(error)}`,
+        502,
+      )
+    }
   },
 }

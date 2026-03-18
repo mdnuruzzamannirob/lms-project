@@ -10,16 +10,14 @@ export const migration20260318Phase9Hardening = async (): Promise<void> => {
         singletonKey: 'global',
         providers: {
           email: {
-            provider: 'console',
             from: 'noreply@example.com',
             enabled: true,
           },
-          sms: { provider: 'console', enabled: false },
-          push: { provider: 'console', enabled: true },
-          storage: { provider: 'local', enabled: true, basePath: 'uploads' },
-          payment: { provider: 'sslcommerz', enabled: true, currency: 'BDT' },
+          push: { enabled: true },
+          storage: { enabled: true, basePath: 'uploads' },
+          payment: { enabled: true, currency: 'BDT' },
         },
-        templates: { email: {}, sms: {}, push: {} },
+        templates: { email: {}, push: {} },
         maintenance: {
           enabled: false,
           message: 'System is currently under maintenance.',

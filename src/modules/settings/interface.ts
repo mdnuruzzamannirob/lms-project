@@ -5,33 +5,23 @@ export interface IGlobalSettings {
   singletonKey: 'global'
   providers: {
     email: {
-      provider: 'console' | 'resend'
       from: string
       enabled: boolean
     }
-    sms: {
-      provider: 'console' | 'twilio'
-      from: string | undefined
-      enabled: boolean
-    }
     push: {
-      provider: 'console' | 'fcm'
       enabled: boolean
     }
     storage: {
-      provider: 'local' | 'cloudinary'
       enabled: boolean
       basePath: string
     }
     payment: {
-      provider: 'sslcommerz' | 'stripe' | 'paypal'
       enabled: boolean
       currency: string
     }
   }
   templates: {
     email: Record<string, string>
-    sms: Record<string, string>
     push: Record<string, string>
   }
   maintenance: {

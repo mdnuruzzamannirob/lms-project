@@ -13,11 +13,6 @@ const settingsSchema = new Schema<IGlobalSettings>(
     },
     providers: {
       email: {
-        provider: {
-          type: String,
-          enum: ['console', 'resend'],
-          default: 'console',
-        },
         from: {
           type: String,
           required: true,
@@ -28,39 +23,13 @@ const settingsSchema = new Schema<IGlobalSettings>(
           default: true,
         },
       },
-      sms: {
-        provider: {
-          type: String,
-          enum: ['console', 'twilio'],
-          default: 'console',
-        },
-        from: {
-          type: String,
-          required: false,
-          default: undefined,
-        },
-        enabled: {
-          type: Boolean,
-          default: false,
-        },
-      },
       push: {
-        provider: {
-          type: String,
-          enum: ['console', 'fcm'],
-          default: 'console',
-        },
         enabled: {
           type: Boolean,
           default: true,
         },
       },
       storage: {
-        provider: {
-          type: String,
-          enum: ['local', 'cloudinary'],
-          default: 'local',
-        },
         enabled: {
           type: Boolean,
           default: true,
@@ -72,11 +41,6 @@ const settingsSchema = new Schema<IGlobalSettings>(
         },
       },
       payment: {
-        provider: {
-          type: String,
-          enum: ['sslcommerz', 'stripe', 'paypal'],
-          default: 'sslcommerz',
-        },
         enabled: {
           type: Boolean,
           default: true,
@@ -90,10 +54,6 @@ const settingsSchema = new Schema<IGlobalSettings>(
     },
     templates: {
       email: {
-        type: Schema.Types.Mixed,
-        default: {},
-      },
-      sms: {
         type: Schema.Types.Mixed,
         default: {},
       },

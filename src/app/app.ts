@@ -4,8 +4,7 @@ import express from 'express'
 import mongoSanitize from 'express-mongo-sanitize'
 import helmet from 'helmet'
 import morgan from 'morgan'
-import fs from 'node:fs'
-import path from 'node:path'
+import responseTime from 'response-time'
 
 import { globalErrorHandler } from '../common/errors/globalErrorHandler'
 import { notFound } from '../common/middlewares/notFound'
@@ -18,7 +17,6 @@ import {
   webhookRateLimiter,
 } from '../common/middlewares/rateLimiter'
 import { requestContext } from '../common/middlewares/requestContext'
-import { responseTime } from '../common/middlewares/responseTime'
 import { config } from '../config'
 import { morganStream } from '../config/logger'
 import { initializePassport } from '../config/passport'
@@ -34,7 +32,12 @@ morgan.token('response-time-ms', (_request: Request, response: Response) =>
 app.disable('x-powered-by')
 
 app.use(requestContext)
-app.use(responseTime)
+app.use(
+  responseTime((request: Request, response: Response, duration: number) => {
+    void request
+    response.locals.responseTimeMs = duration.toFixed(2)
+  }),
+)
 app.use(
   morgan(
     ':request-id :method :url :status :res[content-length] - :response-time-ms ms',
@@ -75,17 +78,6 @@ app.use(
 app.use(express.urlencoded({ extended: true }))
 app.use(mongoSanitize())
 initializePassport(app)
-
-const uploadsRoot = path.resolve(
-  process.cwd(),
-  config.providers.localStoragePath,
-)
-
-if (!fs.existsSync(uploadsRoot)) {
-  fs.mkdirSync(uploadsRoot, { recursive: true })
-}
-
-app.use('/uploads', express.static(uploadsRoot))
 
 app.use(config.apiPrefix, appRouter)
 

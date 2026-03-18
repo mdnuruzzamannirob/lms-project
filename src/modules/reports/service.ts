@@ -1,10 +1,13 @@
+import ExcelJS from 'exceljs'
 import { Types } from 'mongoose'
+import PDFDocument from 'pdfkit'
 
 import { AppError } from '../../common/errors/AppError'
 import {
   createPaginationMeta,
   getPaginationState,
 } from '../../common/utils/pagination'
+import { config } from '../../config'
 import { auditService } from '../audit/service'
 import { reportsAggregationService } from './aggregation.service'
 import type {
@@ -14,11 +17,12 @@ import type {
 } from './interface'
 import { ReportArtifactModel, ReportJobModel } from './model'
 
-const REPORT_FILE_EXPIRY_DAYS = 7
 const MAX_REPORT_RETRIES = 3
 
 const getReportExpiryDate = (): Date => {
-  return new Date(Date.now() + REPORT_FILE_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+  return new Date(
+    Date.now() + config.reportDownloadTtlDays * 24 * 60 * 60 * 1000,
+  )
 }
 
 const toJobResponse = (job: any) => {
@@ -83,17 +87,106 @@ const toCsv = (data: unknown): { content: string; rowCount: number } => {
   }
 }
 
+const toPdf = async (
+  jobType: string,
+  data: unknown,
+): Promise<{ content: string; rowCount: number }> => {
+  const doc = new PDFDocument({ margin: 32 })
+  const chunks: Buffer[] = []
+
+  await new Promise<void>((resolve, reject) => {
+    doc.on('data', (chunk: Buffer) => chunks.push(Buffer.from(chunk)))
+    doc.on('end', resolve)
+    doc.on('error', reject)
+
+    doc.fontSize(18).text(`LMS Report: ${jobType}`)
+    doc.moveDown()
+    doc.fontSize(10).text(`Generated at: ${new Date().toISOString()}`)
+    doc.moveDown()
+    doc.fontSize(10).text(JSON.stringify(data, null, 2))
+    doc.end()
+  })
+
+  const rowCount = Array.isArray(data)
+    ? data.length
+    : data && typeof data === 'object'
+      ? Object.keys(data as Record<string, unknown>).length
+      : 1
+
+  return {
+    content: Buffer.concat(chunks).toString('base64'),
+    rowCount,
+  }
+}
+
+const toExcel = async (
+  data: unknown,
+): Promise<{ content: string; rowCount: number }> => {
+  const workbook = new ExcelJS.Workbook()
+  const sheet = workbook.addWorksheet('Report')
+
+  let rowCount = 0
+
+  if (Array.isArray(data) && data.length > 0) {
+    const rows = data as Array<Record<string, unknown>>
+    const headers = Object.keys(rows[0] ?? {})
+    sheet.addRow(headers)
+    for (const row of rows) {
+      sheet.addRow(headers.map((header) => row[header] ?? ''))
+    }
+    rowCount = rows.length
+  } else if (data && typeof data === 'object') {
+    sheet.addRow(['key', 'value'])
+    for (const [key, value] of Object.entries(
+      data as Record<string, unknown>,
+    )) {
+      sheet.addRow([key, JSON.stringify(value)])
+    }
+    rowCount = Object.keys(data as Record<string, unknown>).length
+  } else {
+    sheet.addRow(['value'])
+    sheet.addRow([String(data ?? '')])
+    rowCount = 1
+  }
+
+  const buffer = await workbook.xlsx.writeBuffer()
+
+  return {
+    content: Buffer.from(buffer).toString('base64'),
+    rowCount,
+  }
+}
+
 const createArtifact = async (job: any, reportData: unknown) => {
   const expiresAt = getReportExpiryDate()
-  const fileName = `${job.type}-${job._id.toString()}.${job.format === 'csv' ? 'csv' : 'json'}`
+  const extensionByFormat: Record<string, string> = {
+    json: 'json',
+    csv: 'csv',
+    pdf: 'pdf',
+    excel: 'xlsx',
+  }
+  const mimeByFormat: Record<string, string> = {
+    json: 'application/json',
+    csv: 'text/csv',
+    pdf: 'application/pdf',
+    excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  }
 
-  const serialized =
-    job.format === 'csv'
-      ? toCsv(reportData)
-      : {
-          content: JSON.stringify(reportData, null, 2),
-          rowCount: Array.isArray(reportData) ? reportData.length : 1,
-        }
+  const fileName = `${job.type}-${job._id.toString()}.${extensionByFormat[job.format] ?? 'json'}`
+
+  let serialized: { content: string; rowCount: number }
+  if (job.format === 'csv') {
+    serialized = toCsv(reportData)
+  } else if (job.format === 'pdf') {
+    serialized = await toPdf(job.type, reportData)
+  } else if (job.format === 'excel') {
+    serialized = await toExcel(reportData)
+  } else {
+    serialized = {
+      content: JSON.stringify(reportData, null, 2),
+      rowCount: Array.isArray(reportData) ? reportData.length : 1,
+    }
+  }
 
   const artifact = await ReportArtifactModel.findOneAndUpdate(
     {
@@ -102,7 +195,7 @@ const createArtifact = async (job: any, reportData: unknown) => {
     {
       $set: {
         fileName,
-        mimeType: job.format === 'csv' ? 'text/csv' : 'application/json',
+        mimeType: mimeByFormat[job.format] ?? 'application/json',
         content: serialized.content,
         rowCount: serialized.rowCount,
         expiresAt,

@@ -1,6 +1,8 @@
 import type { ErrorRequestHandler } from 'express'
+import httpStatus from 'http-status'
 import mongoose from 'mongoose'
 import { ZodError } from 'zod'
+import { fromZodError } from 'zod-validation-error'
 
 import { logger } from '../../config/logger'
 import { AppError } from './AppError'
@@ -21,12 +23,14 @@ export const globalErrorHandler: ErrorRequestHandler = (
   if (error instanceof AppError) {
     normalizedError = error
   } else if (error instanceof ZodError) {
+    const zodMessage = fromZodError(error).toString()
     normalizedError = handleValidationError(
       error.issues.map((issue) => ({
         path: issue.path.join('.'),
         message: issue.message,
       })),
     )
+    normalizedError.message = zodMessage
   } else if (error instanceof mongoose.Error.CastError) {
     normalizedError = handleCastError(error)
   } else if (error instanceof mongoose.Error.ValidationError) {
@@ -48,7 +52,7 @@ export const globalErrorHandler: ErrorRequestHandler = (
   } else {
     const message =
       error instanceof Error ? error.message : 'Internal server error'
-    normalizedError = new AppError(message, 500)
+    normalizedError = new AppError(message, httpStatus.INTERNAL_SERVER_ERROR)
   }
 
   logger.error(normalizedError.message, {

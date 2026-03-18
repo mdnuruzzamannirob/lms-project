@@ -30,7 +30,6 @@ type UserLoginHistory = {
 const notificationPreferencesSchema = new Schema<UserNotificationPreferences>(
   {
     email: { type: Boolean, default: true },
-    sms: { type: Boolean, default: false },
     push: { type: Boolean, default: true },
   },
   { _id: false },
@@ -67,7 +66,7 @@ const userSchema = new Schema<UserDocument>(
     isEmailVerified: { type: Boolean, default: false },
     notificationPreferences: {
       type: notificationPreferencesSchema,
-      default: () => ({ email: true, sms: false, push: true }),
+      default: () => ({ email: true, push: true }),
     },
     lastLoginAt: { type: Date, required: false },
   },

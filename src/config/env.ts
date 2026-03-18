@@ -4,13 +4,20 @@ import { z } from 'zod'
 dotenv.config()
 
 const envSchema = z.object({
+  // Runtime
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
     .default('development'),
   PORT: z.coerce.number().int().min(1).max(65535).default(5000),
   API_VERSION: z.string().trim().min(1).default('v1'),
+
+  // Database
   MONGODB_URI: z.string().trim().min(1, 'MONGODB_URI is required'),
+
+  // HTTP
   CORS_ORIGINS: z.string().trim().default('http://localhost:3000'),
+
+  // Logging
   LOG_LEVEL: z
     .enum(['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'])
     .default('info'),
@@ -26,6 +33,8 @@ const envSchema = z.object({
       return value
     }, z.boolean())
     .default(true),
+
+  // Rate limiting
   RATE_LIMIT_WINDOW_MS: z.coerce
     .number()
     .int()
@@ -37,10 +46,21 @@ const envSchema = z.object({
   SEARCH_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(180),
   WEBHOOK_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(1000),
   REPORT_RATE_LIMIT_MAX: z.coerce.number().int().positive().default(80),
+
+  // JWT
   JWT_USER_SECRET: z.string().trim().min(1, 'JWT_USER_SECRET is required'),
   JWT_STAFF_SECRET: z.string().trim().min(1, 'JWT_STAFF_SECRET is required'),
   JWT_ACCESS_EXPIRES_IN: z.string().trim().default('1d'),
+  JWT_REFRESH_EXPIRES_IN: z.string().trim().default('30d'),
   JWT_ISSUER: z.string().trim().default('lms-backend'),
+  BCRYPT_SALT_ROUNDS: z.coerce.number().int().min(8).max(20).default(12),
+  SESSION_SECRET: z
+    .string()
+    .trim()
+    .min(1)
+    .default('change-this-session-secret'),
+
+  // OAuth + 2FA
   GOOGLE_CLIENT_ID: z.string().trim().optional(),
   GOOGLE_CLIENT_SECRET: z.string().trim().optional(),
   GOOGLE_CALLBACK_URL: z.string().trim().optional(),
@@ -48,27 +68,23 @@ const envSchema = z.object({
   FACEBOOK_APP_SECRET: z.string().trim().optional(),
   FACEBOOK_CALLBACK_URL: z.string().trim().optional(),
   TWO_FACTOR_ISSUER: z.string().trim().default('LMS-Staff'),
-  EMAIL_PROVIDER: z.enum(['console', 'resend']).default('console'),
+
+  // Email (Gmail SMTP)
+  GMAIL_USER: z.string().trim().optional(),
+  GMAIL_APP_PASSWORD: z.string().trim().optional(),
   EMAIL_FROM: z.string().trim().default('noreply@example.com'),
-  RESEND_API_KEY: z.string().trim().optional(),
-  SMS_PROVIDER: z.enum(['console', 'twilio']).default('console'),
-  TWILIO_ACCOUNT_SID: z.string().trim().optional(),
-  TWILIO_AUTH_TOKEN: z.string().trim().optional(),
-  TWILIO_FROM: z.string().trim().optional(),
-  PUSH_PROVIDER: z.enum(['console', 'fcm']).default('console'),
-  FCM_SERVER_KEY: z.string().trim().optional(),
-  STORAGE_PROVIDER: z.enum(['local', 'cloudinary']).default('local'),
-  LOCAL_STORAGE_PATH: z.string().trim().default('uploads'),
-  LOCAL_STORAGE_BASE_URL: z
-    .string()
-    .trim()
-    .default('http://localhost:5000/uploads'),
+
+  // Push (Firebase)
+  FIREBASE_PROJECT_ID: z.string().trim().optional(),
+  FIREBASE_CLIENT_EMAIL: z.string().trim().optional(),
+  FIREBASE_PRIVATE_KEY: z.string().trim().optional(),
+
+  // Storage (Cloudinary)
   CLOUDINARY_CLOUD_NAME: z.string().trim().optional(),
   CLOUDINARY_API_KEY: z.string().trim().optional(),
   CLOUDINARY_API_SECRET: z.string().trim().optional(),
-  PAYMENT_PROVIDER: z
-    .enum(['sslcommerz', 'stripe', 'paypal'])
-    .default('sslcommerz'),
+
+  // Payments (all active)
   SSLCOMMERZ_STORE_ID: z.string().trim().optional(),
   SSLCOMMERZ_STORE_PASSWORD: z.string().trim().optional(),
   SSLCOMMERZ_IS_LIVE: z
@@ -85,8 +101,13 @@ const envSchema = z.object({
   PAYPAL_WEBHOOK_ID: z.string().trim().optional(),
   STRIPE_SECRET_KEY: z.string().trim().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().trim().optional(),
+
+  // URLs
   FRONTEND_URL: z.string().trim().default('http://localhost:3000'),
   BACKEND_URL: z.string().trim().default('http://localhost:5000'),
+  STAFF_PORTAL_URL: z.string().trim().default('http://localhost:3001'),
+
+  // Bootstrap/seed
   SUPER_ADMIN_NAME: z.string().trim().default('Super Admin'),
   SUPER_ADMIN_EMAIL: z.string().trim().email().default('admin@example.com'),
   SUPER_ADMIN_PASSWORD: z
@@ -94,6 +115,8 @@ const envSchema = z.object({
     .trim()
     .min(8)
     .default('change-this-password'),
+
+  // Workers
   WORKER_ENABLED: z
     .preprocess((value) => {
       if (typeof value === 'string') {
@@ -106,6 +129,12 @@ const envSchema = z.object({
   JOB_RETRY_LIMIT: z.coerce.number().int().positive().default(3),
   JOB_RETRY_BACKOFF_MS: z.coerce.number().int().positive().default(500),
   SHUTDOWN_TIMEOUT_MS: z.coerce.number().int().positive().default(20000),
+
+  // Domain defaults
+  REPORT_DOWNLOAD_TTL_DAYS: z.coerce.number().int().positive().default(7),
+  DEFAULT_TIMEZONE: z.string().trim().default('Asia/Dhaka'),
+  DEFAULT_CURRENCY: z.string().trim().min(3).max(3).default('BDT'),
+  DEFAULT_LANGUAGE: z.string().trim().default('en'),
 })
 
 const parsedEnv = envSchema.safeParse(process.env)
@@ -141,106 +170,64 @@ if (rawEnv.NODE_ENV === 'production') {
     },
   ]
 
-  if (rawEnv.EMAIL_PROVIDER === 'resend') {
-    productionChecks.push({
-      ok: Boolean(rawEnv.RESEND_API_KEY),
-      message:
-        'RESEND_API_KEY is required in production when EMAIL_PROVIDER=resend.',
-    })
-  }
-
-  if (rawEnv.SMS_PROVIDER === 'twilio') {
-    productionChecks.push(
-      {
-        ok: Boolean(rawEnv.TWILIO_ACCOUNT_SID),
-        message:
-          'TWILIO_ACCOUNT_SID is required in production when SMS_PROVIDER=twilio.',
-      },
-      {
-        ok: Boolean(rawEnv.TWILIO_AUTH_TOKEN),
-        message:
-          'TWILIO_AUTH_TOKEN is required in production when SMS_PROVIDER=twilio.',
-      },
-      {
-        ok: Boolean(rawEnv.TWILIO_FROM),
-        message:
-          'TWILIO_FROM is required in production when SMS_PROVIDER=twilio.',
-      },
-    )
-  }
-
-  if (rawEnv.PUSH_PROVIDER === 'fcm') {
-    productionChecks.push({
-      ok: Boolean(rawEnv.FCM_SERVER_KEY),
-      message:
-        'FCM_SERVER_KEY is required in production when PUSH_PROVIDER=fcm.',
-    })
-  }
-
-  if (rawEnv.STORAGE_PROVIDER === 'cloudinary') {
-    productionChecks.push(
-      {
-        ok: Boolean(rawEnv.CLOUDINARY_CLOUD_NAME),
-        message:
-          'CLOUDINARY_CLOUD_NAME is required in production when STORAGE_PROVIDER=cloudinary.',
-      },
-      {
-        ok: Boolean(rawEnv.CLOUDINARY_API_KEY),
-        message:
-          'CLOUDINARY_API_KEY is required in production when STORAGE_PROVIDER=cloudinary.',
-      },
-      {
-        ok: Boolean(rawEnv.CLOUDINARY_API_SECRET),
-        message:
-          'CLOUDINARY_API_SECRET is required in production when STORAGE_PROVIDER=cloudinary.',
-      },
-    )
-  }
-
-  if (rawEnv.PAYMENT_PROVIDER === 'sslcommerz') {
-    productionChecks.push(
-      {
-        ok: Boolean(rawEnv.SSLCOMMERZ_STORE_ID),
-        message:
-          'SSLCOMMERZ_STORE_ID is required in production when PAYMENT_PROVIDER=sslcommerz.',
-      },
-      {
-        ok: Boolean(rawEnv.SSLCOMMERZ_STORE_PASSWORD),
-        message:
-          'SSLCOMMERZ_STORE_PASSWORD is required in production when PAYMENT_PROVIDER=sslcommerz.',
-      },
-    )
-  }
-
-  if (rawEnv.PAYMENT_PROVIDER === 'stripe') {
-    productionChecks.push(
-      {
-        ok: Boolean(rawEnv.STRIPE_SECRET_KEY),
-        message:
-          'STRIPE_SECRET_KEY is required in production when PAYMENT_PROVIDER=stripe.',
-      },
-      {
-        ok: Boolean(rawEnv.STRIPE_WEBHOOK_SECRET),
-        message:
-          'STRIPE_WEBHOOK_SECRET is required in production when PAYMENT_PROVIDER=stripe.',
-      },
-    )
-  }
-
-  if (rawEnv.PAYMENT_PROVIDER === 'paypal') {
-    productionChecks.push(
-      {
-        ok: Boolean(rawEnv.PAYPAL_CLIENT_ID),
-        message:
-          'PAYPAL_CLIENT_ID is required in production when PAYMENT_PROVIDER=paypal.',
-      },
-      {
-        ok: Boolean(rawEnv.PAYPAL_CLIENT_SECRET),
-        message:
-          'PAYPAL_CLIENT_SECRET is required in production when PAYMENT_PROVIDER=paypal.',
-      },
-    )
-  }
+  productionChecks.push(
+    {
+      ok: Boolean(rawEnv.GMAIL_USER),
+      message: 'GMAIL_USER is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.GMAIL_APP_PASSWORD),
+      message: 'GMAIL_APP_PASSWORD is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.FIREBASE_PROJECT_ID),
+      message: 'FIREBASE_PROJECT_ID is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.FIREBASE_CLIENT_EMAIL),
+      message: 'FIREBASE_CLIENT_EMAIL is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.FIREBASE_PRIVATE_KEY),
+      message: 'FIREBASE_PRIVATE_KEY is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.CLOUDINARY_CLOUD_NAME),
+      message: 'CLOUDINARY_CLOUD_NAME is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.CLOUDINARY_API_KEY),
+      message: 'CLOUDINARY_API_KEY is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.CLOUDINARY_API_SECRET),
+      message: 'CLOUDINARY_API_SECRET is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.SSLCOMMERZ_STORE_ID),
+      message: 'SSLCOMMERZ_STORE_ID is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.SSLCOMMERZ_STORE_PASSWORD),
+      message: 'SSLCOMMERZ_STORE_PASSWORD is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.STRIPE_SECRET_KEY),
+      message: 'STRIPE_SECRET_KEY is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.STRIPE_WEBHOOK_SECRET),
+      message: 'STRIPE_WEBHOOK_SECRET is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.PAYPAL_CLIENT_ID),
+      message: 'PAYPAL_CLIENT_ID is required in production.',
+    },
+    {
+      ok: Boolean(rawEnv.PAYPAL_CLIENT_SECRET),
+      message: 'PAYPAL_CLIENT_SECRET is required in production.',
+    },
+  )
 
   const failedChecks = productionChecks.filter((check) => !check.ok)
   if (failedChecks.length > 0) {
@@ -284,7 +271,10 @@ export const env = {
     userSecret: rawEnv.JWT_USER_SECRET,
     staffSecret: rawEnv.JWT_STAFF_SECRET,
     accessExpiresIn: rawEnv.JWT_ACCESS_EXPIRES_IN,
+    refreshExpiresIn: rawEnv.JWT_REFRESH_EXPIRES_IN,
     issuer: rawEnv.JWT_ISSUER,
+    scryptCost: rawEnv.BCRYPT_SALT_ROUNDS,
+    sessionSecret: rawEnv.SESSION_SECRET,
   },
   oauth: {
     googleClientId: rawEnv.GOOGLE_CLIENT_ID,
@@ -296,22 +286,15 @@ export const env = {
     twoFactorIssuer: rawEnv.TWO_FACTOR_ISSUER,
   },
   providers: {
-    email: rawEnv.EMAIL_PROVIDER,
+    gmailUser: rawEnv.GMAIL_USER,
+    gmailAppPassword: rawEnv.GMAIL_APP_PASSWORD,
     emailFrom: rawEnv.EMAIL_FROM,
-    resendApiKey: rawEnv.RESEND_API_KEY,
-    sms: rawEnv.SMS_PROVIDER,
-    twilioAccountSid: rawEnv.TWILIO_ACCOUNT_SID,
-    twilioAuthToken: rawEnv.TWILIO_AUTH_TOKEN,
-    twilioFrom: rawEnv.TWILIO_FROM,
-    push: rawEnv.PUSH_PROVIDER,
-    fcmServerKey: rawEnv.FCM_SERVER_KEY,
-    storage: rawEnv.STORAGE_PROVIDER,
-    localStoragePath: rawEnv.LOCAL_STORAGE_PATH,
-    localStorageBaseUrl: rawEnv.LOCAL_STORAGE_BASE_URL,
+    firebaseProjectId: rawEnv.FIREBASE_PROJECT_ID,
+    firebaseClientEmail: rawEnv.FIREBASE_CLIENT_EMAIL,
+    firebasePrivateKey: rawEnv.FIREBASE_PRIVATE_KEY,
     cloudinaryCloudName: rawEnv.CLOUDINARY_CLOUD_NAME,
     cloudinaryApiKey: rawEnv.CLOUDINARY_API_KEY,
     cloudinaryApiSecret: rawEnv.CLOUDINARY_API_SECRET,
-    payment: rawEnv.PAYMENT_PROVIDER,
     sslCommerzStoreId: rawEnv.SSLCOMMERZ_STORE_ID,
     sslCommerzStorePassword: rawEnv.SSLCOMMERZ_STORE_PASSWORD,
     sslCommerzIsLive: rawEnv.SSLCOMMERZ_IS_LIVE,
@@ -324,6 +307,7 @@ export const env = {
   },
   frontendUrl: rawEnv.FRONTEND_URL,
   backendUrl: rawEnv.BACKEND_URL,
+  staffPortalUrl: rawEnv.STAFF_PORTAL_URL,
   superAdmin: {
     name: rawEnv.SUPER_ADMIN_NAME,
     email: rawEnv.SUPER_ADMIN_EMAIL,
@@ -335,6 +319,12 @@ export const env = {
     jobRetryLimit: rawEnv.JOB_RETRY_LIMIT,
     jobRetryBackoffMs: rawEnv.JOB_RETRY_BACKOFF_MS,
     shutdownTimeoutMs: rawEnv.SHUTDOWN_TIMEOUT_MS,
+  },
+  reportDownloadTtlDays: rawEnv.REPORT_DOWNLOAD_TTL_DAYS,
+  defaults: {
+    timezone: rawEnv.DEFAULT_TIMEZONE,
+    currency: rawEnv.DEFAULT_CURRENCY,
+    language: rawEnv.DEFAULT_LANGUAGE,
   },
 } as const
 

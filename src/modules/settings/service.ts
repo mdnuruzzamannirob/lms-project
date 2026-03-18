@@ -10,26 +10,17 @@ const DEFAULT_SETTINGS: Omit<
   singletonKey: 'global',
   providers: {
     email: {
-      provider: 'console',
       from: 'noreply@example.com',
       enabled: true,
     },
-    sms: {
-      provider: 'console',
-      from: undefined,
-      enabled: false,
-    },
     push: {
-      provider: 'console',
       enabled: true,
     },
     storage: {
-      provider: 'local',
       enabled: true,
       basePath: 'uploads',
     },
     payment: {
-      provider: 'sslcommerz',
       enabled: true,
       currency: 'BDT',
     },
@@ -39,10 +30,6 @@ const DEFAULT_SETTINGS: Omit<
       welcome: 'Welcome to LMS!',
       subscriptionRenewalReminder: 'Your subscription will renew soon.',
       reportReady: 'Your report is ready to download.',
-    },
-    sms: {
-      otp: 'Your OTP is {{otp}}',
-      borrowExpiryReminder: 'Your borrowed book is due soon.',
     },
     push: {
       reservationReady: 'Your reserved book is now claimable.',

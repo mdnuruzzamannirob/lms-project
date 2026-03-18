@@ -5,6 +5,7 @@ export const authValidation = {
     name: z.string().trim().min(2).max(100),
     email: z.string().trim().email(),
     password: z.string().min(8).max(72),
+    countryCode: z.string().trim().length(2).toUpperCase(),
   }),
   loginBody: z.object({
     email: z.string().trim().email(),
@@ -30,7 +31,6 @@ export const authValidation = {
       notificationPreferences: z
         .object({
           email: z.boolean().optional(),
-          sms: z.boolean().optional(),
           push: z.boolean().optional(),
         })
         .optional(),
@@ -51,14 +51,11 @@ export const authValidation = {
   updateNotificationPreferencesBody: z
     .object({
       email: z.boolean().optional(),
-      sms: z.boolean().optional(),
       push: z.boolean().optional(),
     })
     .refine(
       (value) =>
-        typeof value.email !== 'undefined' ||
-        typeof value.sms !== 'undefined' ||
-        typeof value.push !== 'undefined',
+        typeof value.email !== 'undefined' || typeof value.push !== 'undefined',
       {
         message: 'At least one notification preference is required',
       },

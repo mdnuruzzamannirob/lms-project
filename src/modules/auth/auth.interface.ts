@@ -4,7 +4,6 @@ export type UserAuthProvider = 'local' | 'google' | 'facebook'
 
 export type UserNotificationPreferences = {
   email: boolean
-  sms: boolean
   push: boolean
 }
 
@@ -27,6 +26,7 @@ export type RegisterPayload = {
   name: string
   email: string
   password: string
+  countryCode: string
 }
 
 export type LoginPayload = {

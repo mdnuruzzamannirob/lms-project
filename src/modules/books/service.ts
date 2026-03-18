@@ -8,7 +8,6 @@ import {
   createPaginationMeta,
   getPaginationState,
 } from '../../common/utils/pagination'
-import { config } from '../../config'
 import { AuthorModel } from '../authors/model'
 import { CategoryModel } from '../categories/model'
 import type { IBook } from './interface'
@@ -459,7 +458,7 @@ export const booksService = {
       })
 
       book.files.push({
-        provider: config.providers.storage,
+        provider: 'cloudinary',
         key: upload.key,
         url: upload.url,
         contentType: upload.contentType,
@@ -477,7 +476,7 @@ export const booksService = {
       }
 
       book.files.push({
-        provider: payload.provider ?? config.providers.storage,
+        provider: payload.provider ?? 'cloudinary',
         key: payload.key,
         url: payload.url,
         contentType: payload.contentType,

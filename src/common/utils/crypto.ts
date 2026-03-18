@@ -1,6 +1,19 @@
 import crypto from 'node:crypto'
 
+import { config } from '../../config'
+
 const DEFAULT_SCRYPT_KEY_LENGTH = 64
+
+const getScryptOptions = (): crypto.ScryptOptions => {
+  const rounds = config.jwt.scryptCost
+  const boundedRounds = Math.max(8, Math.min(rounds, 20))
+
+  return {
+    N: 1 << boundedRounds,
+    r: 8,
+    p: 1,
+  }
+}
 
 export const generateRandomToken = (bytes = 32): string => {
   return crypto.randomBytes(bytes).toString('hex')
@@ -18,6 +31,7 @@ export const hashWithScrypt = async (value: string): Promise<string> => {
       value,
       salt,
       DEFAULT_SCRYPT_KEY_LENGTH,
+      getScryptOptions(),
       (error, derivedKey) => {
         if (error) {
           reject(error)
@@ -47,6 +61,7 @@ export const compareScryptHash = async (
       value,
       salt,
       DEFAULT_SCRYPT_KEY_LENGTH,
+      getScryptOptions(),
       (error, derivedKey) => {
         if (error) {
           reject(error)

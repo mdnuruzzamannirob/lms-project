@@ -92,6 +92,7 @@ export const authService = {
     const user = await UserModel.create({
       name: payload.name,
       email: payload.email,
+      countryCode: payload.countryCode.toUpperCase(),
       passwordHash,
       provider: 'local',
       isEmailVerified: false,
