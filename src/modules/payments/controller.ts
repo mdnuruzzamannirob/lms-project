@@ -51,6 +51,21 @@ export const listMyPayments: RequestHandler = catchAsync(
   },
 )
 
+export const listAvailablePaymentGateways: RequestHandler = catchAsync(
+  async (request, response) => {
+    const data = await paymentsService.listAvailablePaymentGatewaysForUser(
+      getUserId(request),
+    )
+
+    sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: 'Available payment gateways retrieved successfully.',
+      data,
+    })
+  },
+)
+
 export const getMyPaymentById: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await paymentsService.getMyPaymentById(

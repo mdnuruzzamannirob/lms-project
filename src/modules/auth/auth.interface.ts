@@ -12,6 +12,7 @@ export interface IUser {
   _id: Types.ObjectId
   name: string
   email: string
+  countryCode?: string
   passwordHash?: string
   provider: UserAuthProvider
   socialProviderId?: string
@@ -41,6 +42,7 @@ export type SanitizedUser = {
   id: string
   name: string
   email: string
+  countryCode?: string
   provider: UserAuthProvider
   isEmailVerified: boolean
   notificationPreferences: UserNotificationPreferences

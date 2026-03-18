@@ -1,7 +1,6 @@
 export * from './controller'
-export * from './gateway.config'
 export * from './interface'
 export * from './model'
-export { paymentsRouter } from './router'
+export { categoriesRouter } from './router'
 export * from './service'
 export * from './validation'

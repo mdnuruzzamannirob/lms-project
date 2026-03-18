@@ -1,15 +1,17 @@
 import crypto from 'node:crypto'
 
-import mongoose, { type ClientSession, Types } from 'mongoose'
-import Stripe from 'stripe'
-import SSLCommerzPayment from 'sslcommerz-lts'
 import * as paypalSdk from '@paypal/checkout-server-sdk'
+import mongoose, { type ClientSession, Types } from 'mongoose'
+import SSLCommerzPayment from 'sslcommerz-lts'
+import Stripe from 'stripe'
 
 import { AppError } from '../../common/errors/AppError'
 import { config } from '../../config'
+import { UserModel } from '../auth/auth.model'
 import { PlanModel } from '../plans/model'
 import { promotionsService } from '../promotions/service'
 import { subscriptionsService } from '../subscriptions/service'
+import { paymentGatewayCountryConfig } from './gateway.config'
 import type { IPayment, PaymentGateway } from './interface'
 import { PaymentModel, WebhookLogModel } from './model'
 
@@ -53,6 +55,7 @@ interface PaymentGatewayAdapter {
     reference: string
     customerName: string
     customerEmail: string
+    customerCountry: string
     metadata: Record<string, string>
   }): Promise<GatewayInitResult>
   verifyWebhook(
@@ -89,6 +92,7 @@ class SslCommerzBangladeshAdapter implements PaymentGatewayAdapter {
     reference: string
     customerName: string
     customerEmail: string
+    customerCountry: string
     metadata: Record<string, string>
   }): Promise<GatewayInitResult> {
     const client = this.getClient()
@@ -111,7 +115,7 @@ class SslCommerzBangladeshAdapter implements PaymentGatewayAdapter {
       cus_phone: '01700000000',
       cus_add1: 'Bangladesh',
       cus_city: 'Dhaka',
-      cus_country: 'Bangladesh',
+      cus_country: payload.customerCountry,
     })
 
     if (!response.GatewayPageURL) {
@@ -204,6 +208,7 @@ class StripeGatewayAdapter implements PaymentGatewayAdapter {
     reference: string
     customerName: string
     customerEmail: string
+    customerCountry: string
     metadata: Record<string, string>
   }): Promise<GatewayInitResult> {
     const stripe = this.getClient()
@@ -347,6 +352,7 @@ class PaypalGatewayAdapter implements PaymentGatewayAdapter {
     reference: string
     customerName: string
     customerEmail: string
+    customerCountry: string
     metadata: Record<string, string>
   }): Promise<GatewayInitResult> {
     const client = this.getClient()
@@ -429,10 +435,7 @@ class PaypalGatewayAdapter implements PaymentGatewayAdapter {
         verification_status: string
       }
       if (verifyData.verification_status !== 'SUCCESS') {
-        throw new AppError(
-          'PayPal webhook signature verification failed.',
-          400,
-        )
+        throw new AppError('PayPal webhook signature verification failed.', 400)
       }
     }
 
@@ -494,14 +497,103 @@ class PaypalGatewayAdapter implements PaymentGatewayAdapter {
 // Gateway factory
 // ---------------------------------------------------------------------------
 
-const resolveGatewayAdapter = (gateway: PaymentGateway): PaymentGatewayAdapter => {
-  if (gateway === 'bkash' || gateway === 'nagad') {
+const resolveGatewayAdapter = (
+  gateway: PaymentGateway,
+): PaymentGatewayAdapter => {
+  const gatewayConfig = paymentGatewayCountryConfig.find(
+    (row) => row.gateway === gateway,
+  )
+
+  if (!gatewayConfig) {
+    throw new AppError('Gateway is not configured.', 500)
+  }
+
+  if (gatewayConfig.provider === 'SSLCommerz') {
+    if (gateway !== 'bkash' && gateway !== 'nagad') {
+      throw new AppError('Invalid SSLCommerz gateway configuration.', 500)
+    }
+
     return new SslCommerzBangladeshAdapter(gateway)
   }
-  if (gateway === 'stripe') {
+
+  if (gatewayConfig.provider === 'Stripe') {
     return new StripeGatewayAdapter()
   }
-  return new PaypalGatewayAdapter()
+
+  if (gatewayConfig.provider === 'PayPal') {
+    return new PaypalGatewayAdapter()
+  }
+
+  throw new AppError('Unsupported payment gateway provider.', 500)
+}
+
+const normalizeCountryCode = (countryCode: string | undefined) => {
+  return countryCode?.trim().toUpperCase()
+}
+
+const getAvailableGatewayConfigByCountry = (
+  countryCode: string | undefined,
+) => {
+  const normalizedCountryCode = normalizeCountryCode(countryCode)
+
+  return paymentGatewayCountryConfig.filter((gatewayConfig) => {
+    if (gatewayConfig.countries.includes('*')) {
+      return true
+    }
+
+    if (!normalizedCountryCode) {
+      return false
+    }
+
+    return gatewayConfig.countries.includes(normalizedCountryCode)
+  })
+}
+
+const getUserCountryCode = async (userId: string) => {
+  const user = await UserModel.findById(userId)
+
+  if (!user) {
+    throw new AppError('User not found.', 404)
+  }
+
+  return {
+    countryCode: normalizeCountryCode(user.countryCode),
+    name: user.name,
+    email: user.email,
+  }
+}
+
+const ensureGatewayAvailableForCountry = (
+  gateway: PaymentGateway,
+  countryCode: string | undefined,
+) => {
+  const availableConfig = getAvailableGatewayConfigByCountry(countryCode)
+  const selectedConfig = availableConfig.find(
+    (item) => item.gateway === gateway,
+  )
+
+  if (!selectedConfig) {
+    throw new AppError(
+      'Selected payment gateway is not available for your country.',
+      400,
+    )
+  }
+
+  return selectedConfig
+}
+
+const toGatewayView = (countryCode: string | undefined) => {
+  return getAvailableGatewayConfigByCountry(countryCode).map(
+    (gatewayConfig) => ({
+      gateway: gatewayConfig.gateway,
+      provider: gatewayConfig.provider,
+      countries: gatewayConfig.countries,
+    }),
+  )
+}
+
+const resolveCustomerCountry = (countryCode: string | undefined): string => {
+  return countryCode ?? 'UNKNOWN'
 }
 
 // ---------------------------------------------------------------------------
@@ -614,6 +706,15 @@ const applyVerificationTransaction = async (
 // ---------------------------------------------------------------------------
 
 export const paymentsService = {
+  listAvailablePaymentGatewaysForUser: async (userId: string) => {
+    const userCountry = await getUserCountryCode(userId)
+
+    return {
+      countryCode: userCountry.countryCode,
+      gateways: toGatewayView(userCountry.countryCode),
+    }
+  },
+
   listMyPayments: async (userId: string) => {
     const payments = await PaymentModel.find({ userId }).sort({ createdAt: -1 })
     return payments.map(formatPayment)
@@ -643,6 +744,12 @@ export const paymentsService = {
     couponCode?: string
     autoRenew?: boolean
   }) => {
+    const user = await getUserCountryCode(payload.userId)
+    const selectedGatewayConfig = ensureGatewayAvailableForCountry(
+      payload.gateway,
+      user.countryCode,
+    )
+
     const plan = await PlanModel.findById(payload.planId)
     if (!plan || !plan.isActive) {
       throw new AppError('Plan not found or inactive.', 404)
@@ -669,18 +776,20 @@ export const paymentsService = {
       })
 
     const reference = `PAY-${Date.now()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`
-    const gatewayAdapter = resolveGatewayAdapter(payload.gateway)
+    const gatewayAdapter = resolveGatewayAdapter(selectedGatewayConfig.gateway)
 
     const gatewayResult = await gatewayAdapter.initiate({
       amount: payableAmount,
       currency: plan.currency,
       reference,
-      customerName: 'LMS User',
-      customerEmail: 'customer@example.com',
+      customerName: user.name,
+      customerEmail: user.email,
+      customerCountry: resolveCustomerCountry(user.countryCode),
       metadata: {
         subscriptionId: pendingSubscription._id.toString(),
         userId: payload.userId,
         gateway: payload.gateway,
+        countryCode: user.countryCode ?? 'UNKNOWN',
       },
     })
 

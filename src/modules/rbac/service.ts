@@ -87,6 +87,42 @@ export const defaultPermissionSeeds: PermissionSeed[] = [
     description: 'Create and update coupons and flash sales',
     module: 'promotions',
   },
+  {
+    key: 'authors.view',
+    name: 'View Authors',
+    description: 'View author records',
+    module: 'authors',
+  },
+  {
+    key: 'authors.manage',
+    name: 'Manage Authors',
+    description: 'Create, update, and delete authors',
+    module: 'authors',
+  },
+  {
+    key: 'categories.view',
+    name: 'View Categories',
+    description: 'View category records and trees',
+    module: 'categories',
+  },
+  {
+    key: 'categories.manage',
+    name: 'Manage Categories',
+    description: 'Create, update, and delete categories',
+    module: 'categories',
+  },
+  {
+    key: 'books.view',
+    name: 'View Books',
+    description: 'View book records',
+    module: 'books',
+  },
+  {
+    key: 'books.manage',
+    name: 'Manage Books',
+    description: 'Create, update, delete books and manage files',
+    module: 'books',
+  },
 ]
 
 export const rbacService = {

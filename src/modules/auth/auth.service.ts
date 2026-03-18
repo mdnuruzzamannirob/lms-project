@@ -234,6 +234,7 @@ export const authService = {
     userId: string,
     payload: {
       name?: string
+      countryCode?: string
       notificationPreferences?: Partial<UserNotificationPreferences>
     },
   ): Promise<SanitizedUser> => {
@@ -245,6 +246,10 @@ export const authService = {
 
     if (payload.name) {
       user.name = payload.name
+    }
+
+    if (payload.countryCode) {
+      user.countryCode = payload.countryCode.toUpperCase()
     }
 
     if (payload.notificationPreferences) {

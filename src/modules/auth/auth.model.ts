@@ -46,6 +46,16 @@ const userSchema = new Schema<UserDocument>(
       lowercase: true,
       trim: true,
     },
+    countryCode: {
+      type: String,
+      required: false,
+      trim: true,
+      uppercase: true,
+      minlength: 2,
+      maxlength: 3,
+      default: undefined,
+      index: true,
+    },
     passwordHash: { type: String, required: false },
     provider: {
       type: String,

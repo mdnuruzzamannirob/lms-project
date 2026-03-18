@@ -1,6 +1,9 @@
 import { Router } from 'express'
 
 import { authRouter } from '../modules/auth'
+import { authorsRouter } from '../modules/authors'
+import { booksRouter } from '../modules/books'
+import { categoriesRouter } from '../modules/categories'
 import { healthRouter } from '../modules/health'
 import { onboardingRouter } from '../modules/onboarding'
 import { paymentsRouter } from '../modules/payments'
@@ -16,8 +19,11 @@ const router = Router()
 router.use('/auth', authRouter)
 router.use('/staff', staffAuthRouter)
 router.use('/onboarding', onboardingRouter)
+router.use('/authors', authorsRouter)
+router.use('/categories', categoriesRouter)
 router.use('/plans', plansRouter)
 router.use('/subscriptions', subscriptionsRouter)
+router.use('/', booksRouter)
 router.use('/', paymentsRouter)
 router.use('/', promotionsRouter)
 router.use('/admin', rbacRouter)

@@ -13,11 +13,13 @@ export const buildUserJwtPayload = (user: IUser): BaseJwtPayload => {
 
 export const sanitizeUser = (user: IUser): SanitizedUser => {
   const lastLoginAt = user.lastLoginAt?.toISOString()
+  const countryCode = user.countryCode
 
   return {
     id: user._id.toString(),
     name: user.name,
     email: user.email,
+    ...(countryCode ? { countryCode } : {}),
     provider: user.provider,
     isEmailVerified: user.isEmailVerified,
     notificationPreferences: user.notificationPreferences,

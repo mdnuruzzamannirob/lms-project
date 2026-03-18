@@ -26,6 +26,7 @@ export const authValidation = {
   updateMeBody: z
     .object({
       name: z.string().trim().min(2).max(100).optional(),
+      countryCode: z.string().trim().min(2).max(3).toUpperCase().optional(),
       notificationPreferences: z
         .object({
           email: z.boolean().optional(),
@@ -37,6 +38,7 @@ export const authValidation = {
     .refine(
       (value) =>
         typeof value.name !== 'undefined' ||
+        typeof value.countryCode !== 'undefined' ||
         typeof value.notificationPreferences !== 'undefined',
       {
         message: 'At least one profile field is required',

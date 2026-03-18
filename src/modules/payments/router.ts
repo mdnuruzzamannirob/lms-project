@@ -11,6 +11,7 @@ import {
   getPaymentById,
   handleWebhook,
   initiatePayment,
+  listAvailablePaymentGateways,
   listMyPayments,
   listPayments,
   refundPayment,
@@ -20,6 +21,11 @@ import { paymentsValidation } from './validation'
 
 const router = Router()
 
+router.get(
+  '/payments/gateways/my',
+  authenticateUser,
+  listAvailablePaymentGateways,
+)
 router.get('/payments/my', authenticateUser, listMyPayments)
 router.get(
   '/payments/my/:id',
