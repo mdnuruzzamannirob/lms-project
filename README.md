@@ -209,8 +209,8 @@ This separation prevents long-running tasks from affecting request latency and i
 ### 1) Clone repository
 
 ```bash
-git clone https://github.com/mdnuruzzamannirob/lms-project.git
-cd lms-project
+git clone https://github.com/mdnuruzzamannirob/stackread-backend.git
+cd stackread-backend
 ```
 
 ### 2) Install dependencies

@@ -465,10 +465,10 @@ Build the backend as a strict TypeScript modular monolith on Node.js + Express +
 
 **Relevant files**
 
-- c:\Users\devmd\work\lms-project\documentation\LMS_Feature_List_v2.md — feature scope and module inventory.
-- c:\Users\devmd\work\lms-project\documentation\LMS_Feature_DB_Mapping.md — feature-to-collection mapping and cross-check.
-- c:\Users\devmd\work\lms-project\documentation\LMS_MongoDB_Design_v3.md — collection definitions, TTL/index rules, and report data design.
-- c:\Users\devmd\work\lms-project\documentation\LMS_REST_API_Design.md — endpoint inventory, auth levels, and response contract.
+- c:\Users\devmd\work\stackread-backend\documentation\LMS_Feature_List_v2.md — feature scope and module inventory.
+- c:\Users\devmd\work\stackread-backend\documentation\LMS_Feature_DB_Mapping.md — feature-to-collection mapping and cross-check.
+- c:\Users\devmd\work\stackread-backend\documentation\LMS_MongoDB_Design_v3.md — collection definitions, TTL/index rules, and report data design.
+- c:\Users\devmd\work\stackread-backend\documentation\LMS_REST_API_Design.md — endpoint inventory, auth levels, and response contract.
 
 **Verification**
 
