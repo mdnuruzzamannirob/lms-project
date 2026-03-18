@@ -1,10 +1,13 @@
-import { MongoMemoryServer } from 'mongodb-memory-server'
+import { MongoMemoryReplSet } from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 
-let mongoServer: MongoMemoryServer | null = null
+let mongoServer: MongoMemoryReplSet | null = null
 
 export const setupTestDatabase = async () => {
-  mongoServer = await MongoMemoryServer.create({
+  mongoServer = await MongoMemoryReplSet.create({
+    replSet: {
+      count: 1,
+    },
     binary: {
       version: '7.0.14',
     },

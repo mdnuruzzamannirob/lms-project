@@ -111,6 +111,21 @@ const deepMerge = (
   return output
 }
 
+const toPlainRecord = (value: unknown): Record<string, unknown> => {
+  if (!value || typeof value !== 'object') {
+    return {}
+  }
+
+  if (
+    'toObject' in value &&
+    typeof (value as { toObject: unknown }).toObject === 'function'
+  ) {
+    return (value as { toObject: () => Record<string, unknown> }).toObject()
+  }
+
+  return value as Record<string, unknown>
+}
+
 export const settingsService = {
   getGlobalSettings: async () => {
     let settings = await SettingsModel.findOne({ singletonKey: 'global' })
@@ -142,22 +157,22 @@ export const settingsService = {
     }
 
     settings.providers = deepMerge(
-      settings.providers as unknown as Record<string, unknown>,
+      toPlainRecord(settings.providers),
       (payload.providers ?? {}) as Record<string, unknown>,
     ) as IGlobalSettings['providers']
 
     settings.templates = deepMerge(
-      settings.templates as unknown as Record<string, unknown>,
+      toPlainRecord(settings.templates),
       (payload.templates ?? {}) as Record<string, unknown>,
     ) as IGlobalSettings['templates']
 
     settings.maintenance = deepMerge(
-      settings.maintenance as unknown as Record<string, unknown>,
+      toPlainRecord(settings.maintenance),
       (payload.maintenance ?? {}) as Record<string, unknown>,
     ) as IGlobalSettings['maintenance']
 
     settings.trial = deepMerge(
-      settings.trial as unknown as Record<string, unknown>,
+      toPlainRecord(settings.trial),
       (payload.trial ?? {}) as Record<string, unknown>,
     ) as IGlobalSettings['trial']
 
