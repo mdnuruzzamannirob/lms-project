@@ -16,6 +16,34 @@
     {
       "key": "staffToken",
       "value": ""
+    },
+    {
+      "key": "userId",
+      "value": "65f19a9a6f8f4a2b3c4d5e6f"
+    },
+    {
+      "key": "bookId",
+      "value": "65f19a9a6f8f4a2b3c4d5e6f"
+    },
+    {
+      "key": "planId",
+      "value": "65f19a9a6f8f4a2b3c4d5e6f"
+    },
+    {
+      "key": "authorId",
+      "value": "65f19a9a6f8f4a2b3c4d5e6f"
+    },
+    {
+      "key": "categoryId",
+      "value": "65f19a9a6f8f4a2b3c4d5e6f"
+    },
+    {
+      "key": "couponId",
+      "value": "65f19a9a6f8f4a2b3c4d5e6f"
+    },
+    {
+      "key": "reportId",
+      "value": "65f19a9a6f8f4a2b3c4d5e6f"
     }
   ],
   "item": [
@@ -57,7 +85,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"actorType\": \"staff\",\n  \"action\": \"string\",\n  \"module\": \"string\",\n  \"description\": \"string\",\n  \"targetId\": \"string\",\n  \"targetType\": \"string\",\n  \"meta\": {}\n}",
+              "raw": "{\n  \"actorType\": \"staff\",\n  \"action\": \"Action sample\",\n  \"module\": \"Module sample\",\n  \"description\": \"Well-structured data for documentation examples.\",\n  \"targetId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"targetType\": \"Target Type sample\",\n  \"meta\": {}\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -93,7 +121,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/audit/logs",
+              "raw": "{{baseUrl}}/api/v1/admin/audit/logs?page=1&limit=20&actorType=staff&module=Module%20sample&action=Action%20sample&from=2026-03-18T09%3A30%3A00.000Z&to=2026-03-18T09%3A30%3A00.000Z&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -103,6 +131,68 @@
                 "admin",
                 "audit",
                 "logs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "actorType",
+                  "value": "staff",
+                  "disabled": true,
+                  "description": "Query parameter 'actorType'."
+                },
+                {
+                  "key": "module",
+                  "value": "Module sample",
+                  "disabled": true,
+                  "description": "Query parameter 'module'."
+                },
+                {
+                  "key": "action",
+                  "value": "Action sample",
+                  "disabled": true,
+                  "description": "Query parameter 'action'."
+                },
+                {
+                  "key": "from",
+                  "value": "2026-03-18T09:30:00.000Z",
+                  "disabled": true,
+                  "description": "Query parameter 'from'."
+                },
+                {
+                  "key": "to",
+                  "value": "2026-03-18T09:30:00.000Z",
+                  "disabled": true,
+                  "description": "Query parameter 'to'."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -134,7 +224,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/audit/logs/export",
+              "raw": "{{baseUrl}}/api/v1/admin/audit/logs/export?actorType=staff&module=Module%20sample&action=Action%20sample&from=2026-03-18T09%3A30%3A00.000Z&to=2026-03-18T09%3A30%3A00.000Z&format=json&page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -145,6 +235,74 @@
                 "audit",
                 "logs",
                 "export"
+              ],
+              "query": [
+                {
+                  "key": "actorType",
+                  "value": "staff",
+                  "disabled": true,
+                  "description": "Query parameter 'actorType'."
+                },
+                {
+                  "key": "module",
+                  "value": "Module sample",
+                  "disabled": true,
+                  "description": "Query parameter 'module'."
+                },
+                {
+                  "key": "action",
+                  "value": "Action sample",
+                  "disabled": true,
+                  "description": "Query parameter 'action'."
+                },
+                {
+                  "key": "from",
+                  "value": "2026-03-18T09:30:00.000Z",
+                  "disabled": true,
+                  "description": "Query parameter 'from'."
+                },
+                {
+                  "key": "to",
+                  "value": "2026-03-18T09:30:00.000Z",
+                  "disabled": true,
+                  "description": "Query parameter 'to'."
+                },
+                {
+                  "key": "format",
+                  "value": "json",
+                  "disabled": true,
+                  "description": "Query parameter 'format'."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -171,7 +329,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/facebook",
+              "raw": "{{baseUrl}}/api/v1/auth/facebook?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -180,6 +338,38 @@
                 "v1",
                 "auth",
                 "facebook"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -190,7 +380,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/facebook/callback",
+              "raw": "{{baseUrl}}/api/v1/auth/facebook/callback?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -200,6 +390,38 @@
                 "auth",
                 "facebook",
                 "callback"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -228,7 +450,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\"\n}",
+              "raw": "{\n  \"email\": \"reader@example.com\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -243,7 +465,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/google",
+              "raw": "{{baseUrl}}/api/v1/auth/google?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -252,6 +474,38 @@
                 "v1",
                 "auth",
                 "google"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -262,7 +516,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/google/callback",
+              "raw": "{{baseUrl}}/api/v1/auth/google/callback?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -272,6 +526,38 @@
                 "auth",
                 "google",
                 "callback"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -300,7 +586,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"string\"\n}",
+              "raw": "{\n  \"email\": \"reader@example.com\",\n  \"password\": \"P@ssw0rd123!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -357,7 +643,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/me",
+              "raw": "{{baseUrl}}/api/v1/auth/me?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -366,6 +652,38 @@
                 "v1",
                 "auth",
                 "me"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -451,7 +769,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/me/login-history",
+              "raw": "{{baseUrl}}/api/v1/auth/me/login-history?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -461,6 +779,38 @@
                 "auth",
                 "me",
                 "login-history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -566,7 +916,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"string\",\n  \"newPassword\": \"string\"\n}",
+              "raw": "{\n  \"currentPassword\": \"P@ssw0rd123!\",\n  \"newPassword\": \"P@ssw0rd123!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -610,7 +960,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"string\",\n  \"email\": \"user@example.com\",\n  \"password\": \"string\",\n  \"countryCode\": \"string\"\n}",
+              "raw": "{\n  \"name\": \"Ayesha Rahman\",\n  \"email\": \"reader@example.com\",\n  \"password\": \"P@ssw0rd123!\",\n  \"countryCode\": \"BD\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -656,7 +1006,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\"\n}",
+              "raw": "{\n  \"email\": \"reader@example.com\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -689,7 +1039,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"string\",\n  \"newPassword\": \"string\"\n}",
+              "raw": "{\n  \"token\": \"Token sample\",\n  \"newPassword\": \"P@ssw0rd123!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -722,7 +1072,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"string\"\n}",
+              "raw": "{\n  \"token\": \"Token sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -742,7 +1092,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/authors",
+              "raw": "{{baseUrl}}/api/v1/authors?page=1&limit=20&search=clean%20code&isActive=true&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -750,6 +1100,44 @@
                 "api",
                 "v1",
                 "authors"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Query parameter 'isActive'."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -787,7 +1175,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"string\",\n  \"bio\": \"string\",\n  \"countryCode\": \"string\",\n  \"avatarUrl\": \"https://example.com/resource\",\n  \"website\": \"https://example.com/resource\",\n  \"isActive\": true\n}",
+              "raw": "{\n  \"name\": \"Ayesha Rahman\",\n  \"bio\": \"Bio sample\",\n  \"countryCode\": \"BD\",\n  \"avatarUrl\": \"https://example.com/resource\",\n  \"website\": \"https://example.com/resource\",\n  \"isActive\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -853,7 +1241,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/authors/:id",
+              "raw": "{{baseUrl}}/api/v1/authors/:id?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -862,6 +1250,38 @@
                 "v1",
                 "authors",
                 ":id"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -959,7 +1379,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"string\",\n  \"slug\": \"string\",\n  \"isbn\": \"string\",\n  \"summary\": \"string\",\n  \"description\": \"string\",\n  \"language\": \"string\",\n  \"pageCount\": 1,\n  \"publicationDate\": \"2026-03-18T08:09:10.133Z\",\n  \"coverImageUrl\": \"https://example.com/resource\",\n  \"featured\": true,\n  \"isAvailable\": true,\n  \"authorIds\": [\n    \"string\"\n  ],\n  \"categoryIds\": [\n    \"string\"\n  ],\n  \"tags\": [\n    \"string\"\n  ]\n}",
+              "raw": "{\n  \"title\": \"Atomic Habits\",\n  \"slug\": \"Slug sample\",\n  \"isbn\": \"Isbn sample\",\n  \"summary\": \"Summary sample\",\n  \"description\": \"Well-structured data for documentation examples.\",\n  \"language\": \"Language sample\",\n  \"pageCount\": 1,\n  \"publicationDate\": \"2026-03-18T09:30:00.000Z\",\n  \"coverImageUrl\": \"https://example.com/resource\",\n  \"featured\": true,\n  \"isAvailable\": true,\n  \"authorIds\": [\n    \"Author Ids sample\"\n  ],\n  \"categoryIds\": [\n    \"Category Ids sample\"\n  ],\n  \"tags\": [\n    \"Tags sample\"\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1321,7 +1741,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"books\": [\n    {\n      \"title\": \"string\",\n      \"slug\": \"string\",\n      \"isbn\": \"string\",\n      \"summary\": \"string\",\n      \"description\": \"string\",\n      \"language\": \"string\",\n      \"pageCount\": 1,\n      \"publicationDate\": \"2026-03-18T08:09:10.145Z\",\n      \"coverImageUrl\": \"https://example.com/resource\",\n      \"featured\": true,\n      \"isAvailable\": true,\n      \"authorIds\": [\n        \"string\"\n      ],\n      \"categoryIds\": [\n        \"string\"\n      ],\n      \"tags\": [\n        \"string\"\n      ]\n    }\n  ]\n}",
+              "raw": "{\n  \"books\": [\n    {\n      \"title\": \"Atomic Habits\",\n      \"slug\": \"Slug sample\",\n      \"isbn\": \"Isbn sample\",\n      \"summary\": \"Summary sample\",\n      \"description\": \"Well-structured data for documentation examples.\",\n      \"language\": \"Language sample\",\n      \"pageCount\": 1,\n      \"publicationDate\": \"2026-03-18T09:30:00.000Z\",\n      \"coverImageUrl\": \"https://example.com/resource\",\n      \"featured\": true,\n      \"isAvailable\": true,\n      \"authorIds\": [\n        \"Author Ids sample\"\n      ],\n      \"categoryIds\": [\n        \"Category Ids sample\"\n      ],\n      \"tags\": [\n        \"Tags sample\"\n      ]\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1347,7 +1767,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books",
+              "raw": "{{baseUrl}}/api/v1/books?page=1&limit=20&search=clean%20code&featured=true&isAvailable=true&authorId=65f19a9a6f8f4a2b3c4d5e6f&categoryId=65f19a9a6f8f4a2b3c4d5e6f&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1355,6 +1775,62 @@
                 "api",
                 "v1",
                 "books"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "featured",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Query parameter 'featured'."
+                },
+                {
+                  "key": "isAvailable",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Query parameter 'isAvailable'."
+                },
+                {
+                  "key": "authorId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'authorId'."
+                },
+                {
+                  "key": "categoryId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'categoryId'."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -1365,7 +1841,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:id",
+              "raw": "{{baseUrl}}/api/v1/books/:id?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1374,6 +1850,38 @@
                 "v1",
                 "books",
                 ":id"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -1384,7 +1892,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:id/preview",
+              "raw": "{{baseUrl}}/api/v1/books/:id/preview?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1394,6 +1902,38 @@
                 "books",
                 ":id",
                 "preview"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -1404,7 +1944,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/featured",
+              "raw": "{{baseUrl}}/api/v1/books/featured?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1413,6 +1953,38 @@
                 "v1",
                 "books",
                 "featured"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -1438,7 +2010,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/borrows",
+              "raw": "{{baseUrl}}/api/v1/borrows?page=1&limit=20&status=borrowed&userId=65f19a9a6f8f4a2b3c4d5e6f&bookId=65f19a9a6f8f4a2b3c4d5e6f&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1446,6 +2018,56 @@
                 "api",
                 "v1",
                 "borrows"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "status",
+                  "value": "borrowed",
+                  "disabled": true,
+                  "description": "Query parameter 'status'."
+                },
+                {
+                  "key": "userId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'userId'."
+                },
+                {
+                  "key": "bookId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'bookId'."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -1494,7 +2116,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"bookId\": \"string\",\n  \"bookFileId\": \"string\",\n  \"dueAt\": \"2026-03-18T08:09:10.230Z\"\n}",
+              "raw": "{\n  \"bookId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"bookFileId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"dueAt\": \"2026-03-18T09:30:00.000Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1603,7 +2225,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"note\": \"string\"\n}",
+              "raw": "{\n  \"note\": \"Note sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1639,7 +2261,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/borrows/my",
+              "raw": "{{baseUrl}}/api/v1/borrows/my?page=1&limit=20&status=borrowed&userId=65f19a9a6f8f4a2b3c4d5e6f&bookId=65f19a9a6f8f4a2b3c4d5e6f&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1648,6 +2270,56 @@
                 "v1",
                 "borrows",
                 "my"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "status",
+                  "value": "borrowed",
+                  "disabled": true,
+                  "description": "Query parameter 'status'."
+                },
+                {
+                  "key": "userId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'userId'."
+                },
+                {
+                  "key": "bookId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'bookId'."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -1674,7 +2346,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/categories",
+              "raw": "{{baseUrl}}/api/v1/categories?page=1&limit=20&search=clean%20code&includeInactive=true&tree=true&parentId=65f19a9a6f8f4a2b3c4d5e6f&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1682,6 +2354,56 @@
                 "api",
                 "v1",
                 "categories"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "includeInactive",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Query parameter 'includeInactive'."
+                },
+                {
+                  "key": "tree",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Query parameter 'tree'."
+                },
+                {
+                  "key": "parentId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'parentId'."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -1719,7 +2441,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"string\",\n  \"slug\": \"string\",\n  \"description\": \"string\",\n  \"parentId\": \"string\",\n  \"sortOrder\": 0,\n  \"isActive\": true\n}",
+              "raw": "{\n  \"name\": \"Ayesha Rahman\",\n  \"slug\": \"Slug sample\",\n  \"description\": \"Well-structured data for documentation examples.\",\n  \"parentId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"sortOrder\": 1,\n  \"isActive\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1785,7 +2507,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/categories/:id",
+              "raw": "{{baseUrl}}/api/v1/categories/:id?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1794,6 +2516,38 @@
                 "v1",
                 "categories",
                 ":id"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -1873,7 +2627,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/dashboard",
+              "raw": "{{baseUrl}}/api/v1/dashboard?limit=20&page=1&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1881,6 +2635,38 @@
                 "api",
                 "v1",
                 "dashboard"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -1912,7 +2698,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/dashboard/library",
+              "raw": "{{baseUrl}}/api/v1/dashboard/library?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1921,6 +2707,38 @@
                 "v1",
                 "dashboard",
                 "library"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -1952,7 +2770,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/dashboard/recommendations",
+              "raw": "{{baseUrl}}/api/v1/dashboard/recommendations?limit=20&page=1&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -1961,6 +2779,38 @@
                 "v1",
                 "dashboard",
                 "recommendations"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -1992,7 +2842,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/dashboard/stats",
+              "raw": "{{baseUrl}}/api/v1/dashboard/stats?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2001,6 +2851,38 @@
                 "v1",
                 "dashboard",
                 "stats"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -2027,7 +2909,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/health",
+              "raw": "{{baseUrl}}/api/v1/health?details=%7B%7D&page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2035,6 +2917,44 @@
                 "api",
                 "v1",
                 "health"
+              ],
+              "query": [
+                {
+                  "key": "details",
+                  "value": "{}",
+                  "disabled": true,
+                  "description": "Query parameter 'details'."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -2045,7 +2965,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/health/live",
+              "raw": "{{baseUrl}}/api/v1/health/live?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2054,6 +2974,38 @@
                 "v1",
                 "health",
                 "live"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -2064,7 +3016,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/health/ready",
+              "raw": "{{baseUrl}}/api/v1/health/ready?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2073,6 +3025,38 @@
                 "v1",
                 "health",
                 "ready"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -2098,7 +3082,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/members",
+              "raw": "{{baseUrl}}/api/v1/admin/members?page=1&limit=20&search=clean%20code&isSuspended=true&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2107,6 +3091,44 @@
                 "v1",
                 "admin",
                 "members"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "isSuspended",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Query parameter 'isSuspended'."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -2138,7 +3160,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/members/:userId",
+              "raw": "{{baseUrl}}/api/v1/admin/members/{{userId}}?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2147,7 +3169,39 @@
                 "v1",
                 "admin",
                 "members",
-                ":userId"
+                "{{userId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -2179,7 +3233,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/members/:userId/payments",
+              "raw": "{{baseUrl}}/api/v1/admin/members/{{userId}}/payments?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2188,8 +3242,40 @@
                 "v1",
                 "admin",
                 "members",
-                ":userId",
+                "{{userId}}",
                 "payments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -2221,7 +3307,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/members/:userId/reading-history",
+              "raw": "{{baseUrl}}/api/v1/admin/members/{{userId}}/reading-history?status=current&page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2230,8 +3316,46 @@
                 "v1",
                 "admin",
                 "members",
-                ":userId",
+                "{{userId}}",
                 "reading-history"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "current",
+                  "disabled": true,
+                  "description": "Query parameter 'status'."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -2268,7 +3392,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/members/:userId/suspend",
+              "raw": "{{baseUrl}}/api/v1/admin/members/{{userId}}/suspend",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2277,13 +3401,13 @@
                 "v1",
                 "admin",
                 "members",
-                ":userId",
+                "{{userId}}",
                 "suspend"
               ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"string\"\n}",
+              "raw": "{\n  \"reason\": \"Reason sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2319,7 +3443,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/members/:userId/unsuspend",
+              "raw": "{{baseUrl}}/api/v1/admin/members/{{userId}}/unsuspend",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2328,7 +3452,7 @@
                 "v1",
                 "admin",
                 "members",
-                ":userId",
+                "{{userId}}",
                 "unsuspend"
               ]
             }
@@ -2366,7 +3490,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/notifications",
+              "raw": "{{baseUrl}}/api/v1/notifications?page=1&limit=20&read=true&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2374,6 +3498,44 @@
                 "api",
                 "v1",
                 "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "read",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Query parameter 'read'."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -2464,7 +3626,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userIds\": [\n    \"string\"\n  ],\n  \"type\": \"string\",\n  \"title\": \"string\",\n  \"body\": \"string\",\n  \"relatedEntityId\": \"string\",\n  \"relatedEntityType\": \"string\"\n}",
+              "raw": "{\n  \"userIds\": [\n    \"User Ids sample\"\n  ],\n  \"type\": \"Type sample\",\n  \"title\": \"Atomic Habits\",\n  \"body\": \"Body sample\",\n  \"relatedEntityId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"relatedEntityType\": \"Related Entity Type sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2518,7 +3680,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"notificationIds\": [\n    \"string\"\n  ]\n}",
+              "raw": "{\n  \"notificationIds\": [\n    \"Notification Ids sample\"\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2554,7 +3716,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/notifications/unread-count",
+              "raw": "{{baseUrl}}/api/v1/notifications/unread-count?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2563,6 +3725,38 @@
                 "v1",
                 "notifications",
                 "unread-count"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -2643,7 +3837,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/onboarding/plans",
+              "raw": "{{baseUrl}}/api/v1/onboarding/plans?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2652,6 +3846,38 @@
                 "v1",
                 "onboarding",
                 "plans"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -2690,7 +3916,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"planCode\": \"string\"\n}",
+              "raw": "{\n  \"planCode\": \"Plan Code sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2726,7 +3952,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/onboarding/status",
+              "raw": "{{baseUrl}}/api/v1/onboarding/status?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2735,6 +3961,38 @@
                 "v1",
                 "onboarding",
                 "status"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -2771,7 +4029,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/payments",
+              "raw": "{{baseUrl}}/api/v1/payments?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2779,6 +4037,38 @@
                 "api",
                 "v1",
                 "payments"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -2810,7 +4100,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/payments/:id",
+              "raw": "{{baseUrl}}/api/v1/payments/:id?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2819,6 +4109,38 @@
                 "v1",
                 "payments",
                 ":id"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -2869,7 +4191,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"string\"\n}",
+              "raw": "{\n  \"reason\": \"Reason sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2905,7 +4227,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/payments/gateways/my",
+              "raw": "{{baseUrl}}/api/v1/payments/gateways/my?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2915,6 +4237,38 @@
                 "payments",
                 "gateways",
                 "my"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -2964,7 +4318,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"planId\": \"string\",\n  \"gateway\": \"bkash\",\n  \"couponCode\": \"string\",\n  \"autoRenew\": true\n}",
+              "raw": "{\n  \"planId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"gateway\": \"bkash\",\n  \"couponCode\": \"Coupon Code sample\",\n  \"autoRenew\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3000,7 +4354,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/payments/my",
+              "raw": "{{baseUrl}}/api/v1/payments/my?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3009,6 +4363,38 @@
                 "v1",
                 "payments",
                 "my"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -3040,7 +4426,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/payments/my/:id",
+              "raw": "{{baseUrl}}/api/v1/payments/my/:id?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3050,6 +4436,38 @@
                 "payments",
                 "my",
                 ":id"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -3099,7 +4517,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reference\": \"string\",\n  \"providerPaymentId\": \"string\",\n  \"gatewayTransactionId\": \"string\",\n  \"status\": \"success\"\n}",
+              "raw": "{\n  \"reference\": \"Reference sample\",\n  \"providerPaymentId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"gatewayTransactionId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"status\": \"success\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3149,7 +4567,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/plans",
+              "raw": "{{baseUrl}}/api/v1/plans?includeInactive=true&page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3157,6 +4575,44 @@
                 "api",
                 "v1",
                 "plans"
+              ],
+              "query": [
+                {
+                  "key": "includeInactive",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Query parameter 'includeInactive'."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -3194,7 +4650,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"string\",\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"price\": 0,\n  \"currency\": \"string\",\n  \"durationDays\": 1,\n  \"maxBorrows\": 1,\n  \"features\": [\n    \"string\"\n  ],\n  \"isFree\": true,\n  \"isActive\": true,\n  \"sortOrder\": 0\n}",
+              "raw": "{\n  \"code\": \"Code sample\",\n  \"name\": \"Ayesha Rahman\",\n  \"description\": \"Well-structured data for documentation examples.\",\n  \"price\": 0,\n  \"currency\": \"BDT\",\n  \"durationDays\": 1,\n  \"maxBorrows\": 1,\n  \"features\": [\n    \"Features sample\"\n  ],\n  \"isFree\": true,\n  \"isActive\": true,\n  \"sortOrder\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3220,7 +4676,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/plans/:id",
+              "raw": "{{baseUrl}}/api/v1/plans/:id?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3229,6 +4685,38 @@
                 "v1",
                 "plans",
                 ":id"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -3349,7 +4837,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/coupons",
+              "raw": "{{baseUrl}}/api/v1/coupons?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3357,6 +4845,38 @@
                 "api",
                 "v1",
                 "coupons"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -3405,7 +4925,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"string\",\n  \"title\": \"string\",\n  \"description\": \"string\",\n  \"discountType\": \"percentage\",\n  \"discountValue\": 0,\n  \"maxDiscountAmount\": 0,\n  \"minOrderAmount\": 0,\n  \"totalLimit\": 1,\n  \"applicablePlanIds\": [\n    \"string\"\n  ],\n  \"isActive\": true,\n  \"startsAt\": \"2026-03-18T08:09:10.243Z\",\n  \"endsAt\": \"2026-03-18T08:09:10.243Z\"\n}",
+              "raw": "{\n  \"code\": \"Code sample\",\n  \"title\": \"Atomic Habits\",\n  \"description\": \"Well-structured data for documentation examples.\",\n  \"discountType\": \"percentage\",\n  \"discountValue\": 0,\n  \"maxDiscountAmount\": 0,\n  \"minOrderAmount\": 0,\n  \"totalLimit\": 1,\n  \"applicablePlanIds\": [\n    \"Applicable Plan Ids sample\"\n  ],\n  \"isActive\": true,\n  \"startsAt\": \"2026-03-18T09:30:00.000Z\",\n  \"endsAt\": \"2026-03-18T09:30:00.000Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3481,7 +5001,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/coupons/:id",
+              "raw": "{{baseUrl}}/api/v1/coupons/:id?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3490,6 +5010,38 @@
                 "v1",
                 "coupons",
                 ":id"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -3624,7 +5176,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"string\",\n  \"planId\": \"string\",\n  \"amount\": 0\n}",
+              "raw": "{\n  \"code\": \"Code sample\",\n  \"planId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"amount\": 0\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3649,7 +5201,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/flash-sales",
+              "raw": "{{baseUrl}}/api/v1/flash-sales?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3657,6 +5209,38 @@
                 "api",
                 "v1",
                 "flash-sales"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -3705,7 +5289,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"string\",\n  \"description\": \"string\",\n  \"discountPercentage\": 0,\n  \"applicablePlanIds\": [\n    \"string\"\n  ],\n  \"isActive\": true,\n  \"startsAt\": \"2026-03-18T08:09:10.252Z\",\n  \"endsAt\": \"2026-03-18T08:09:10.252Z\"\n}",
+              "raw": "{\n  \"title\": \"Atomic Habits\",\n  \"description\": \"Well-structured data for documentation examples.\",\n  \"discountPercentage\": 0,\n  \"applicablePlanIds\": [\n    \"Applicable Plan Ids sample\"\n  ],\n  \"isActive\": true,\n  \"startsAt\": \"2026-03-18T09:30:00.000Z\",\n  \"endsAt\": \"2026-03-18T09:30:00.000Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3866,7 +5450,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/flash-sales/active",
+              "raw": "{{baseUrl}}/api/v1/flash-sales/active?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3875,6 +5459,38 @@
                 "v1",
                 "flash-sales",
                 "active"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -3890,7 +5506,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/permissions",
+              "raw": "{{baseUrl}}/api/v1/admin/permissions?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3899,6 +5515,38 @@
                 "v1",
                 "admin",
                 "permissions"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -3909,7 +5557,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/roles",
+              "raw": "{{baseUrl}}/api/v1/admin/roles?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3918,6 +5566,38 @@
                 "v1",
                 "admin",
                 "roles"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -3946,7 +5626,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"string\",\n  \"description\": \"string\",\n  \"permissions\": [\n    \"string\"\n  ],\n  \"isSystem\": true\n}",
+              "raw": "{\n  \"name\": \"Ayesha Rahman\",\n  \"description\": \"Well-structured data for documentation examples.\",\n  \"permissions\": [\n    \"Permissions sample\"\n  ],\n  \"isSystem\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3981,7 +5661,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/roles/:id",
+              "raw": "{{baseUrl}}/api/v1/admin/roles/:id?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -3991,6 +5671,38 @@
                 "admin",
                 "roles",
                 ":id"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -4040,7 +5752,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:bookId/bookmarks",
+              "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/bookmarks?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4048,8 +5760,40 @@
                 "api",
                 "v1",
                 "books",
-                ":bookId",
+                "{{bookId}}",
                 "bookmarks"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -4065,7 +5809,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:bookId/bookmarks",
+              "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/bookmarks",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4073,13 +5817,13 @@
                 "api",
                 "v1",
                 "books",
-                ":bookId",
+                "{{bookId}}",
                 "bookmarks"
               ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fileId\": \"string\",\n  \"location\": \"string\",\n  \"page\": 1,\n  \"note\": \"string\"\n}",
+              "raw": "{\n  \"fileId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"location\": \"Location sample\",\n  \"page\": 1,\n  \"note\": \"Note sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4094,7 +5838,7 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:bookId/bookmarks/:id",
+              "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/bookmarks/:id",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4102,7 +5846,7 @@
                 "api",
                 "v1",
                 "books",
-                ":bookId",
+                "{{bookId}}",
                 "bookmarks",
                 ":id"
               ]
@@ -4120,7 +5864,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:bookId/bookmarks/:id",
+              "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/bookmarks/:id",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4128,7 +5872,7 @@
                 "api",
                 "v1",
                 "books",
-                ":bookId",
+                "{{bookId}}",
                 "bookmarks",
                 ":id"
               ]
@@ -4150,7 +5894,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:bookId/highlights",
+              "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/highlights?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4158,8 +5902,40 @@
                 "api",
                 "v1",
                 "books",
-                ":bookId",
+                "{{bookId}}",
                 "highlights"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -4175,7 +5951,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:bookId/highlights",
+              "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/highlights",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4183,7 +5959,7 @@
                 "api",
                 "v1",
                 "books",
-                ":bookId",
+                "{{bookId}}",
                 "highlights"
               ]
             },
@@ -4204,7 +5980,7 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:bookId/highlights/:id",
+              "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/highlights/:id",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4212,7 +5988,7 @@
                 "api",
                 "v1",
                 "books",
-                ":bookId",
+                "{{bookId}}",
                 "highlights",
                 ":id"
               ]
@@ -4230,7 +6006,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:bookId/highlights/:id",
+              "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/highlights/:id",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4238,7 +6014,7 @@
                 "api",
                 "v1",
                 "books",
-                ":bookId",
+                "{{bookId}}",
                 "highlights",
                 ":id"
               ]
@@ -4265,7 +6041,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/reading/:bookId/progress",
+              "raw": "{{baseUrl}}/api/v1/reading/{{bookId}}/progress",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4273,13 +6049,13 @@
                 "api",
                 "v1",
                 "reading",
-                ":bookId",
+                "{{bookId}}",
                 "progress"
               ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currentFileId\": \"string\",\n  \"currentPage\": 1,\n  \"progressPercentage\": 0,\n  \"status\": \"currently-reading\"\n}",
+              "raw": "{\n  \"currentFileId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"currentPage\": 1,\n  \"progressPercentage\": 0,\n  \"status\": \"currently-reading\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4299,7 +6075,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/reading/:bookId/session",
+              "raw": "{{baseUrl}}/api/v1/reading/{{bookId}}/session",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4307,13 +6083,13 @@
                 "api",
                 "v1",
                 "reading",
-                ":bookId",
+                "{{bookId}}",
                 "session"
               ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fileId\": \"string\",\n  \"startedAt\": \"2026-03-18T08:09:10.289Z\",\n  \"endedAt\": \"2026-03-18T08:09:10.289Z\",\n  \"progressDelta\": 0,\n  \"device\": \"string\"\n}",
+              "raw": "{\n  \"fileId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"startedAt\": \"2026-03-18T09:30:00.000Z\",\n  \"endedAt\": \"2026-03-18T09:30:00.000Z\",\n  \"progressDelta\": 0,\n  \"device\": \"Device sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4333,7 +6109,7 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/reading/:bookId/start",
+              "raw": "{{baseUrl}}/api/v1/reading/{{bookId}}/start",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4341,13 +6117,13 @@
                 "api",
                 "v1",
                 "reading",
-                ":bookId",
+                "{{bookId}}",
                 "start"
               ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currentFileId\": \"string\",\n  \"currentPage\": 1\n}",
+              "raw": "{\n  \"currentFileId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"currentPage\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4362,7 +6138,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/reading/completed",
+              "raw": "{{baseUrl}}/api/v1/reading/completed?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4371,6 +6147,38 @@
                 "v1",
                 "reading",
                 "completed"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -4381,7 +6189,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/reading/currently-reading",
+              "raw": "{{baseUrl}}/api/v1/reading/currently-reading?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4390,6 +6198,38 @@
                 "v1",
                 "reading",
                 "currently-reading"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -4400,7 +6240,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/reading/history",
+              "raw": "{{baseUrl}}/api/v1/reading/history?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4409,6 +6249,38 @@
                 "v1",
                 "reading",
                 "history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -4434,7 +6306,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/reports",
+              "raw": "{{baseUrl}}/api/v1/admin/reports?page=1&limit=20&status=queued&type=admin_overview&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4443,6 +6315,50 @@
                 "v1",
                 "admin",
                 "reports"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "status",
+                  "value": "queued",
+                  "disabled": true,
+                  "description": "Query parameter 'status'."
+                },
+                {
+                  "key": "type",
+                  "value": "admin_overview",
+                  "disabled": true,
+                  "description": "Query parameter 'type'."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -4528,7 +6444,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/reports/:reportId",
+              "raw": "{{baseUrl}}/api/v1/admin/reports/{{reportId}}?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4537,7 +6453,39 @@
                 "v1",
                 "admin",
                 "reports",
-                ":reportId"
+                "{{reportId}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -4569,7 +6517,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/reports/:reportId/download",
+              "raw": "{{baseUrl}}/api/v1/admin/reports/{{reportId}}/download?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4578,8 +6526,40 @@
                 "v1",
                 "admin",
                 "reports",
-                ":reportId",
+                "{{reportId}}",
                 "download"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -4611,7 +6591,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/reports/admin-overview",
+              "raw": "{{baseUrl}}/api/v1/admin/reports/admin-overview?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4621,6 +6601,38 @@
                 "admin",
                 "reports",
                 "admin-overview"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -4698,7 +6710,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/reservations",
+              "raw": "{{baseUrl}}/api/v1/reservations?page=1&limit=20&status=queued&userId=65f19a9a6f8f4a2b3c4d5e6f&bookId=65f19a9a6f8f4a2b3c4d5e6f&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4706,6 +6718,56 @@
                 "api",
                 "v1",
                 "reservations"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "status",
+                  "value": "queued",
+                  "disabled": true,
+                  "description": "Query parameter 'status'."
+                },
+                {
+                  "key": "userId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'userId'."
+                },
+                {
+                  "key": "bookId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'bookId'."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -4754,7 +6816,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"bookId\": \"string\"\n}",
+              "raw": "{\n  \"bookId\": \"65f19a9a6f8f4a2b3c4d5e6f\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4884,7 +6946,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/reservations/my",
+              "raw": "{{baseUrl}}/api/v1/reservations/my?page=1&limit=20&status=queued&userId=65f19a9a6f8f4a2b3c4d5e6f&bookId=65f19a9a6f8f4a2b3c4d5e6f&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4893,6 +6955,56 @@
                 "v1",
                 "reservations",
                 "my"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "status",
+                  "value": "queued",
+                  "disabled": true,
+                  "description": "Query parameter 'status'."
+                },
+                {
+                  "key": "userId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'userId'."
+                },
+                {
+                  "key": "bookId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'bookId'."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -4929,7 +7041,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/reviews",
+              "raw": "{{baseUrl}}/api/v1/admin/reviews?page=1&limit=20&bookId=65f19a9a6f8f4a2b3c4d5e6f&userId=65f19a9a6f8f4a2b3c4d5e6f&isVisible=true&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -4938,6 +7050,56 @@
                 "v1",
                 "admin",
                 "reviews"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "bookId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'bookId'."
+                },
+                {
+                  "key": "userId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'userId'."
+                },
+                {
+                  "key": "isVisible",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Query parameter 'isVisible'."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -5015,7 +7177,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:bookId/reviews",
+              "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/reviews?page=1&limit=20&bookId=65f19a9a6f8f4a2b3c4d5e6f&userId=65f19a9a6f8f4a2b3c4d5e6f&isVisible=true&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5023,8 +7185,58 @@
                 "api",
                 "v1",
                 "books",
-                ":bookId",
+                "{{bookId}}",
                 "reviews"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "bookId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'bookId'."
+                },
+                {
+                  "key": "userId",
+                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
+                  "disabled": true,
+                  "description": "Query parameter 'userId'."
+                },
+                {
+                  "key": "isVisible",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Query parameter 'isVisible'."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -5050,7 +7262,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:bookId/reviews",
+              "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/reviews",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5058,13 +7270,13 @@
                 "api",
                 "v1",
                 "books",
-                ":bookId",
+                "{{bookId}}",
                 "reviews"
               ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"rating\": 1,\n  \"title\": \"string\",\n  \"comment\": \"string\"\n}",
+              "raw": "{\n  \"rating\": 1,\n  \"title\": \"Atomic Habits\",\n  \"comment\": \"Comment sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5100,7 +7312,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:bookId/reviews/:id",
+              "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/reviews/:id",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5108,7 +7320,7 @@
                 "api",
                 "v1",
                 "books",
-                ":bookId",
+                "{{bookId}}",
                 "reviews",
                 ":id"
               ]
@@ -5147,7 +7359,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/books/:bookId/reviews/:id",
+              "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/reviews/:id",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5155,7 +7367,7 @@
                 "api",
                 "v1",
                 "books",
-                ":bookId",
+                "{{bookId}}",
                 "reviews",
                 ":id"
               ]
@@ -5193,7 +7405,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/search",
+              "raw": "{{baseUrl}}/api/v1/search?q=clean%20code&page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5201,6 +7413,44 @@
                 "api",
                 "v1",
                 "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "clean code",
+                  "disabled": false,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -5221,7 +7471,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/search/history",
+              "raw": "{{baseUrl}}/api/v1/search/history?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5230,6 +7480,38 @@
                 "v1",
                 "search",
                 "history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -5279,7 +7561,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"query\": \"string\",\n  \"bookId\": \"string\"\n}",
+              "raw": "{\n  \"query\": \"clean code\",\n  \"bookId\": \"65f19a9a6f8f4a2b3c4d5e6f\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5305,7 +7587,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/search/popular-terms",
+              "raw": "{{baseUrl}}/api/v1/search/popular-terms?period=day&limit=20&page=1&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5314,6 +7596,44 @@
                 "v1",
                 "search",
                 "popular-terms"
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "day",
+                  "disabled": true,
+                  "description": "Query parameter 'period'."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -5324,7 +7644,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/search/suggestions",
+              "raw": "{{baseUrl}}/api/v1/search/suggestions?q=clean%20code&limit=20&page=1&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5333,6 +7653,44 @@
                 "v1",
                 "search",
                 "suggestions"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "clean code",
+                  "disabled": false,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -5358,7 +7716,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/settings",
+              "raw": "{{baseUrl}}/api/v1/admin/settings?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5367,6 +7725,38 @@
                 "v1",
                 "admin",
                 "settings"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -5416,7 +7806,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"providers\": {\n    \"email\": {\n      \"from\": \"user@example.com\",\n      \"enabled\": true\n    },\n    \"push\": {\n      \"enabled\": true\n    },\n    \"storage\": {\n      \"enabled\": true,\n      \"basePath\": \"string\"\n    },\n    \"payment\": {\n      \"enabled\": true,\n      \"currency\": \"string\"\n    }\n  },\n  \"templates\": {\n    \"email\": {},\n    \"push\": {}\n  },\n  \"maintenance\": {\n    \"enabled\": true,\n    \"message\": \"string\",\n    \"startsAt\": \"2026-03-18T08:09:10.185Z\",\n    \"endsAt\": \"2026-03-18T08:09:10.185Z\",\n    \"allowedIps\": [\n      \"string\"\n    ]\n  },\n  \"trial\": {\n    \"enabled\": true,\n    \"durationDays\": 0,\n    \"maxBorrows\": 0,\n    \"autoActivate\": true\n  }\n}",
+              "raw": "{\n  \"providers\": {\n    \"email\": \"reader@example.com\",\n    \"push\": {\n      \"enabled\": true\n    },\n    \"storage\": {\n      \"enabled\": true,\n      \"basePath\": \"Base Path sample\"\n    },\n    \"payment\": {\n      \"enabled\": true,\n      \"currency\": \"BDT\"\n    }\n  },\n  \"templates\": {\n    \"email\": \"reader@example.com\",\n    \"push\": {}\n  },\n  \"maintenance\": {\n    \"enabled\": true,\n    \"message\": \"Message sample\",\n    \"startsAt\": \"2026-03-18T09:30:00.000Z\",\n    \"endsAt\": \"2026-03-18T09:30:00.000Z\",\n    \"allowedIps\": [\n      \"Allowed Ips sample\"\n    ]\n  },\n  \"trial\": {\n    \"enabled\": true,\n    \"durationDays\": 0,\n    \"maxBorrows\": 0,\n    \"autoActivate\": true\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5442,7 +7832,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/settings/maintenance",
+              "raw": "{{baseUrl}}/api/v1/admin/settings/maintenance?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5452,6 +7842,38 @@
                 "admin",
                 "settings",
                 "maintenance"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -5467,7 +7889,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/staff",
+              "raw": "{{baseUrl}}/api/v1/admin/staff?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5476,6 +7898,38 @@
                 "v1",
                 "admin",
                 "staff"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -5506,7 +7960,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/staff/:id",
+              "raw": "{{baseUrl}}/api/v1/admin/staff/:id?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5516,6 +7970,38 @@
                 "admin",
                 "staff",
                 ":id"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -5526,7 +8012,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/staff/:id/activity",
+              "raw": "{{baseUrl}}/api/v1/admin/staff/:id/activity?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5537,6 +8023,38 @@
                 "staff",
                 ":id",
                 "activity"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           }
@@ -5588,7 +8106,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"roleId\": \"string\"\n}",
+              "raw": "{\n  \"roleId\": \"65f19a9a6f8f4a2b3c4d5e6f\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5664,7 +8182,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"string\",\n  \"email\": \"user@example.com\",\n  \"roleId\": \"string\",\n  \"phone\": \"string\",\n  \"expiresInDays\": 1\n}",
+              "raw": "{\n  \"name\": \"Ayesha Rahman\",\n  \"email\": \"reader@example.com\",\n  \"roleId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"phone\": \"+8801712345678\",\n  \"expiresInDays\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5713,7 +8231,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"password\": \"string\",\n  \"code\": \"string\"\n}",
+              "raw": "{\n  \"password\": \"P@ssw0rd123!\",\n  \"code\": \"Code sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5809,7 +8327,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"string\"\n}",
+              "raw": "{\n  \"code\": \"Code sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5864,7 +8382,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"token\": \"string\",\n  \"password\": \"string\"\n}",
+              "raw": "{\n  \"token\": \"Token sample\",\n  \"password\": \"P@ssw0rd123!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5897,7 +8415,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"string\"\n}",
+              "raw": "{\n  \"email\": \"reader@example.com\",\n  \"password\": \"P@ssw0rd123!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5975,7 +8493,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/staff/me",
+              "raw": "{{baseUrl}}/api/v1/staff/me?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -5984,6 +8502,38 @@
                 "v1",
                 "staff",
                 "me"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -6034,7 +8584,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"currentPassword\": \"string\",\n  \"newPassword\": \"string\"\n}",
+              "raw": "{\n  \"currentPassword\": \"P@ssw0rd123!\",\n  \"newPassword\": \"P@ssw0rd123!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6075,7 +8625,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/subscriptions",
+              "raw": "{{baseUrl}}/api/v1/subscriptions?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6083,6 +8633,38 @@
                 "api",
                 "v1",
                 "subscriptions"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -6131,7 +8713,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userId\": \"string\",\n  \"planId\": \"string\",\n  \"autoRenew\": true\n}",
+              "raw": "{\n  \"userId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"planId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"autoRenew\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6167,7 +8749,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/subscriptions/:id",
+              "raw": "{{baseUrl}}/api/v1/subscriptions/:id?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6176,6 +8758,38 @@
                 "v1",
                 "subscriptions",
                 ":id"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -6261,7 +8875,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/subscriptions/my",
+              "raw": "{{baseUrl}}/api/v1/subscriptions/my?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6270,6 +8884,38 @@
                 "v1",
                 "subscriptions",
                 "my"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -6320,7 +8966,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"string\"\n}",
+              "raw": "{\n  \"reason\": \"Reason sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6375,7 +9021,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"newPlanId\": \"string\"\n}",
+              "raw": "{\n  \"newPlanId\": \"65f19a9a6f8f4a2b3c4d5e6f\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6411,7 +9057,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/subscriptions/my/history",
+              "raw": "{{baseUrl}}/api/v1/subscriptions/my/history?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6421,6 +9067,38 @@
                 "subscriptions",
                 "my",
                 "history"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -6512,7 +9190,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"newPlanId\": \"string\"\n}",
+              "raw": "{\n  \"newPlanId\": \"65f19a9a6f8f4a2b3c4d5e6f\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6553,7 +9231,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/wishlist",
+              "raw": "{{baseUrl}}/api/v1/wishlist?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6561,6 +9239,38 @@
                 "api",
                 "v1",
                 "wishlist"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
               ]
             }
           },
@@ -6592,7 +9302,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/wishlist/:bookId",
+              "raw": "{{baseUrl}}/api/v1/wishlist/{{bookId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6600,7 +9310,7 @@
                 "api",
                 "v1",
                 "wishlist",
-                ":bookId"
+                "{{bookId}}"
               ]
             }
           },
@@ -6632,7 +9342,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/wishlist/:bookId",
+              "raw": "{{baseUrl}}/api/v1/wishlist/{{bookId}}",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -6640,7 +9350,7 @@
                 "api",
                 "v1",
                 "wishlist",
-                ":bookId"
+                "{{bookId}}"
               ]
             }
           },

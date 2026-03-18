@@ -26,11 +26,38 @@ type RouteDef = {
 
 type JsonSchema = Record<string, unknown>
 
+type OpenApiParameter = {
+  name: string
+  in: 'query' | 'path'
+  required: boolean
+  schema: JsonSchema
+  description?: string
+  example?: unknown
+}
+
+type PostmanQueryParam = {
+  key: string
+  value: string
+  description?: string
+  disabled?: boolean
+}
+
 const projectRoot = process.cwd()
 const apiPrefix = '/api/v1'
 const docsDir = path.join(projectRoot, 'documentation')
 const openApiPath = path.join(docsDir, 'OpenAPI_v1.json')
 const postmanPath = path.join(docsDir, 'Postman_Collection_v1.json')
+const nowIsoExample = '2026-03-18T09:30:00.000Z'
+const objectIdExample = '65f19a9a6f8f4a2b3c4d5e6f'
+const knownIdVariables = new Set([
+  'userId',
+  'bookId',
+  'planId',
+  'authorId',
+  'categoryId',
+  'couponId',
+  'reportId',
+])
 
 const read = (filePath: string) => fs.readFileSync(filePath, 'utf8')
 
@@ -495,19 +522,69 @@ const zodToSchema = (schema: ZodTypeAny): JsonSchema => {
   }
 }
 
-const sampleFromSchema = (schema: JsonSchema): unknown => {
+const exampleForName = (
+  name: string,
+  schema: JsonSchema,
+): unknown | undefined => {
+  const lower = name.toLowerCase()
+  const schemaType = schema.type as string | undefined
+
+  if (Array.isArray(schema.enum) && schema.enum.length > 0) {
+    return schema.enum[0]
+  }
+  if (lower.includes('email')) return 'reader@example.com'
+  if (lower.includes('password')) return 'P@ssw0rd123!'
+  if (lower.includes('name')) return 'Ayesha Rahman'
+  if (lower.includes('phone')) return '+8801712345678'
+  if (lower.includes('country')) return 'BD'
+  if (lower.includes('currency')) return 'BDT'
+  if (lower.includes('title')) return 'Atomic Habits'
+  if (lower.includes('description'))
+    return 'Well-structured data for documentation examples.'
+  if (lower.includes('url') || lower.includes('link')) {
+    return 'https://example.com/resource'
+  }
+  if (
+    lower.includes('date') ||
+    lower.includes('time') ||
+    lower.endsWith('at')
+  ) {
+    return nowIsoExample
+  }
+  if ((lower === 'id' || lower.endsWith('id')) && schemaType !== 'number') {
+    return objectIdExample
+  }
+  if (lower === 'page') return 1
+  if (lower === 'limit') return 20
+  if (lower === 'sortby' && schemaType !== 'number') return 'createdAt'
+  if (lower === 'sortorder') {
+    if (schemaType === 'integer' || schemaType === 'number') return 1
+    return 'desc'
+  }
+  if (lower.includes('search') || lower.includes('query') || lower === 'q') {
+    return 'clean code'
+  }
+  return undefined
+}
+
+const sampleFromSchema = (schema: JsonSchema, keyHint = ''): unknown => {
+  const keyExample = keyHint ? exampleForName(keyHint, schema) : undefined
+  if (keyExample !== undefined) return keyExample
   if (Array.isArray(schema.enum) && schema.enum.length > 0)
     return schema.enum[0]
   if (schema.oneOf && Array.isArray(schema.oneOf) && schema.oneOf[0]) {
-    return sampleFromSchema(schema.oneOf[0] as JsonSchema)
+    return sampleFromSchema(schema.oneOf[0] as JsonSchema, keyHint)
   }
 
   const type = schema.type as string | undefined
   if (type === 'string') {
-    if (schema.format === 'email') return 'user@example.com'
-    if (schema.format === 'date-time') return new Date().toISOString()
+    if (schema.format === 'email') return 'reader@example.com'
+    if (schema.format === 'date-time') return nowIsoExample
     if (schema.format === 'uri') return 'https://example.com/resource'
-    return 'string'
+    if (keyHint) {
+      return `${prettify(keyHint)} sample`
+    }
+    return 'Sample text'
   }
   if (type === 'integer' || type === 'number') {
     if (typeof schema.minimum === 'number') return schema.minimum
@@ -515,18 +592,149 @@ const sampleFromSchema = (schema: JsonSchema): unknown => {
   }
   if (type === 'boolean') return true
   if (type === 'array') {
-    return [sampleFromSchema((schema.items as JsonSchema) ?? {})]
+    return [sampleFromSchema((schema.items as JsonSchema) ?? {}, keyHint)]
   }
   if (type === 'object') {
     const output: Record<string, unknown> = {}
     const properties =
       (schema.properties as Record<string, JsonSchema> | undefined) ?? {}
     for (const [key, value] of Object.entries(properties)) {
-      output[key] = sampleFromSchema(value)
+      output[key] = sampleFromSchema(value, key)
     }
     return output
   }
   return {}
+}
+
+const parameterDescription = (name: string, location: 'query' | 'path') => {
+  const lower = name.toLowerCase()
+  if (location === 'path') {
+    if (lower === 'id' || lower.endsWith('id')) {
+      return `Unique identifier for ${prettify(name.replace(/Id$/, ''))}.`
+    }
+    return `Path parameter '${name}'.`
+  }
+
+  if (lower === 'page') return 'Page number for paginated results.'
+  if (lower === 'limit') return 'Maximum records per page.'
+  if (lower === 'sortby') return 'Field name used for sorting.'
+  if (lower === 'sortorder') return 'Sorting order: asc or desc.'
+  if (lower.includes('search') || lower.includes('query') || lower === 'q') {
+    return 'Search keyword or query string.'
+  }
+  return `Query parameter '${name}'.`
+}
+
+const defaultGetQueryParameters = (): OpenApiParameter[] => {
+  return [
+    {
+      name: 'page',
+      in: 'query',
+      required: false,
+      description: parameterDescription('page', 'query'),
+      schema: { type: 'integer', minimum: 1, example: 1 },
+      example: 1,
+    },
+    {
+      name: 'limit',
+      in: 'query',
+      required: false,
+      description: parameterDescription('limit', 'query'),
+      schema: { type: 'integer', minimum: 1, maximum: 100, example: 20 },
+      example: 20,
+    },
+    {
+      name: 'search',
+      in: 'query',
+      required: false,
+      description: parameterDescription('search', 'query'),
+      schema: { type: 'string', example: 'clean code' },
+      example: 'clean code',
+    },
+    {
+      name: 'sortBy',
+      in: 'query',
+      required: false,
+      description: parameterDescription('sortBy', 'query'),
+      schema: { type: 'string', example: 'createdAt' },
+      example: 'createdAt',
+    },
+    {
+      name: 'sortOrder',
+      in: 'query',
+      required: false,
+      description: parameterDescription('sortOrder', 'query'),
+      schema: { type: 'string', enum: ['asc', 'desc'], example: 'desc' },
+      example: 'desc',
+    },
+  ]
+}
+
+const buildErrorSchema = () => ({
+  type: 'object',
+  properties: {
+    success: { type: 'boolean', example: false },
+    message: { type: 'string', example: 'Validation failed.' },
+    code: { type: 'string', example: 'BAD_REQUEST' },
+    errors: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          field: { type: 'string', example: 'email' },
+          message: { type: 'string', example: 'Email is invalid.' },
+        },
+      },
+    },
+    data: { nullable: true, example: null },
+    meta: {
+      type: 'object',
+      additionalProperties: true,
+      example: {
+        timestamp: nowIsoExample,
+        requestId: 'req_01HV4D2S5D4VTR2Y8YZVKB6Y6H',
+      },
+    },
+  },
+  required: ['success', 'message'],
+})
+
+const buildSuccessSchema = (route: RouteDef) => {
+  const successMessage =
+    route.method === 'post'
+      ? 'Created successfully.'
+      : route.method === 'delete'
+        ? 'Deleted successfully.'
+        : 'Request successful.'
+
+  return {
+    type: 'object',
+    properties: {
+      success: { type: 'boolean', example: true },
+      message: { type: 'string', example: successMessage },
+      data: {
+        type: 'object',
+        additionalProperties: true,
+        example: {
+          id: objectIdExample,
+          status: 'active',
+        },
+      },
+      meta: {
+        type: 'object',
+        additionalProperties: true,
+        example:
+          route.method === 'get'
+            ? {
+                page: 1,
+                limit: 20,
+                total: 1,
+              }
+            : {},
+      },
+    },
+    required: ['success', 'message', 'data'],
+  }
 }
 
 const standardErrorResponse = (statusCode: string, description: string) => ({
@@ -534,40 +742,30 @@ const standardErrorResponse = (statusCode: string, description: string) => ({
     description,
     content: {
       'application/json': {
-        schema: {
-          type: 'object',
-          properties: {
-            success: { type: 'boolean', example: false },
-            message: { type: 'string' },
-            data: { nullable: true },
-            meta: {
-              type: 'object',
-              additionalProperties: true,
-            },
+        schema: buildErrorSchema(),
+        example: {
+          success: false,
+          message: description,
+          code:
+            statusCode === '400'
+              ? 'BAD_REQUEST'
+              : statusCode === '401'
+                ? 'UNAUTHORIZED'
+                : statusCode === '403'
+                  ? 'FORBIDDEN'
+                  : statusCode === '404'
+                    ? 'NOT_FOUND'
+                    : 'INTERNAL_SERVER_ERROR',
+          data: null,
+          meta: {
+            timestamp: nowIsoExample,
+            requestId: 'req_01HV4D2S5D4VTR2Y8YZVKB6Y6H',
           },
-          required: ['success', 'message'],
         },
       },
     },
   },
 })
-
-const responseSchema = {
-  type: 'object',
-  properties: {
-    success: { type: 'boolean', example: true },
-    message: { type: 'string' },
-    data: {
-      type: 'object',
-      additionalProperties: true,
-    },
-    meta: {
-      type: 'object',
-      additionalProperties: true,
-    },
-  },
-  required: ['success', 'message', 'data'],
-}
 
 const buildOperation = async (route: RouteDef) => {
   const bodySchema = await resolveSchemaByRef(
@@ -583,7 +781,7 @@ const buildOperation = async (route: RouteDef) => {
     route.paramsSchemaRef,
   )
 
-  const parameters: Array<Record<string, unknown>> = []
+  const parameters: OpenApiParameter[] = []
 
   const pushParams = (
     schema: ZodTypeAny | undefined,
@@ -596,17 +794,31 @@ const buildOperation = async (route: RouteDef) => {
       (parsed.properties as Record<string, JsonSchema> | undefined) ?? {}
     const required = new Set((parsed.required as string[] | undefined) ?? [])
     for (const [name, propSchema] of Object.entries(props)) {
+      const example = sampleFromSchema(propSchema, name)
       parameters.push({
         name,
         in: location,
         required: location === 'path' ? true : required.has(name),
         schema: propSchema,
+        description: parameterDescription(name, location),
+        example,
       })
     }
   }
 
   pushParams(querySchema, 'query')
   pushParams(paramsSchema, 'path')
+
+  if (route.method === 'get') {
+    const existingQueryNames = new Set(
+      parameters.filter((item) => item.in === 'query').map((item) => item.name),
+    )
+    for (const fallbackQuery of defaultGetQueryParameters()) {
+      if (!existingQueryNames.has(fallbackQuery.name)) {
+        parameters.push(fallbackQuery)
+      }
+    }
+  }
 
   const declaredPathParams = new Set(
     parameters
@@ -624,8 +836,11 @@ const buildOperation = async (route: RouteDef) => {
       name,
       in: 'path',
       required: true,
+      description: parameterDescription(name, 'path'),
+      example: exampleForName(name, { type: 'string' }) ?? objectIdExample,
       schema: {
         type: 'string',
+        example: exampleForName(name, { type: 'string' }) ?? objectIdExample,
       },
     })
   }
@@ -645,13 +860,36 @@ const buildOperation = async (route: RouteDef) => {
         ? {
             '201': {
               description: 'Created successfully.',
-              content: { 'application/json': { schema: responseSchema } },
+              content: {
+                'application/json': {
+                  schema: buildSuccessSchema(route),
+                  example: {
+                    success: true,
+                    message: 'Created successfully.',
+                    data: { id: objectIdExample, status: 'created' },
+                    meta: {},
+                  },
+                },
+              },
             },
           }
         : {
             '200': {
               description: 'Request successful.',
-              content: { 'application/json': { schema: responseSchema } },
+              content: {
+                'application/json': {
+                  schema: buildSuccessSchema(route),
+                  example: {
+                    success: true,
+                    message: 'Request successful.',
+                    data: { id: objectIdExample, status: 'active' },
+                    meta:
+                      route.method === 'get'
+                        ? { page: 1, limit: 20, total: 1 }
+                        : {},
+                  },
+                },
+              },
             },
           }),
       ...standardErrorResponse('400', 'Bad request.'),
@@ -663,26 +901,84 @@ const buildOperation = async (route: RouteDef) => {
   }
 
   if (route.auth !== 'none') {
-    op.security = [{ bearerAuth: [] }]
+    op.security =
+      route.auth === 'staff'
+        ? [{ bearerStaffAuth: [] }]
+        : [{ bearerUserAuth: [] }]
   }
 
   if (bodySchema) {
+    const jsonSchema = zodToSchema(bodySchema)
+    const bodySample = sampleFromSchema(jsonSchema)
     op.requestBody = {
       required: true,
       content: {
         'application/json': {
-          schema: zodToSchema(bodySchema),
+          schema: jsonSchema,
+          example: bodySample,
         },
       },
+    }
+
+    return {
+      op,
+      bodySample,
+      queryParameters: parameters.filter((item) => item.in === 'query'),
     }
   }
 
   return {
     op,
-    bodySample: bodySchema
-      ? sampleFromSchema(zodToSchema(bodySchema))
-      : undefined,
+    bodySample: undefined,
+    queryParameters: parameters.filter((item) => item.in === 'query'),
   }
+}
+
+const postmanPathWithVariables = (fullPath: string): string => {
+  return fullPath.replace(/:([A-Za-z0-9_]+)/g, (_match, paramName: string) => {
+    if (knownIdVariables.has(paramName)) {
+      return `{{${paramName}}}`
+    }
+    return `:${paramName}`
+  })
+}
+
+const toPostmanQuery = (
+  parameters: OpenApiParameter[],
+): PostmanQueryParam[] => {
+  return parameters
+    .filter((parameter) => parameter.in === 'query')
+    .map((parameter) => {
+      const normalizedValue =
+        parameter.example === undefined || parameter.example === null
+          ? ''
+          : typeof parameter.example === 'object'
+            ? JSON.stringify(parameter.example)
+            : String(parameter.example)
+
+      const item: PostmanQueryParam = {
+        key: parameter.name,
+        value: normalizedValue,
+        disabled: !parameter.required,
+      }
+
+      if (parameter.description) {
+        item.description = parameter.description
+      }
+
+      return item
+    })
+}
+
+const withQueryString = (
+  rawPath: string,
+  query: PostmanQueryParam[],
+): string => {
+  if (query.length === 0) return rawPath
+  const serialized = query
+    .map((item) => `${item.key}=${encodeURIComponent(item.value)}`)
+    .join('&')
+  return `${rawPath}?${serialized}`
 }
 
 const buildDocs = async () => {
@@ -700,7 +996,7 @@ const buildDocs = async () => {
 
   for (const route of routeDefs) {
     const openPath = toOpenApiPath(route.fullPath)
-    const { op, bodySample } = await buildOperation(route)
+    const { op, bodySample, queryParameters } = await buildOperation(route)
 
     if (!paths[openPath]) {
       paths[openPath] = {}
@@ -776,6 +1072,10 @@ const buildDocs = async () => {
       })
     }
 
+    const postmanPath = postmanPathWithVariables(route.fullPath)
+    const postmanQuery =
+      route.method === 'get' ? toPostmanQuery(queryParameters) : []
+
     const requestItem: Record<string, unknown> = {
       name: `${route.method.toUpperCase()} ${route.fullPath}`,
       request: {
@@ -783,9 +1083,10 @@ const buildDocs = async () => {
         header: headers,
         ...(auth ? { auth } : {}),
         url: {
-          raw: `{{baseUrl}}${route.fullPath}`,
+          raw: withQueryString(`{{baseUrl}}${postmanPath}`, postmanQuery),
           host: ['{{baseUrl}}'],
-          path: route.fullPath.split('/').filter(Boolean),
+          path: postmanPath.split('/').filter(Boolean),
+          ...(postmanQuery.length ? { query: postmanQuery } : {}),
         },
       },
     }
@@ -826,10 +1127,17 @@ const buildDocs = async () => {
     })),
     components: {
       securitySchemes: {
-        bearerAuth: {
+        bearerUserAuth: {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
+          description: 'Bearer token for user-authenticated endpoints.',
+        },
+        bearerStaffAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          description: 'Bearer token for staff/admin-authenticated endpoints.',
         },
       },
     },
@@ -848,6 +1156,13 @@ const buildDocs = async () => {
       { key: 'baseUrl', value: 'http://localhost:5000' },
       { key: 'userToken', value: '' },
       { key: 'staffToken', value: '' },
+      { key: 'userId', value: objectIdExample },
+      { key: 'bookId', value: objectIdExample },
+      { key: 'planId', value: objectIdExample },
+      { key: 'authorId', value: objectIdExample },
+      { key: 'categoryId', value: objectIdExample },
+      { key: 'couponId', value: objectIdExample },
+      { key: 'reportId', value: objectIdExample },
     ],
     item: [...postmanByTag.entries()]
       .sort(([a], [b]) => a.localeCompare(b))
