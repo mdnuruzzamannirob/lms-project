@@ -36,7 +36,10 @@ export const dashboardController = {
     const userId = (req as any).user?.id
     const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10
 
-    const recommendations = await dashboardService.getRecommendations(userId, limit)
+    const recommendations = await dashboardService.getRecommendations(
+      userId,
+      limit,
+    )
 
     sendResponse(res, {
       statusCode: 200,

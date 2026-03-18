@@ -42,10 +42,6 @@ router.post(
   searchController.logSearchClick,
 )
 
-router.get(
-  '/history',
-  authenticateUser,
-  searchController.getSearchHistory,
-)
+router.get('/history', authenticateUser, searchController.getSearchHistory)
 
 export const searchRouter = router

@@ -5,9 +5,7 @@ import { catchAsync } from '../../common/utils/catchAsync'
 import { sendResponse } from '../../common/utils/sendResponse'
 import { membersService } from './service'
 
-const getUserIdParam = (
-  request: Parameters<RequestHandler>[0],
-): string => {
+const getUserIdParam = (request: Parameters<RequestHandler>[0]): string => {
   const id = request.params.userId
   if (typeof id !== 'string') {
     throw new AppError('Invalid user id parameter.', 400)

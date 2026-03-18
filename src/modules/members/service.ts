@@ -1,13 +1,14 @@
 import { Types } from 'mongoose'
 
 import { AppError } from '../../common/errors/AppError'
-import { createPaginationMeta, getPaginationState } from '../../common/utils/pagination'
+import {
+  createPaginationMeta,
+  getPaginationState,
+} from '../../common/utils/pagination'
 import { UserModel } from '../auth/auth.model'
-import { BorrowModel } from '../borrows/model'
 import { PaymentModel } from '../payments/model'
 import { ReadingProgressModel } from '../reading/model'
 import { SubscriptionModel } from '../subscriptions/model'
-import { ReviewModel } from '../reviews/model'
 
 const formatMember = (user: any, stats: any): object => {
   return {
@@ -29,14 +30,12 @@ const formatMember = (user: any, stats: any): object => {
 }
 
 export const membersService = {
-  listMembers: async (
-    query: {
-      page: number
-      limit: number
-      search?: string
-      isSuspended?: string
-    },
-  ) => {
+  listMembers: async (query: {
+    page: number
+    limit: number
+    search?: string
+    isSuspended?: string
+  }) => {
     const paginationState = getPaginationState(query)
     const { skip, limit } = paginationState
 
@@ -91,22 +90,23 @@ export const membersService = {
     const userIdObj = new Types.ObjectId(userId)
     const stats = await membersService.getUserStats(userId)
 
-    const [readingHistory, paymentHistory, activeSubscription] = await Promise.all([
-      ReadingProgressModel.find({ userId: userIdObj })
-        .select('bookId status createdAt updatedAt')
-        .sort({ createdAt: -1 })
-        .limit(50)
-        .lean(),
-      PaymentModel.find({ userId: userIdObj })
-        .select('amount status transactionId createdAt')
-        .sort({ createdAt: -1 })
-        .limit(50)
-        .lean(),
-      SubscriptionModel.findOne({ userId: userIdObj })
-        .select('planId startedAt endsAt status')
-        .sort({ createdAt: -1 })
-        .lean(),
-    ])
+    const [readingHistory, paymentHistory, activeSubscription] =
+      await Promise.all([
+        ReadingProgressModel.find({ userId: userIdObj })
+          .select('bookId status createdAt updatedAt')
+          .sort({ createdAt: -1 })
+          .limit(50)
+          .lean(),
+        PaymentModel.find({ userId: userIdObj })
+          .select('amount status transactionId createdAt')
+          .sort({ createdAt: -1 })
+          .limit(50)
+          .lean(),
+        SubscriptionModel.findOne({ userId: userIdObj })
+          .select('planId startedAt endsAt status')
+          .sort({ createdAt: -1 })
+          .lean(),
+      ])
 
     const memberDetail = {
       ...formatMember(user, stats),

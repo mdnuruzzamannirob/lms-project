@@ -1,14 +1,17 @@
 import { Types } from 'mongoose'
 
+import {
+  createPaginationMeta,
+  getPaginationState,
+} from '../../common/utils/pagination'
+import { BookModel } from '../books/model'
 import { BorrowModel } from '../borrows/model'
 import { ReadingProgressModel } from '../reading/model'
 import { ReservationModel } from '../reservations/model'
 import { ReviewModel } from '../reviews/model'
 import { SubscriptionModel } from '../subscriptions/model'
 import { WishlistModel } from '../wishlist/model'
-import { BookModel } from '../books/model'
-import { createPaginationMeta, getPaginationState } from '../../common/utils/pagination'
-import type { IDashboardStats, IDashboardRecommendation } from './interface'
+import type { IDashboardRecommendation, IDashboardStats } from './interface'
 
 const formatBook = (book: any): object => {
   if (!book) {
@@ -52,7 +55,9 @@ export const dashboardService = {
               $sum: { $cond: [{ $eq: ['$status', 'completed'] }, 1, 0] },
             },
             currentCount: {
-              $sum: { $cond: [{ $eq: ['$status', 'currently_reading'] }, 1, 0] },
+              $sum: {
+                $cond: [{ $eq: ['$status', 'currently_reading'] }, 1, 0],
+              },
             },
             averageRating: { $avg: '$rating' },
           },
@@ -67,11 +72,7 @@ export const dashboardService = {
             _id: null,
             active: {
               $sum: {
-                $cond: [
-                  { $in: ['$status', ['borrowed', 'overdue']] },
-                  1,
-                  0,
-                ],
+                $cond: [{ $in: ['$status', ['borrowed', 'overdue']] }, 1, 0],
               },
             },
             overdue: {
@@ -120,7 +121,9 @@ export const dashboardService = {
         totalBooksRead: reading?.completedCount || 0,
         booksCurrentlyReading: reading?.currentCount || 0,
         totalReadingTime: 0,
-        averageRatingGiven: reading?.averageRating ? Number(reading.averageRating.toFixed(2)) : 0,
+        averageRatingGiven: reading?.averageRating
+          ? Number(reading.averageRating.toFixed(2))
+          : 0,
       },
       borrowStats: {
         activeBorrows: borrows?.active || 0,
@@ -153,10 +156,7 @@ export const dashboardService = {
     }
   },
 
-  getDashboardHome: async (
-    userId: string,
-    recommendationLimit: number,
-  ) => {
+  getDashboardHome: async (userId: string, recommendationLimit: number) => {
     const stats = await dashboardService.getDashboardStats(userId)
 
     const recommendations = await dashboardService.getRecommendations(
@@ -218,10 +218,14 @@ export const dashboardService = {
       const popularBooks = await BookModel.find({ isAvailable: true })
         .sort({ ratingAverage: -1, ratingCount: -1 })
         .limit(limit)
-        .select('title description authorIds categoryIds coverImageUrl ratingAverage ratingCount')
+        .select(
+          'title description authorIds categoryIds coverImageUrl ratingAverage ratingCount',
+        )
         .lean()
 
-      return popularBooks.map((book: any) => formatBook({ ...book, reason: 'Popular' })) as IDashboardRecommendation[]
+      return popularBooks.map((book: any) =>
+        formatBook({ ...book, reason: 'Popular' }),
+      ) as IDashboardRecommendation[]
     }
 
     const recommendations = await BookModel.find({
@@ -230,10 +234,14 @@ export const dashboardService = {
     })
       .sort({ ratingAverage: -1, createdAt: -1 })
       .limit(limit)
-      .select('title description authorIds categoryIds coverImageUrl ratingAverage ratingCount')
+      .select(
+        'title description authorIds categoryIds coverImageUrl ratingAverage ratingCount',
+      )
       .lean()
 
-    return recommendations.map((book: any) => formatBook({ ...book, reason: 'Based on your reading' })) as IDashboardRecommendation[]
+    return recommendations.map((book: any) =>
+      formatBook({ ...book, reason: 'Based on your reading' }),
+    ) as IDashboardRecommendation[]
   },
 
   getMyLibraryAggregation: async (

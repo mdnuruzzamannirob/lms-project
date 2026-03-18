@@ -1,6 +1,9 @@
 import express from 'express'
 
-import { authenticateStaff, authenticateUser } from '../../common/middlewares/auth'
+import {
+  authenticateStaff,
+  authenticateUser,
+} from '../../common/middlewares/auth'
 import { requirePermission } from '../../common/middlewares/requirePermission'
 import { validateRequest } from '../../common/middlewares/validateRequest'
 import { notificationsController } from './controller'

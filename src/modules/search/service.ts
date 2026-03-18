@@ -1,6 +1,5 @@
 import { Types } from 'mongoose'
 
-import { AppError } from '../../common/errors/AppError'
 import {
   createPaginationMeta,
   getPaginationState,
@@ -50,7 +49,9 @@ export const searchService = {
 
     const [books, total] = await Promise.all([
       BookModel.find(searchQuery)
-        .select('title description authorIds categoryIds isbn publishedYear ratingAverage ratingCount pageCount language coverImageUrl')
+        .select(
+          'title description authorIds categoryIds isbn publishedYear ratingAverage ratingCount pageCount language coverImageUrl',
+        )
         .skip(skip)
         .limit(limit)
         .lean(),

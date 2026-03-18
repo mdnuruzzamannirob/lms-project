@@ -13,9 +13,7 @@ const getUserId = (request: Parameters<RequestHandler>[0]): string => {
   return id
 }
 
-const getNotificationId = (
-  request: Parameters<RequestHandler>[0],
-): string => {
+const getNotificationId = (request: Parameters<RequestHandler>[0]): string => {
   const id = request.params.id
   if (typeof id !== 'string') {
     throw new AppError('Invalid notification id parameter.', 400)

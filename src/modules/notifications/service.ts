@@ -61,7 +61,9 @@ export const notificationsService = {
       NotificationModel.countDocuments(filter),
     ])
 
-    const formatted = notifications.map((n) => formatNotification(n as INotification))
+    const formatted = notifications.map((n) =>
+      formatNotification(n as INotification),
+    )
 
     return {
       data: formatted,
@@ -89,10 +91,7 @@ export const notificationsService = {
     return formatNotification(notification)
   },
 
-  bulkMarkAsRead: async (
-    userId: string,
-    notificationIds: string[],
-  ) => {
+  bulkMarkAsRead: async (userId: string, notificationIds: string[]) => {
     const objectIds = notificationIds.map((id) => new Types.ObjectId(id))
 
     const result = await NotificationModel.updateMany(

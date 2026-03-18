@@ -34,7 +34,4 @@ const searchLogSchema = new Schema<ISearchLog>(
 searchLogSchema.index({ userId: 1, timestamp: -1 })
 searchLogSchema.index({ query: 1, timestamp: -1 })
 
-export const SearchLogModel = model<ISearchLog>(
-  'SearchLog',
-  searchLogSchema,
-)
+export const SearchLogModel = model<ISearchLog>('SearchLog', searchLogSchema)
