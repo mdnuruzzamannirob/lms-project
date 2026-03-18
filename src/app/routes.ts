@@ -1,5 +1,6 @@
 import { Router } from 'express'
 
+import { auditRouter } from '../modules/audit'
 import { authRouter } from '../modules/auth'
 import { authorsRouter } from '../modules/authors'
 import { booksRouter } from '../modules/books'
@@ -15,9 +16,11 @@ import { plansRouter } from '../modules/plans'
 import { promotionsRouter } from '../modules/promotions'
 import { rbacRouter } from '../modules/rbac'
 import { readingRouter } from '../modules/reading'
+import { reportsRouter } from '../modules/reports'
 import { reservationsRouter } from '../modules/reservations'
 import { reviewsRouter } from '../modules/reviews'
 import { searchRouter } from '../modules/search'
+import { settingsRouter } from '../modules/settings'
 import { staffRouter } from '../modules/staff'
 import { staffAuthRouter } from '../modules/staff-auth'
 import { subscriptionsRouter } from '../modules/subscriptions'
@@ -46,6 +49,9 @@ router.use('/notifications', notificationsRouter)
 router.use('/admin', rbacRouter)
 router.use('/admin/staff', staffRouter)
 router.use('/admin/members', membersRouter)
+router.use('/admin/audit', auditRouter)
+router.use('/admin/reports', reportsRouter)
+router.use('/admin/settings', settingsRouter)
 router.use('/health', healthRouter)
 
 export const appRouter = router

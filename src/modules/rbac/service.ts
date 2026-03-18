@@ -189,6 +189,42 @@ export const defaultPermissionSeeds: PermissionSeed[] = [
     description: 'Suspend, unsuspend, and manage user accounts',
     module: 'members',
   },
+  {
+    key: 'audit.view',
+    name: 'View Audit Logs',
+    description: 'View and export staff/admin activity logs',
+    module: 'audit',
+  },
+  {
+    key: 'audit.manage',
+    name: 'Manage Audit Logs',
+    description: 'Create and manage activity log entries',
+    module: 'audit',
+  },
+  {
+    key: 'reports.view',
+    name: 'View Reports',
+    description: 'View report jobs, statuses, and downloads',
+    module: 'reports',
+  },
+  {
+    key: 'reports.manage',
+    name: 'Manage Reports',
+    description: 'Create and process asynchronous reports',
+    module: 'reports',
+  },
+  {
+    key: 'settings.view',
+    name: 'View Settings',
+    description: 'View global application settings',
+    module: 'settings',
+  },
+  {
+    key: 'settings.manage',
+    name: 'Manage Settings',
+    description: 'Update global application settings',
+    module: 'settings',
+  },
 ]
 
 export const rbacService = {

@@ -3,8 +3,11 @@ import { schedulerService } from '../common/services/scheduler.service'
 import { config } from '../config'
 import { connectToDatabase, disconnectFromDatabase } from '../config/db'
 import { logger } from '../config/logger'
+import { registerCronJobs } from '../jobs'
+import { registerBackgroundWorkers } from '../workers'
 
 let isShuttingDown = false
+let cronTasks: Array<{ stop: () => void }> = []
 
 const workerTick = async (): Promise<void> => {
   await auditService.logEvent({
@@ -27,6 +30,8 @@ const shutdown = async (signal: string, exitCode = 0): Promise<void> => {
   logger.info(`Worker received ${signal}. Starting graceful shutdown.`)
 
   try {
+    cronTasks.forEach((task) => task.stop())
+    cronTasks = []
     schedulerService.stopAllJobs()
     await disconnectFromDatabase()
     logger.info('Worker graceful shutdown completed.')
@@ -48,11 +53,15 @@ const startWorker = async (): Promise<void> => {
 
   await connectToDatabase()
 
+  registerBackgroundWorkers()
+
   schedulerService.registerJob({
     name: 'worker-heartbeat',
     intervalMs: config.worker.pollIntervalMs,
     handler: workerTick,
   })
+
+  cronTasks = registerCronJobs()
 
   logger.info('Worker process started successfully', {
     environment: config.nodeEnv,
