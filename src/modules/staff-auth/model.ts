@@ -25,7 +25,7 @@ const staffInviteTokenSchema = new Schema<IStaffInviteToken>(
     },
     tokenHash: { type: String, required: true, unique: true, index: true },
     invitedBy: { type: String, required: false },
-    expiresAt: { type: Date, required: true, index: true },
+    expiresAt: { type: Date, required: true },
     usedAt: { type: Date, required: false },
   },
   {
@@ -65,7 +65,7 @@ const staffTwoFactorChallengeSchema = new Schema<IStaffTwoFactorChallenge>(
       index: true,
     },
     tokenHash: { type: String, required: true, unique: true, index: true },
-    expiresAt: { type: Date, required: true, index: true },
+    expiresAt: { type: Date, required: true },
     consumedAt: { type: Date, required: false },
   },
   {

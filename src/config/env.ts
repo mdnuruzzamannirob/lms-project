@@ -87,6 +87,13 @@ const envSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().trim().optional(),
   FRONTEND_URL: z.string().trim().default('http://localhost:3000'),
   BACKEND_URL: z.string().trim().default('http://localhost:5000'),
+  SUPER_ADMIN_NAME: z.string().trim().default('Super Admin'),
+  SUPER_ADMIN_EMAIL: z.string().trim().email().default('admin@example.com'),
+  SUPER_ADMIN_PASSWORD: z
+    .string()
+    .trim()
+    .min(8)
+    .default('change-this-password'),
   WORKER_ENABLED: z
     .preprocess((value) => {
       if (typeof value === 'string') {
@@ -126,6 +133,11 @@ if (rawEnv.NODE_ENV === 'production') {
     {
       ok: rawEnv.CORS_ORIGINS !== '*',
       message: 'CORS_ORIGINS cannot be wildcard in production.',
+    },
+    {
+      ok: rawEnv.SUPER_ADMIN_PASSWORD !== 'change-this-password',
+      message:
+        'SUPER_ADMIN_PASSWORD must be changed from default value in production.',
     },
   ]
 
@@ -312,6 +324,11 @@ export const env = {
   },
   frontendUrl: rawEnv.FRONTEND_URL,
   backendUrl: rawEnv.BACKEND_URL,
+  superAdmin: {
+    name: rawEnv.SUPER_ADMIN_NAME,
+    email: rawEnv.SUPER_ADMIN_EMAIL,
+    password: rawEnv.SUPER_ADMIN_PASSWORD,
+  },
   worker: {
     enabled: rawEnv.WORKER_ENABLED,
     pollIntervalMs: rawEnv.WORKER_POLL_INTERVAL_MS,
@@ -319,7 +336,6 @@ export const env = {
     jobRetryBackoffMs: rawEnv.JOB_RETRY_BACKOFF_MS,
     shutdownTimeoutMs: rawEnv.SHUTDOWN_TIMEOUT_MS,
   },
-  shutdownTimeoutMs: rawEnv.SHUTDOWN_TIMEOUT_MS,
 } as const
 
 export type Env = typeof env

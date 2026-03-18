@@ -21,10 +21,10 @@ const shutdown = async (signal: string, exitCode = 0): Promise<void> => {
   try {
     const shutdownTimer = setTimeout(() => {
       logger.error('Graceful shutdown timeout reached. Forcing process exit.', {
-        timeoutMs: config.shutdownTimeoutMs,
+        timeoutMs: config.worker.shutdownTimeoutMs,
       })
       process.exit(1)
-    }, config.shutdownTimeoutMs)
+    }, config.worker.shutdownTimeoutMs)
 
     if (server) {
       await new Promise<void>((resolve, reject) => {

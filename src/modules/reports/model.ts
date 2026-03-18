@@ -125,7 +125,6 @@ const reportArtifactSchema = new Schema<IReportArtifact>(
     expiresAt: {
       type: Date,
       required: true,
-      index: true,
     },
   },
   {

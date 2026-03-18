@@ -81,7 +81,7 @@ const emailVerificationTokenSchema = new Schema<UserEmailVerificationToken>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     tokenHash: { type: String, required: true, unique: true, index: true },
-    expiresAt: { type: Date, required: true, index: true },
+    expiresAt: { type: Date, required: true },
   },
   {
     timestamps: true,
@@ -95,7 +95,7 @@ const passwordResetTokenSchema = new Schema<UserPasswordResetToken>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     tokenHash: { type: String, required: true, unique: true, index: true },
-    expiresAt: { type: Date, required: true, index: true },
+    expiresAt: { type: Date, required: true },
   },
   {
     timestamps: true,

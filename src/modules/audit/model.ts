@@ -79,7 +79,6 @@ const auditLogSchema = new Schema<IAuditLog>(
     expiresAt: {
       type: Date,
       required: true,
-      index: true,
     },
   },
   {
