@@ -1,6 +1,7 @@
 import { Router } from 'express'
 
 import { authenticateStaff } from '../../common/middlewares/auth'
+import { authenticateTempToken } from '../../common/middlewares/authenticateTempToken'
 import { validateRequest } from '../../common/middlewares/validateRequest'
 import {
   acceptInvite,
@@ -37,16 +38,19 @@ router.patch(
 )
 router.post(
   '/2fa/setup',
+  authenticateTempToken,
   validateRequest({ body: staffAuthValidation.staffTwoFactorSetupBody }),
   setupTwoFactor,
 )
 router.post(
   '/2fa/enable',
+  authenticateTempToken,
   validateRequest({ body: staffAuthValidation.staffTwoFactorEnableBody }),
   enableTwoFactor,
 )
 router.post(
   '/2fa/verify',
+  authenticateTempToken,
   validateRequest({ body: staffAuthValidation.staffTwoFactorVerifyBody }),
   verifyTwoFactor,
 )

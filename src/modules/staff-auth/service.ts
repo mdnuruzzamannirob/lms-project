@@ -230,17 +230,11 @@ export const staffAuthService = {
     await staff.save()
   },
 
-  setupTwoFactor: async (tempToken: string) => {
-    const decoded = verifyTempToken(tempToken, config.jwt.staffSecret)
+  setupTwoFactor: async (staffId: string) => {
+    const staff = await StaffModel.findById(staffId)
 
-    if (decoded.actorType !== 'staff' || !decoded.mustSetup2FA) {
-      throw new AppError('Invalid staff 2FA setup token.', 401)
-    }
-
-    const staff = await StaffModel.findById(decoded.id)
-
-    if (!staff || !staff.isActive || staff.email !== decoded.email) {
-      throw new AppError('Staff account is invalid for 2FA setup.', 401)
+    if (!staff || !staff.isActive) {
+      throw new AppError('Staff account not found or inactive.', 401)
     }
 
     const secret = speakeasy.generateSecret({
@@ -261,17 +255,11 @@ export const staffAuthService = {
     }
   },
 
-  enableTwoFactor: async (payload: { tempToken: string; otp: string }) => {
-    const decoded = verifyTempToken(payload.tempToken, config.jwt.staffSecret)
+  enableTwoFactor: async (staffId: string, payload: { otp: string }) => {
+    const staff = await StaffModel.findById(staffId)
 
-    if (decoded.actorType !== 'staff' || !decoded.mustSetup2FA) {
-      throw new AppError('Invalid staff 2FA setup token.', 401)
-    }
-
-    const staff = await StaffModel.findById(decoded.id)
-
-    if (!staff || !staff.isActive || staff.email !== decoded.email) {
-      throw new AppError('Staff account is invalid for 2FA setup.', 401)
+    if (!staff || !staff.isActive) {
+      throw new AppError('Staff account not found or inactive.', 401)
     }
 
     if (!staff.twoFactor.pendingSecret) {
@@ -294,26 +282,20 @@ export const staffAuthService = {
     await staff.save()
 
     return {
-      accessToken: await issueStaffToken(staff._id.toString()),
+      token: await issueStaffToken(staff._id.toString()),
       staff: await buildStaffAuthResponse(staff._id.toString()),
     }
   },
 
-  verifyTwoFactor: async (payload: { tempToken: string; otp: string }) => {
-    const decoded = verifyTempToken(payload.tempToken, config.jwt.staffSecret)
+  verifyTwoFactor: async (staffId: string, payload: { otp: string }) => {
+    const staff = await StaffModel.findById(staffId)
 
-    if (decoded.actorType !== 'staff' || !decoded.pending2FA) {
-      throw new AppError('Invalid staff 2FA challenge token.', 401)
-    }
-
-    const staff = await StaffModel.findById(decoded.id)
-
-    if (!staff || !staff.isActive || staff.email !== decoded.email) {
-      throw new AppError('Staff account is invalid for 2FA verification.', 401)
+    if (!staff || !staff.isActive) {
+      throw new AppError('Staff account not found or inactive.', 401)
     }
 
     if (!staff.twoFactor.enabled || !staff.twoFactor.secret) {
-      throw new AppError('2FA is not enabled for this staff account.', 400)
+      throw new AppError('2FA is not enabled on this account.', 401)
     }
 
     const isOtpValid = verifyStaffTotp(staff.twoFactor.secret, payload.otp)
@@ -325,8 +307,10 @@ export const staffAuthService = {
     staff.twoFactor.lastVerifiedAt = new Date()
     await staff.save()
 
+    await logStaffActivity(staff._id.toString(), 'staff.2fa_verify')
+
     return {
-      accessToken: await issueStaffToken(staff._id.toString()),
+      token: await issueStaffToken(staff._id.toString()),
       staff: await buildStaffAuthResponse(staff._id.toString()),
     }
   },

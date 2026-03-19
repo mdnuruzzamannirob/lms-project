@@ -87,7 +87,10 @@ export const changeStaffPassword: RequestHandler = catchAsync(
 
 export const enableTwoFactor: RequestHandler = catchAsync(
   async (request, response) => {
-    const data = await staffAuthService.enableTwoFactor(request.body)
+    const data = await staffAuthService.enableTwoFactor(
+      request.auth.sub,
+      request.body,
+    )
 
     sendResponse(response, {
       statusCode: 200,
@@ -100,7 +103,7 @@ export const enableTwoFactor: RequestHandler = catchAsync(
 
 export const setupTwoFactor: RequestHandler = catchAsync(
   async (request, response) => {
-    const data = await staffAuthService.setupTwoFactor(request.body.tempToken)
+    const data = await staffAuthService.setupTwoFactor(request.auth.sub)
 
     sendResponse(response, {
       statusCode: 200,
@@ -113,7 +116,10 @@ export const setupTwoFactor: RequestHandler = catchAsync(
 
 export const verifyTwoFactor: RequestHandler = catchAsync(
   async (request, response) => {
-    const data = await staffAuthService.verifyTwoFactor(request.body)
+    const data = await staffAuthService.verifyTwoFactor(
+      request.auth.sub,
+      request.body,
+    )
 
     sendResponse(response, {
       statusCode: 200,
