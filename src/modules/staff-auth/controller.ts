@@ -20,9 +20,9 @@ export const staffLogin: RequestHandler = catchAsync(
     sendResponse(response, {
       statusCode: 200,
       success: true,
-      message: data.requiresTwoFactor
-        ? '2FA verification is required.'
-        : 'Staff login successful.',
+      message: data.mustSetup2FA
+        ? '2FA setup is required before access.'
+        : '2FA verification is required.',
       data,
     })
   },
@@ -35,7 +35,7 @@ export const acceptInvite: RequestHandler = catchAsync(
     sendResponse(response, {
       statusCode: 201,
       success: true,
-      message: 'Staff invitation accepted successfully.',
+      message: data.message,
       data,
     })
   },
@@ -87,14 +87,25 @@ export const changeStaffPassword: RequestHandler = catchAsync(
 
 export const enableTwoFactor: RequestHandler = catchAsync(
   async (request, response) => {
-    const data = await staffAuthService.enableTwoFactor(
-      getStaffIdFromAuth(request),
-    )
+    const data = await staffAuthService.enableTwoFactor(request.body)
 
     sendResponse(response, {
       statusCode: 200,
       success: true,
-      message: '2FA secret generated successfully.',
+      message: '2FA enabled successfully.',
+      data,
+    })
+  },
+)
+
+export const setupTwoFactor: RequestHandler = catchAsync(
+  async (request, response) => {
+    const data = await staffAuthService.setupTwoFactor(request.body.tempToken)
+
+    sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: '2FA setup secret generated successfully.',
       data,
     })
   },
@@ -102,11 +113,7 @@ export const enableTwoFactor: RequestHandler = catchAsync(
 
 export const verifyTwoFactor: RequestHandler = catchAsync(
   async (request, response) => {
-    const data = await staffAuthService.verifyTwoFactor(
-      getStaffIdFromAuth(request),
-      request.body.code,
-      request,
-    )
+    const data = await staffAuthService.verifyTwoFactor(request.body)
 
     sendResponse(response, {
       statusCode: 200,

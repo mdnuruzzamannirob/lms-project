@@ -7,6 +7,13 @@ export type UserNotificationPreferences = {
   push: boolean
 }
 
+export type UserTwoFactor = {
+  enabled: boolean
+  secret: string | undefined
+  backupCodes: string[] | undefined
+  verifiedAt: Date | undefined
+}
+
 export interface IUser {
   _id: Types.ObjectId
   name: string
@@ -17,6 +24,7 @@ export interface IUser {
   socialProviderId?: string
   isEmailVerified: boolean
   notificationPreferences: UserNotificationPreferences
+  twoFactor: UserTwoFactor
   lastLoginAt?: Date
   createdAt: Date
   updatedAt: Date
@@ -45,10 +53,19 @@ export type SanitizedUser = {
   countryCode?: string
   provider: UserAuthProvider
   isEmailVerified: boolean
+  twoFactorEnabled: boolean
   notificationPreferences: UserNotificationPreferences
   lastLoginAt?: string
   createdAt: string
   updatedAt: string
+}
+
+export type TempTokenPayload = {
+  id: string
+  email: string
+  actorType: 'user' | 'staff'
+  pending2FA?: boolean
+  mustSetup2FA?: boolean
 }
 
 export type SocialProfile = {

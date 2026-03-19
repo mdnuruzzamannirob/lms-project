@@ -36,10 +36,88 @@ export const login: RequestHandler = catchAsync(async (request, response) => {
   sendResponse(response, {
     statusCode: 200,
     success: true,
-    message: 'User login successful.',
+    message: result.requiresTwoFactor
+      ? '2FA challenge required to complete login.'
+      : 'User login successful.',
     data: result,
   })
 })
+
+export const enableTwoFactor: RequestHandler = catchAsync(
+  async (request, response) => {
+    const data = await authService.enableTwoFactor(
+      ensureAuthenticatedUser(request),
+    )
+
+    sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: '2FA setup generated successfully.',
+      data,
+    })
+  },
+)
+
+export const verifyTwoFactor: RequestHandler = catchAsync(
+  async (request, response) => {
+    const data = await authService.verifyTwoFactor(
+      ensureAuthenticatedUser(request),
+      request.body.otp,
+    )
+
+    sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: '2FA enabled successfully.',
+      data,
+    })
+  },
+)
+
+export const disableTwoFactor: RequestHandler = catchAsync(
+  async (request, response) => {
+    const data = await authService.disableTwoFactor(
+      ensureAuthenticatedUser(request),
+      request.body.otp,
+    )
+
+    sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: '2FA disabled successfully.',
+      data,
+    })
+  },
+)
+
+export const challengeTwoFactor: RequestHandler = catchAsync(
+  async (request, response) => {
+    const data = await authService.challengeTwoFactor(request.body)
+
+    sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: '2FA challenge completed successfully.',
+      data,
+    })
+  },
+)
+
+export const getBackupCodesCount: RequestHandler = catchAsync(
+  async (request, response) => {
+    const data = await authService.getBackupCodesCount(
+      ensureAuthenticatedUser(request),
+      String(request.query.otp),
+    )
+
+    sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: 'Backup codes count fetched successfully.',
+      data,
+    })
+  },
+)
 
 export const socialCallback: RequestHandler = catchAsync(
   async (request, response) => {

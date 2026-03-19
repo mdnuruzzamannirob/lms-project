@@ -4,6 +4,7 @@ import type {
   IUser,
   UserAuthProvider,
   UserNotificationPreferences,
+  UserTwoFactor,
 } from './interface'
 
 type UserDocument = IUser
@@ -31,6 +32,20 @@ const notificationPreferencesSchema = new Schema<UserNotificationPreferences>(
   {
     email: { type: Boolean, default: true },
     push: { type: Boolean, default: true },
+  },
+  { _id: false },
+)
+
+const userTwoFactorSchema = new Schema<UserTwoFactor>(
+  {
+    enabled: { type: Boolean, default: false },
+    secret: { type: String, required: false, default: undefined },
+    backupCodes: {
+      type: [String],
+      required: false,
+      default: undefined,
+    },
+    verifiedAt: { type: Date, required: false, default: undefined },
   },
   { _id: false },
 )
@@ -67,6 +82,15 @@ const userSchema = new Schema<UserDocument>(
     notificationPreferences: {
       type: notificationPreferencesSchema,
       default: () => ({ email: true, push: true }),
+    },
+    twoFactor: {
+      type: userTwoFactorSchema,
+      default: () => ({
+        enabled: false,
+        secret: undefined,
+        backupCodes: undefined,
+        verifiedAt: undefined,
+      }),
     },
     lastLoginAt: { type: Date, required: false },
   },

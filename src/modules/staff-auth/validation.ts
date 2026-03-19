@@ -13,15 +13,25 @@ export const staffAuthValidation = {
     currentPassword: z.string().min(8).max(72),
     newPassword: z.string().min(8).max(72),
   }),
-  verifyTwoFactorBody: z.object({
-    code: z
+  staffTwoFactorSetupBody: z.object({
+    tempToken: z.string().trim().min(20),
+  }),
+  staffTwoFactorEnableBody: z.object({
+    tempToken: z.string().trim().min(20),
+    otp: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, 'OTP must be 6 digits'),
+  }),
+  staffTwoFactorVerifyBody: z.object({
+    tempToken: z.string().trim().min(20),
+    otp: z
       .string()
       .trim()
       .regex(/^\d{6}$/, '2FA code must be 6 digits'),
   }),
   disableTwoFactorBody: z.object({
-    password: z.string().min(8).max(72),
-    code: z
+    otp: z
       .string()
       .trim()
       .regex(/^\d{6}$/, '2FA code must be 6 digits'),

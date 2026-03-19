@@ -11,6 +11,31 @@ export const authValidation = {
     email: z.string().trim().email(),
     password: z.string().min(8).max(72),
   }),
+  twoFactorChallengeBody: z.object({
+    tempToken: z.string().trim().min(20),
+    otp: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, 'OTP must be 6 digits'),
+  }),
+  twoFactorVerifyBody: z.object({
+    otp: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, 'OTP must be 6 digits'),
+  }),
+  twoFactorDisableBody: z.object({
+    otp: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, 'OTP must be 6 digits'),
+  }),
+  twoFactorBackupCodesQuery: z.object({
+    otp: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, 'OTP must be 6 digits'),
+  }),
   verifyEmailBody: z.object({
     token: z.string().trim().min(10),
   }),

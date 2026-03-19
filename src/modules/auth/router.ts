@@ -6,8 +6,12 @@ import { authenticateUser } from '../../common/middlewares/auth'
 import { validateRequest } from '../../common/middlewares/validateRequest'
 import { config } from '../../config'
 import {
+  challengeTwoFactor,
   changeMyPassword,
+  disableTwoFactor,
+  enableTwoFactor,
   forgotPassword,
+  getBackupCodesCount,
   getMe,
   getMyLoginHistory,
   login,
@@ -19,6 +23,7 @@ import {
   updateMe,
   updateMyNotificationPreferences,
   verifyEmail,
+  verifyTwoFactor,
 } from './controller'
 import { authValidation } from './validation'
 
@@ -53,6 +58,11 @@ router.post(
   '/login',
   validateRequest({ body: authValidation.loginBody }),
   login,
+)
+router.post(
+  '/2fa/challenge',
+  validateRequest({ body: authValidation.twoFactorChallengeBody }),
+  challengeTwoFactor,
 )
 
 router.get(
@@ -126,6 +136,25 @@ router.post(
 )
 
 router.get('/me', authenticateUser, getMe)
+router.post('/2fa/enable', authenticateUser, enableTwoFactor)
+router.post(
+  '/2fa/verify',
+  authenticateUser,
+  validateRequest({ body: authValidation.twoFactorVerifyBody }),
+  verifyTwoFactor,
+)
+router.post(
+  '/2fa/disable',
+  authenticateUser,
+  validateRequest({ body: authValidation.twoFactorDisableBody }),
+  disableTwoFactor,
+)
+router.get(
+  '/2fa/backup-codes',
+  authenticateUser,
+  validateRequest({ query: authValidation.twoFactorBackupCodesQuery }),
+  getBackupCodesCount,
+)
 router.get('/me/login-history', authenticateUser, getMyLoginHistory)
 router.patch(
   '/me',

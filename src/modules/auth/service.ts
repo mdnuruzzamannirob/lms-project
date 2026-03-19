@@ -1,4 +1,5 @@
 import type { Request } from 'express'
+import speakeasy from 'speakeasy'
 
 import { AppError } from '../../common/errors/AppError'
 import { auditService } from '../../common/services/audit.service'
@@ -9,7 +10,12 @@ import {
   hashStringSha256,
   hashWithScrypt,
 } from '../../common/utils/crypto'
-import { signAccessToken } from '../../common/utils/token'
+import {
+  signAccessToken,
+  signTempToken,
+  verifyTempToken,
+} from '../../common/utils/token'
+import { config } from '../../config'
 import { authConstants } from './constants'
 import type {
   AuthTokens,
@@ -26,7 +32,14 @@ import {
   UserModel,
   UserPasswordResetTokenModel,
 } from './model'
-import { buildUserJwtPayload, sanitizeUser } from './utils'
+import {
+  buildUserJwtPayload,
+  decryptTwoFactorSecret,
+  encryptTwoFactorSecret,
+  generateBackupCodes,
+  hashBackupCodes,
+  sanitizeUser,
+} from './utils'
 
 const computeExpiryDate = (minutes: number): Date => {
   return new Date(Date.now() + minutes * 60 * 1000)
@@ -70,9 +83,30 @@ const recordUserLogin = async (
 
 const issueUserAccessToken = (user: IUser): AuthTokens => {
   return {
-    accessToken: signAccessToken(buildUserJwtPayload(user)),
+    accessToken: signAccessToken(
+      buildUserJwtPayload(user),
+      config.jwt.userSecret,
+      config.jwt.accessExpiresIn,
+    ),
   }
 }
+
+const verifyUserTotp = (encryptedSecret: string, token: string): boolean => {
+  const base32Secret = decryptTwoFactorSecret(encryptedSecret)
+
+  return speakeasy.totp.verify({
+    secret: base32Secret,
+    encoding: 'base32',
+    token,
+    window: 1,
+  })
+}
+
+const buildQrCodeUrl = (otpauthUrl: string): string => {
+  return `https://chart.googleapis.com/chart?chs=256x256&cht=qr&chl=${encodeURIComponent(otpauthUrl)}`
+}
+
+const pendingUserBackupCodes = new Map<string, string[]>()
 
 export const authService = {
   register: async (
@@ -119,7 +153,17 @@ export const authService = {
   login: async (
     payload: LoginPayload,
     request?: Request,
-  ): Promise<{ user: SanitizedUser; tokens: AuthTokens }> => {
+  ): Promise<
+    | {
+        requiresTwoFactor: false
+        accessToken: string
+        user: SanitizedUser
+      }
+    | {
+        requiresTwoFactor: true
+        tempToken: string
+      }
+  > => {
     const user = await UserModel.findOne({ email: payload.email })
 
     if (!user || !user.passwordHash) {
@@ -153,9 +197,181 @@ export const authService = {
       ...(request?.id ? { requestId: request.id } : {}),
     })
 
+    if (user.twoFactor.enabled) {
+      if (!user.twoFactor.secret) {
+        throw new AppError('2FA is enabled but not configured correctly.', 500)
+      }
+
+      const tempTokenExpiry =
+        config.jwt.tempTokenExpiresIn === '5m' ? '5m' : ('5m' as const)
+
+      const tempToken = signTempToken(
+        {
+          id: user._id.toString(),
+          email: user.email,
+          actorType: 'user',
+          pending2FA: true,
+        },
+        config.jwt.userSecret,
+        tempTokenExpiry,
+      )
+
+      return {
+        requiresTwoFactor: true,
+        tempToken,
+      }
+    }
+
+    const tokens = issueUserAccessToken(user)
+
     return {
+      requiresTwoFactor: false,
       user: sanitizeUser(user),
-      tokens: issueUserAccessToken(user),
+      accessToken: tokens.accessToken,
+    }
+  },
+
+  enableTwoFactor: async (userId: string) => {
+    const user = await UserModel.findById(userId)
+
+    if (!user) {
+      throw new AppError('User not found.', 404)
+    }
+
+    const generatedSecret = speakeasy.generateSecret({
+      name: `${config.oauth.twoFactorIssuer}:${user.email}`,
+      length: 20,
+    })
+
+    if (!generatedSecret.base32 || !generatedSecret.otpauth_url) {
+      throw new AppError('Failed to generate 2FA secret.', 500)
+    }
+
+    const backupCodes = generateBackupCodes()
+
+    user.twoFactor.secret = encryptTwoFactorSecret(generatedSecret.base32)
+    user.twoFactor.backupCodes = undefined
+    user.twoFactor.enabled = false
+    user.twoFactor.verifiedAt = undefined
+    await user.save()
+
+    pendingUserBackupCodes.set(user._id.toString(), backupCodes)
+
+    return {
+      secret: generatedSecret.base32,
+      qrCodeUrl: buildQrCodeUrl(generatedSecret.otpauth_url),
+      backupCodes,
+    }
+  },
+
+  verifyTwoFactor: async (userId: string, otp: string) => {
+    const user = await UserModel.findById(userId)
+    const pendingBackupCodes = pendingUserBackupCodes.get(userId)
+
+    if (!user || !user.twoFactor.secret) {
+      throw new AppError('2FA setup not found for this user.', 404)
+    }
+
+    if (!pendingBackupCodes || pendingBackupCodes.length === 0) {
+      throw new AppError(
+        '2FA setup session expired. Please generate a new 2FA setup.',
+        400,
+      )
+    }
+
+    const isOtpValid = verifyUserTotp(user.twoFactor.secret, otp)
+
+    if (!isOtpValid) {
+      throw new AppError('Invalid OTP code.', 401)
+    }
+
+    user.twoFactor.enabled = true
+    user.twoFactor.backupCodes = hashBackupCodes(pendingBackupCodes)
+    user.twoFactor.verifiedAt = new Date()
+    await user.save()
+    pendingUserBackupCodes.delete(userId)
+
+    return { success: true }
+  },
+
+  disableTwoFactor: async (userId: string, otp: string) => {
+    const user = await UserModel.findById(userId)
+
+    if (!user || !user.twoFactor.enabled || !user.twoFactor.secret) {
+      throw new AppError('2FA is not enabled for this user.', 400)
+    }
+
+    const isOtpValid = verifyUserTotp(user.twoFactor.secret, otp)
+
+    if (!isOtpValid) {
+      throw new AppError('Invalid OTP code.', 401)
+    }
+
+    user.twoFactor.enabled = false
+    user.twoFactor.secret = undefined
+    user.twoFactor.backupCodes = undefined
+    user.twoFactor.verifiedAt = undefined
+    await user.save()
+    pendingUserBackupCodes.delete(userId)
+
+    return { success: true }
+  },
+
+  challengeTwoFactor: async (payload: { tempToken: string; otp: string }) => {
+    const decoded = verifyTempToken(payload.tempToken, config.jwt.userSecret)
+
+    if (decoded.actorType !== 'user' || !decoded.pending2FA) {
+      throw new AppError('Invalid user 2FA challenge token.', 401)
+    }
+
+    const user = await UserModel.findById(decoded.id)
+
+    if (
+      !user ||
+      user.email !== decoded.email ||
+      !user.twoFactor.enabled ||
+      !user.twoFactor.secret
+    ) {
+      throw new AppError('User 2FA challenge is invalid.', 401)
+    }
+
+    const isOtpValid = verifyUserTotp(user.twoFactor.secret, payload.otp)
+
+    if (!isOtpValid) {
+      throw new AppError('Invalid OTP code.', 401)
+    }
+
+    user.twoFactor.verifiedAt = new Date()
+    user.lastLoginAt = new Date()
+    await user.save()
+
+    const tokenPayload = buildUserJwtPayload(user)
+
+    return {
+      accessToken: signAccessToken(
+        tokenPayload,
+        config.jwt.userSecret,
+        config.jwt.accessExpiresIn,
+      ),
+      user: sanitizeUser(user),
+    }
+  },
+
+  getBackupCodesCount: async (userId: string, otp: string) => {
+    const user = await UserModel.findById(userId)
+
+    if (!user || !user.twoFactor.enabled || !user.twoFactor.secret) {
+      throw new AppError('2FA is not enabled for this user.', 400)
+    }
+
+    const isOtpValid = verifyUserTotp(user.twoFactor.secret, otp)
+
+    if (!isOtpValid) {
+      throw new AppError('Invalid OTP code.', 401)
+    }
+
+    return {
+      remainingBackupCodes: user.twoFactor.backupCodes?.length ?? 0,
     }
   },
 

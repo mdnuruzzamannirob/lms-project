@@ -5,64 +5,19 @@ import { AppError } from '../../common/errors/AppError'
 import { auditService } from '../../common/services/audit.service'
 import {
   compareScryptHash,
-  generateRandomToken,
   hashStringSha256,
   hashWithScrypt,
 } from '../../common/utils/crypto'
-import { signAccessToken } from '../../common/utils/token'
+import {
+  signAccessToken,
+  signTempToken,
+  verifyTempToken,
+} from '../../common/utils/token'
 import { config } from '../../config'
 import { RoleModel } from '../rbac/model'
 import { StaffModel } from '../staff/model'
 import { staffService } from '../staff/service'
-import {
-  StaffActivityLogModel,
-  StaffInviteTokenModel,
-  StaffTwoFactorChallengeModel,
-} from './model'
-
-const issueStaffToken = async (staffId: string): Promise<string> => {
-  const staff = await StaffModel.findById(staffId)
-
-  if (!staff || !staff.isActive) {
-    throw new AppError('Staff account not found or inactive.', 401)
-  }
-
-  const role = await RoleModel.findById(staff.roleId)
-
-  if (!role) {
-    throw new AppError('Staff role is not configured.', 500)
-  }
-
-  return signAccessToken({
-    sub: staff._id.toString(),
-    type: 'staff',
-    email: staff.email,
-    role: staff.isSuperAdmin ? 'super-admin' : role.name,
-    permissions: staff.isSuperAdmin ? ['*'] : role.permissions,
-  })
-}
-
-const createTwoFactorChallenge = async (staffId: string): Promise<string> => {
-  const rawToken = generateRandomToken(20)
-  const tokenHash = hashStringSha256(rawToken)
-
-  await StaffTwoFactorChallengeModel.deleteMany({
-    staffId,
-    consumedAt: { $exists: false },
-  })
-  await StaffTwoFactorChallengeModel.create({
-    staffId,
-    tokenHash,
-    expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-  })
-
-  return signAccessToken({
-    sub: staffId,
-    type: 'staff',
-    role: 'staff.2fa.pending',
-    permissions: ['staff.2fa.pending'],
-  })
-}
+import { StaffActivityLogModel, StaffInviteTokenModel } from './model'
 
 const logStaffActivity = async (
   staffId: string,
@@ -77,6 +32,76 @@ const logStaffActivity = async (
   })
 }
 
+const issueStaffToken = async (staffId: string): Promise<string> => {
+  const staff = await StaffModel.findById(staffId)
+
+  if (!staff || !staff.isActive) {
+    throw new AppError('Staff account not found or inactive.', 401)
+  }
+
+  const role = await RoleModel.findById(staff.roleId)
+
+  if (!role) {
+    throw new AppError('Staff role is not configured.', 500)
+  }
+
+  return signAccessToken(
+    {
+      id: staff._id.toString(),
+      sub: staff._id.toString(),
+      actorType: 'staff',
+      type: 'staff',
+      email: staff.email,
+      roleId: staff.roleId.toString(),
+      role: staff.isSuperAdmin ? 'super-admin' : role.name,
+      permissions: staff.isSuperAdmin ? ['*'] : role.permissions,
+    },
+    config.jwt.staffSecret,
+    config.jwt.accessExpiresIn,
+  )
+}
+
+const buildStaffAuthResponse = async (staffId: string) => {
+  const staff = await StaffModel.findById(staffId)
+
+  if (!staff || !staff.isActive) {
+    throw new AppError('Staff account not found or inactive.', 401)
+  }
+
+  const role = await RoleModel.findById(staff.roleId)
+
+  if (!role) {
+    throw new AppError('Staff role is not configured.', 500)
+  }
+
+  return {
+    id: staff._id.toString(),
+    name: staff.name,
+    email: staff.email,
+    role: staff.isSuperAdmin ? 'super-admin' : role.name,
+    roleId: staff.roleId.toString(),
+    permissions: staff.isSuperAdmin ? ['*'] : role.permissions,
+    twoFactorEnabled: staff.twoFactor.enabled,
+    isSuperAdmin: staff.isSuperAdmin,
+    isActive: staff.isActive,
+    createdAt: staff.createdAt.toISOString(),
+    updatedAt: staff.updatedAt.toISOString(),
+  }
+}
+
+const buildQrCodeUrl = (otpauthUrl: string): string => {
+  return `https://chart.googleapis.com/chart?chs=256x256&cht=qr&chl=${encodeURIComponent(otpauthUrl)}`
+}
+
+const verifyStaffTotp = (secret: string, otp: string): boolean => {
+  return speakeasy.totp.verify({
+    secret,
+    encoding: 'base32',
+    token: otp,
+    window: 1,
+  })
+}
+
 export const staffAuthService = {
   login: async (
     payload: { email: string; password: string },
@@ -84,11 +109,13 @@ export const staffAuthService = {
   ): Promise<
     | {
         requiresTwoFactor: false
-        accessToken: string
+        mustSetup2FA: true
+        tempToken: string
       }
     | {
         requiresTwoFactor: true
-        twoFactorToken: string
+        mustSetup2FA: false
+        tempToken: string
       }
   > => {
     const staff = await StaffModel.findOne({ email: payload.email })
@@ -108,20 +135,42 @@ export const staffAuthService = {
 
     await logStaffActivity(staff._id.toString(), 'staff.login', request)
 
-    if (staff.twoFactor.enabled) {
-      const twoFactorToken = await createTwoFactorChallenge(
-        staff._id.toString(),
-      )
+    if (!staff.twoFactor.enabled) {
+      const setupTokenExpiry =
+        config.jwt.staffSetupTokenExpiresIn === '10m' ? '10m' : ('10m' as const)
 
       return {
-        requiresTwoFactor: true,
-        twoFactorToken,
+        requiresTwoFactor: false,
+        mustSetup2FA: true,
+        tempToken: signTempToken(
+          {
+            id: staff._id.toString(),
+            email: staff.email,
+            actorType: 'staff',
+            mustSetup2FA: true,
+          },
+          config.jwt.staffSecret,
+          setupTokenExpiry,
+        ),
       }
     }
 
+    const challengeTokenExpiry =
+      config.jwt.tempTokenExpiresIn === '5m' ? '5m' : ('5m' as const)
+
     return {
-      requiresTwoFactor: false,
-      accessToken: await issueStaffToken(staff._id.toString()),
+      requiresTwoFactor: true,
+      mustSetup2FA: false,
+      tempToken: signTempToken(
+        {
+          id: staff._id.toString(),
+          email: staff.email,
+          actorType: 'staff',
+          pending2FA: true,
+        },
+        config.jwt.staffSecret,
+        challengeTokenExpiry,
+      ),
     }
   },
 
@@ -133,7 +182,7 @@ export const staffAuthService = {
       throw new AppError('Invitation token is invalid or expired.', 400)
     }
 
-    const staff = await staffService.createStaffFromInvite({
+    await staffService.createStaffFromInvite({
       email: invite.email,
       name: invite.name,
       ...(invite.phone ? { phone: invite.phone } : {}),
@@ -145,8 +194,8 @@ export const staffAuthService = {
     await invite.save()
 
     return {
-      staff,
-      accessToken: await issueStaffToken(staff.id),
+      success: true,
+      message: 'Account created. Please login and setup 2FA.',
     }
   },
 
@@ -155,30 +204,7 @@ export const staffAuthService = {
   },
 
   getMyProfile: async (staffId: string) => {
-    const staff = await StaffModel.findById(staffId)
-
-    if (!staff) {
-      throw new AppError('Staff not found.', 404)
-    }
-
-    const role = await RoleModel.findById(staff.roleId)
-
-    if (!role) {
-      throw new AppError('Staff role not found.', 404)
-    }
-
-    return {
-      id: staff._id.toString(),
-      name: staff.name,
-      email: staff.email,
-      role: staff.isSuperAdmin ? 'super-admin' : role.name,
-      permissions: staff.isSuperAdmin ? ['*'] : role.permissions,
-      twoFactorEnabled: staff.twoFactor.enabled,
-      isSuperAdmin: staff.isSuperAdmin,
-      isActive: staff.isActive,
-      createdAt: staff.createdAt.toISOString(),
-      updatedAt: staff.updatedAt.toISOString(),
-    }
+    return buildStaffAuthResponse(staffId)
   },
 
   changeMyPassword: async (
@@ -204,11 +230,17 @@ export const staffAuthService = {
     await staff.save()
   },
 
-  enableTwoFactor: async (staffId: string) => {
-    const staff = await StaffModel.findById(staffId)
+  setupTwoFactor: async (tempToken: string) => {
+    const decoded = verifyTempToken(tempToken, config.jwt.staffSecret)
 
-    if (!staff) {
-      throw new AppError('Staff not found.', 404)
+    if (decoded.actorType !== 'staff' || !decoded.mustSetup2FA) {
+      throw new AppError('Invalid staff 2FA setup token.', 401)
+    }
+
+    const staff = await StaffModel.findById(decoded.id)
+
+    if (!staff || !staff.isActive || staff.email !== decoded.email) {
+      throw new AppError('Staff account is invalid for 2FA setup.', 401)
     }
 
     const secret = speakeasy.generateSecret({
@@ -216,102 +248,111 @@ export const staffAuthService = {
       length: 20,
     })
 
+    if (!secret.base32 || !secret.otpauth_url) {
+      throw new AppError('Failed to generate 2FA setup secret.', 500)
+    }
+
     staff.twoFactor.pendingSecret = secret.base32
     await staff.save()
 
     return {
       secret: secret.base32,
-      otpauthUrl: secret.otpauth_url,
+      qrCodeUrl: buildQrCodeUrl(secret.otpauth_url),
     }
   },
 
-  verifyTwoFactor: async (staffId: string, code: string, request?: Request) => {
-    const staff = await StaffModel.findById(staffId)
+  enableTwoFactor: async (payload: { tempToken: string; otp: string }) => {
+    const decoded = verifyTempToken(payload.tempToken, config.jwt.staffSecret)
 
-    if (!staff) {
-      throw new AppError('Staff not found.', 404)
+    if (decoded.actorType !== 'staff' || !decoded.mustSetup2FA) {
+      throw new AppError('Invalid staff 2FA setup token.', 401)
     }
 
-    const pendingSecret = staff.twoFactor.pendingSecret
+    const staff = await StaffModel.findById(decoded.id)
 
-    if (pendingSecret) {
-      const isSetupCodeValid = speakeasy.totp.verify({
-        secret: pendingSecret,
-        encoding: 'base32',
-        token: code,
-        window: 1,
-      })
+    if (!staff || !staff.isActive || staff.email !== decoded.email) {
+      throw new AppError('Staff account is invalid for 2FA setup.', 401)
+    }
 
-      if (!isSetupCodeValid) {
-        throw new AppError('Invalid 2FA setup code.', 400)
-      }
+    if (!staff.twoFactor.pendingSecret) {
+      throw new AppError('2FA setup has not been initialized.', 400)
+    }
 
-      staff.twoFactor.enabled = true
-      staff.twoFactor.secret = pendingSecret
-      staff.twoFactor.pendingSecret = undefined
-      staff.twoFactor.lastVerifiedAt = new Date()
-      await staff.save()
-      await logStaffActivity(staff._id.toString(), 'staff.2fa.enabled', request)
+    const isOtpValid = verifyStaffTotp(
+      staff.twoFactor.pendingSecret,
+      payload.otp,
+    )
 
-      return {
-        enabled: true,
-        accessToken: await issueStaffToken(staff._id.toString()),
-      }
+    if (!isOtpValid) {
+      throw new AppError('Invalid 2FA code.', 401)
+    }
+
+    staff.twoFactor.enabled = true
+    staff.twoFactor.secret = staff.twoFactor.pendingSecret
+    staff.twoFactor.pendingSecret = undefined
+    staff.twoFactor.lastVerifiedAt = new Date()
+    await staff.save()
+
+    return {
+      accessToken: await issueStaffToken(staff._id.toString()),
+      staff: await buildStaffAuthResponse(staff._id.toString()),
+    }
+  },
+
+  verifyTwoFactor: async (payload: { tempToken: string; otp: string }) => {
+    const decoded = verifyTempToken(payload.tempToken, config.jwt.staffSecret)
+
+    if (decoded.actorType !== 'staff' || !decoded.pending2FA) {
+      throw new AppError('Invalid staff 2FA challenge token.', 401)
+    }
+
+    const staff = await StaffModel.findById(decoded.id)
+
+    if (!staff || !staff.isActive || staff.email !== decoded.email) {
+      throw new AppError('Staff account is invalid for 2FA verification.', 401)
     }
 
     if (!staff.twoFactor.enabled || !staff.twoFactor.secret) {
       throw new AppError('2FA is not enabled for this staff account.', 400)
     }
 
-    const isCodeValid = speakeasy.totp.verify({
-      secret: staff.twoFactor.secret,
-      encoding: 'base32',
-      token: code,
-      window: 1,
-    })
+    const isOtpValid = verifyStaffTotp(staff.twoFactor.secret, payload.otp)
 
-    if (!isCodeValid) {
+    if (!isOtpValid) {
       throw new AppError('Invalid 2FA code.', 401)
     }
 
     staff.twoFactor.lastVerifiedAt = new Date()
     await staff.save()
-    await logStaffActivity(staff._id.toString(), 'staff.2fa.verified', request)
 
     return {
-      enabled: true,
       accessToken: await issueStaffToken(staff._id.toString()),
+      staff: await buildStaffAuthResponse(staff._id.toString()),
     }
   },
 
   disableTwoFactor: async (
     staffId: string,
-    payload: { password: string; code: string },
+    payload: { otp: string },
     request?: Request,
   ) => {
     const staff = await StaffModel.findById(staffId)
 
-    if (!staff || !staff.twoFactor.enabled || !staff.twoFactor.secret) {
+    if (!staff) {
+      throw new AppError('Staff not found.', 404)
+    }
+
+    if (!staff.isSuperAdmin) {
+      throw new AppError('Only super-admin can disable their own 2FA.', 403)
+    }
+
+    if (!staff.twoFactor.enabled || !staff.twoFactor.secret) {
       throw new AppError('2FA is not enabled for this staff account.', 400)
     }
 
-    const isPasswordValid = await compareScryptHash(
-      payload.password,
-      staff.passwordHash,
-    )
+    const isOtpValid = verifyStaffTotp(staff.twoFactor.secret, payload.otp)
 
-    if (!isPasswordValid) {
-      throw new AppError('Password is incorrect.', 401)
-    }
-
-    const isCodeValid = speakeasy.totp.verify({
-      secret: staff.twoFactor.secret,
-      encoding: 'base32',
-      token: payload.code,
-      window: 1,
-    })
-
-    if (!isCodeValid) {
+    if (!isOtpValid) {
       throw new AppError('Invalid 2FA code.', 401)
     }
 
@@ -333,7 +374,7 @@ export const staffAuthService = {
     })
 
     return {
-      enabled: false,
+      success: true,
     }
   },
 }

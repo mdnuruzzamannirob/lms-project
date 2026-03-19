@@ -8,6 +8,7 @@ import {
   disableTwoFactor,
   enableTwoFactor,
   getStaffMe,
+  setupTwoFactor,
   staffLogin,
   staffLogout,
   verifyTwoFactor,
@@ -34,11 +35,19 @@ router.patch(
   validateRequest({ body: staffAuthValidation.changePasswordBody }),
   changeStaffPassword,
 )
-router.post('/2fa/enable', authenticateStaff, enableTwoFactor)
+router.post(
+  '/2fa/setup',
+  validateRequest({ body: staffAuthValidation.staffTwoFactorSetupBody }),
+  setupTwoFactor,
+)
+router.post(
+  '/2fa/enable',
+  validateRequest({ body: staffAuthValidation.staffTwoFactorEnableBody }),
+  enableTwoFactor,
+)
 router.post(
   '/2fa/verify',
-  authenticateStaff,
-  validateRequest({ body: staffAuthValidation.verifyTwoFactorBody }),
+  validateRequest({ body: staffAuthValidation.staffTwoFactorVerifyBody }),
   verifyTwoFactor,
 )
 router.post(

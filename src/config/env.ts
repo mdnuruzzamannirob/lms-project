@@ -52,6 +52,8 @@ const envSchema = z.object({
   JWT_STAFF_SECRET: z.string().trim().min(1, 'JWT_STAFF_SECRET is required'),
   JWT_ACCESS_EXPIRES_IN: z.string().trim().default('1d'),
   JWT_REFRESH_EXPIRES_IN: z.string().trim().default('30d'),
+  TEMP_TOKEN_EXPIRES_IN: z.string().trim().default('5m'),
+  STAFF_SETUP_TOKEN_EXPIRES_IN: z.string().trim().default('10m'),
   JWT_ISSUER: z.string().trim().default('lms-backend'),
   BCRYPT_SALT_ROUNDS: z.coerce.number().int().min(8).max(20).default(12),
   SESSION_SECRET: z
@@ -272,6 +274,8 @@ export const env = {
     staffSecret: rawEnv.JWT_STAFF_SECRET,
     accessExpiresIn: rawEnv.JWT_ACCESS_EXPIRES_IN,
     refreshExpiresIn: rawEnv.JWT_REFRESH_EXPIRES_IN,
+    tempTokenExpiresIn: rawEnv.TEMP_TOKEN_EXPIRES_IN,
+    staffSetupTokenExpiresIn: rawEnv.STAFF_SETUP_TOKEN_EXPIRES_IN,
     issuer: rawEnv.JWT_ISSUER,
     scryptCost: rawEnv.BCRYPT_SALT_ROUNDS,
     sessionSecret: rawEnv.SESSION_SECRET,

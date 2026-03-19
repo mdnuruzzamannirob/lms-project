@@ -3,11 +3,15 @@ import type { ZodTypeAny } from 'zod'
 export type AuthActorType = 'user' | 'staff'
 
 export interface BaseJwtPayload {
+  id?: string
   sub: string
+  actorType?: AuthActorType
   type: AuthActorType
   email?: string
   role?: string
   permissions?: string[]
+  pending2FA?: boolean
+  mustSetup2FA?: boolean
   iat?: number
   exp?: number
   iss?: string
