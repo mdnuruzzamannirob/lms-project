@@ -7,7 +7,7 @@ interface ValidationIssue {
 
 export const handleValidationError = (issues: ValidationIssue[]): AppError => {
   const details = issues.map((issue) => ({
-    path: issue.path ?? 'unknown',
+    path: issue.path || 'unknown',
     message: issue.message ?? 'Validation error',
   }))
 

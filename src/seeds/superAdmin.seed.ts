@@ -6,8 +6,6 @@ import { defaultPermissionSeeds, rbacService } from '../modules/rbac'
 import { RoleModel } from '../modules/rbac/model'
 import { StaffModel } from '../modules/staff/model'
 
-const SUPER_ADMIN_ROLE_NAME = 'super-admin'
-
 export const seedSuperAdmin = async (): Promise<void> => {
   await rbacService.ensurePermissionSeed()
 
@@ -16,7 +14,7 @@ export const seedSuperAdmin = async (): Promise<void> => {
   )
 
   const role = await RoleModel.findOneAndUpdate(
-    { name: SUPER_ADMIN_ROLE_NAME },
+    { name: config.superAdmin.name },
     {
       $set: {
         description: 'System Super Admin Role',
