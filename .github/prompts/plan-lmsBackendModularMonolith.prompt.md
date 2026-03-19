@@ -368,7 +368,7 @@ Build the backend as a strict TypeScript modular monolith on Node.js + Express +
 - onboarding: GET /onboarding/plans; POST /onboarding/select, /onboarding/complete.
 - plans: GET /plans, /plans/:id; POST /plans; PUT /plans/:id; PATCH /plans/:id/toggle.
 - subscriptions: GET /subscriptions/my, /subscriptions/my/history, /subscriptions, /subscriptions/:id; POST /subscriptions; PATCH /subscriptions/my/cancel, /subscriptions/my/renew, /subscriptions/my/upgrade, /subscriptions/my/downgrade, /subscriptions/:id.
-- payments: GET /payments/my, /payments/my/:id, /payments, /payments/:id; POST /payments/initiate, /payments/verify, /payments/:id/refund; POST /webhooks/bkash, /webhooks/nagad, /webhooks/stripe, /webhooks/paypal. Recommended internal improvement: route these through a provider adapter and support SSLCommerz-backed Bangladesh processing behind the service layer.
+- payments: GET /payments/my, /payments/my/:id, /payments, /payments/:id; POST /payments/initiate, /payments/verify, /payments/:id/refund; POST /webhooks/:gateway. Recommended internal improvement: route these through a provider adapter and support SSLCommerz-backed Bangladesh processing behind the service layer.
 - promotions: POST /coupons/validate; GET/POST /coupons; GET/PUT/DELETE /coupons/:id; PATCH /coupons/:id/toggle; GET /flash-sales/active; GET/POST /flash-sales; PUT/DELETE /flash-sales/:id; PATCH /flash-sales/:id/toggle.
 - authors: GET /authors, /authors/:id; POST /authors; PUT /authors/:id; DELETE /authors/:id.
 - categories: GET /categories, /categories/:id; POST /categories; PUT /categories/:id; DELETE /categories/:id.
@@ -378,7 +378,7 @@ Build the backend as a strict TypeScript modular monolith on Node.js + Express +
 - reservations: GET /reservations/my, /reservations; POST /reservations; DELETE /reservations/:id; PATCH /reservations/:id.
 - wishlist: GET /wishlist; POST /wishlist/:bookId; DELETE /wishlist/:bookId.
 - reviews: POST /books/:bookId/reviews; PATCH /books/:bookId/reviews/:id, /admin/reviews/:id/toggle; DELETE /books/:bookId/reviews/:id.
-- notifications: GET /notifications, /notifications/unread-count, /admin/notification-logs; PATCH /notifications/:id/read; POST /notifications/read-all, /admin/notifications/send; DELETE /notifications/:id.
+- notifications: GET /notifications, /notifications/unread-count, /admin/notification-logs; PATCH /notifications/:id/read; PATCH /notifications/mark-read, /admin/notifications/send; DELETE /notifications/:id.
 - search: GET /search, /search/suggestions, /search/popular.
 - dashboard: GET /dashboard, /dashboard/stats, /dashboard/recommended, /dashboard/my-library.
 - members: GET /admin/users, /admin/users/:id, /admin/users/:id/reading-history, /admin/users/:id/payments; PATCH /admin/users/:id, /admin/users/:id/suspend, /admin/users/:id/unsuspend; DELETE /admin/users/:id.

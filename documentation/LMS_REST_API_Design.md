@@ -1005,7 +1005,7 @@ books
 **GET** /search/suggestions Public Autocomplete suggestions as
 user types
 
-**GET** /search/popular Public Get popular search terms
+**GET** /search/popular-terms Public Get popular search terms
 
 ---
 
