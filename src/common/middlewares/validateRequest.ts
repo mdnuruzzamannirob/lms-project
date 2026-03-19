@@ -21,7 +21,10 @@ export const validateRequest =
 
       if (schemas.query) {
         validated.query = schemas.query.parse(request.query)
-        request.query = validated.query as typeof request.query
+        Object.assign(
+          request.query as Record<string, unknown>,
+          validated.query as Record<string, unknown>,
+        )
       }
 
       if (schemas.params) {

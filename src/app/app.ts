@@ -2,13 +2,12 @@ import { apiReference } from '@scalar/express-api-reference'
 import cors from 'cors'
 import type { Request, Response } from 'express'
 import express from 'express'
-import mongoSanitize from 'express-mongo-sanitize'
 import helmet from 'helmet'
 import morgan from 'morgan'
 import path from 'node:path'
 import responseTime from 'response-time'
-
 import { globalErrorHandler } from '../common/errors/globalErrorHandler'
+import { mongoSanitizeSafe } from '../common/middlewares/mongoSanitizeSafe'
 import { notFound } from '../common/middlewares/notFound'
 import {
   adminRateLimiter,
@@ -99,7 +98,7 @@ app.use(
   }),
 )
 app.use(express.urlencoded({ extended: true }))
-app.use(mongoSanitize())
+app.use(mongoSanitizeSafe)
 initializePassport(app)
 
 app.use(config.apiPrefix, appRouter)

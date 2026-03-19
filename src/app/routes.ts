@@ -28,6 +28,7 @@ import { wishlistRouter } from '../modules/wishlist'
 
 const router = Router()
 
+router.use('/health', healthRouter)
 router.use('/auth', authRouter)
 router.use('/staff', staffAuthRouter)
 router.use('/onboarding', onboardingRouter)
@@ -52,6 +53,5 @@ router.use('/admin/members', membersRouter)
 router.use('/admin/audit', auditRouter)
 router.use('/admin/reports', reportsRouter)
 router.use('/admin/settings', settingsRouter)
-router.use('/health', healthRouter)
 
 export const appRouter = router

@@ -3,7 +3,7 @@ import http from 'node:http'
 import { config } from '../config'
 import { connectToDatabase, disconnectFromDatabase } from '../config/db'
 import { logger } from '../config/logger'
-import { getReadinessReport } from '../modules/health/service'
+import { healthService } from '../modules/health'
 import { rbacService } from '../modules/rbac'
 import { app } from './app'
 
@@ -53,7 +53,7 @@ const shutdown = async (signal: string, exitCode = 0): Promise<void> => {
 
 const startServer = async (): Promise<void> => {
   await connectToDatabase()
-  const readiness = getReadinessReport()
+  const readiness = healthService.getReadinessReport()
   if (readiness.statusCode !== 200) {
     throw new Error('Health readiness check failed during startup.')
   }

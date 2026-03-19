@@ -29649,7 +29649,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -30049,6 +30054,11 @@
             }
           }
         },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -30497,7 +30507,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ]
       },
       "patch": {
         "tags": [
@@ -30907,6 +30922,11 @@
             }
           }
         },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -31386,7 +31406,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ]
       },
       "post": {
         "tags": [
@@ -31786,6 +31811,11 @@
             }
           }
         },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -32205,7 +32235,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ]
       },
       "patch": {
         "tags": [
@@ -32615,6 +32650,11 @@
             }
           }
         },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -47837,7 +47877,7 @@
         "tags": [
           "health"
         ],
-        "summary": "Get Health",
+        "summary": "GET /api/v1/health",
         "description": "Endpoint in module 'health' defined in src/modules/health/router.ts.",
         "operationId": "health_get__api_v1_health",
         "parameters": [
@@ -48306,7 +48346,7 @@
         "tags": [
           "health"
         ],
-        "summary": "Get Liveness",
+        "summary": "GET /api/v1/health/live",
         "description": "Endpoint in module 'health' defined in src/modules/health/router.ts.",
         "operationId": "health_get__api_v1_health_live",
         "parameters": [
@@ -48767,7 +48807,7 @@
         "tags": [
           "health"
         ],
-        "summary": "Get Readiness",
+        "summary": "GET /api/v1/health/ready",
         "description": "Endpoint in module 'health' defined in src/modules/health/router.ts.",
         "operationId": "health_get__api_v1_health_ready",
         "parameters": [
@@ -59500,6 +59540,11 @@
             }
           }
         },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -59941,6 +59986,11 @@
             }
           }
         },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -60386,6 +60436,11 @@
             }
           }
         },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -60867,7 +60922,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ]
       }
     },
     "/api/v1/reading/currently-reading": {
@@ -61326,7 +61386,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ]
       }
     },
     "/api/v1/reading/history": {
@@ -61785,7 +61850,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerUserAuth": []
+          }
+        ]
       }
     },
     "/api/v1/reservations": {

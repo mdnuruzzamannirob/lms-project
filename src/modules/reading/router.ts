@@ -22,10 +22,9 @@ import { readingValidation } from './validation'
 
 const router = Router()
 
-router.use(authenticateUser)
-
 router.post(
   '/reading/:bookId/start',
+  authenticateUser,
   validateRequest({
     params: readingValidation.bookParam,
     body: readingValidation.startReadingBody,
@@ -34,6 +33,7 @@ router.post(
 )
 router.post(
   '/reading/:bookId/session',
+  authenticateUser,
   validateRequest({
     params: readingValidation.bookParam,
     body: readingValidation.createSessionBody,
@@ -42,6 +42,7 @@ router.post(
 )
 router.patch(
   '/reading/:bookId/progress',
+  authenticateUser,
   validateRequest({
     params: readingValidation.bookParam,
     body: readingValidation.updateProgressBody,
@@ -51,27 +52,32 @@ router.patch(
 
 router.get(
   '/reading/history',
+  authenticateUser,
   validateRequest({ query: readingValidation.paginationQuery }),
   getReadingHistory,
 )
 router.get(
   '/reading/currently-reading',
+  authenticateUser,
   validateRequest({ query: readingValidation.paginationQuery }),
   getCurrentlyReading,
 )
 router.get(
   '/reading/completed',
+  authenticateUser,
   validateRequest({ query: readingValidation.paginationQuery }),
   getCompletedReading,
 )
 
 router.get(
   '/books/:bookId/bookmarks',
+  authenticateUser,
   validateRequest({ params: readingValidation.bookParam }),
   listBookmarks,
 )
 router.post(
   '/books/:bookId/bookmarks',
+  authenticateUser,
   validateRequest({
     params: readingValidation.bookParam,
     body: readingValidation.createBookmarkBody,
@@ -80,6 +86,7 @@ router.post(
 )
 router.patch(
   '/books/:bookId/bookmarks/:id',
+  authenticateUser,
   validateRequest({
     params: readingValidation.nestedIdParam,
     body: readingValidation.updateBookmarkBody,
@@ -88,17 +95,20 @@ router.patch(
 )
 router.delete(
   '/books/:bookId/bookmarks/:id',
+  authenticateUser,
   validateRequest({ params: readingValidation.nestedIdParam }),
   deleteBookmark,
 )
 
 router.get(
   '/books/:bookId/highlights',
+  authenticateUser,
   validateRequest({ params: readingValidation.bookParam }),
   listHighlights,
 )
 router.post(
   '/books/:bookId/highlights',
+  authenticateUser,
   validateRequest({
     params: readingValidation.bookParam,
     body: readingValidation.createHighlightBody,
@@ -107,6 +117,7 @@ router.post(
 )
 router.patch(
   '/books/:bookId/highlights/:id',
+  authenticateUser,
   validateRequest({
     params: readingValidation.nestedIdParam,
     body: readingValidation.updateHighlightBody,
@@ -115,6 +126,7 @@ router.patch(
 )
 router.delete(
   '/books/:bookId/highlights/:id',
+  authenticateUser,
   validateRequest({ params: readingValidation.nestedIdParam }),
   deleteHighlight,
 )

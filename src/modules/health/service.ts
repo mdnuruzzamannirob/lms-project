@@ -2,10 +2,7 @@ import { config } from '../../config'
 import { getDatabaseState } from '../../config/db'
 import type { HealthData, HealthQuery, ReadinessData } from './interface'
 
-export const getHealthReport = (
-  query: HealthQuery,
-  requestId: string,
-): HealthData => {
+const getHealthReport = (query: HealthQuery, requestId: string): HealthData => {
   const baseReport: HealthData = {
     status: 'ok',
     service: 'library-management-system-backend',
@@ -29,7 +26,7 @@ export const getHealthReport = (
   }
 }
 
-export const getLivenessReport = (): Omit<
+const getLivenessReport = (): Omit<
   HealthData,
   'checks' | 'requestId' | 'uptimeSeconds' | 'environment' | 'version'
 > & { timestamp: string } => ({
@@ -38,7 +35,7 @@ export const getLivenessReport = (): Omit<
   timestamp: new Date().toISOString(),
 })
 
-export const getReadinessReport = (): {
+const getReadinessReport = (): {
   statusCode: number
   body: ReadinessData
 } => {
@@ -54,4 +51,10 @@ export const getReadinessReport = (): {
       timestamp: new Date().toISOString(),
     },
   }
+}
+
+export const healthService = {
+  getHealthReport,
+  getLivenessReport,
+  getReadinessReport,
 }

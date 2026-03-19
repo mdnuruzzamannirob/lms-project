@@ -5751,6 +5751,16 @@
           "request": {
             "method": "GET",
             "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/bookmarks?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
@@ -5796,7 +5806,18 @@
                 }
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "POST /api/v1/books/:bookId/bookmarks",
@@ -5808,6 +5829,16 @@
                 "value": "application/json"
               }
             ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/bookmarks",
               "host": [
@@ -5830,13 +5861,34 @@
                 }
               }
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "DELETE /api/v1/books/:bookId/bookmarks/:id",
           "request": {
             "method": "DELETE",
             "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/bookmarks/:id",
               "host": [
@@ -5851,7 +5903,18 @@
                 ":id"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "PATCH /api/v1/books/:bookId/bookmarks/:id",
@@ -5863,6 +5926,16 @@
                 "value": "application/json"
               }
             ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/bookmarks/:id",
               "host": [
@@ -5886,13 +5959,34 @@
                 }
               }
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "GET /api/v1/books/:bookId/highlights",
           "request": {
             "method": "GET",
             "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/highlights?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
@@ -5938,7 +6032,18 @@
                 }
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "POST /api/v1/books/:bookId/highlights",
@@ -5950,6 +6055,16 @@
                 "value": "application/json"
               }
             ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/highlights",
               "host": [
@@ -5972,13 +6087,34 @@
                 }
               }
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "DELETE /api/v1/books/:bookId/highlights/:id",
           "request": {
             "method": "DELETE",
             "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/highlights/:id",
               "host": [
@@ -5993,7 +6129,18 @@
                 ":id"
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "PATCH /api/v1/books/:bookId/highlights/:id",
@@ -6005,6 +6152,16 @@
                 "value": "application/json"
               }
             ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/books/{{bookId}}/highlights/:id",
               "host": [
@@ -6028,7 +6185,18 @@
                 }
               }
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "PATCH /api/v1/reading/:bookId/progress",
@@ -6040,6 +6208,16 @@
                 "value": "application/json"
               }
             ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/reading/{{bookId}}/progress",
               "host": [
@@ -6062,7 +6240,18 @@
                 }
               }
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "POST /api/v1/reading/:bookId/session",
@@ -6074,6 +6263,16 @@
                 "value": "application/json"
               }
             ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/reading/{{bookId}}/session",
               "host": [
@@ -6096,7 +6295,18 @@
                 }
               }
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "POST /api/v1/reading/:bookId/start",
@@ -6108,6 +6318,16 @@
                 "value": "application/json"
               }
             ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/reading/{{bookId}}/start",
               "host": [
@@ -6130,13 +6350,34 @@
                 }
               }
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "GET /api/v1/reading/completed",
           "request": {
             "method": "GET",
             "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/reading/completed?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
@@ -6181,13 +6422,34 @@
                 }
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "GET /api/v1/reading/currently-reading",
           "request": {
             "method": "GET",
             "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/reading/currently-reading?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
@@ -6232,13 +6494,34 @@
                 }
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "GET /api/v1/reading/history",
           "request": {
             "method": "GET",
             "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/reading/history?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
               "host": [
@@ -6283,7 +6566,18 @@
                 }
               ]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         }
       ]
     },

@@ -1,16 +1,12 @@
 import type { RequestHandler } from 'express'
 
 import { sendResponse } from '../../common/utils/sendResponse'
-import {
-  getHealthReport,
-  getLivenessReport,
-  getReadinessReport,
-} from './service'
+import { healthService } from './service'
 
-export const getHealth: RequestHandler = (request, response) => {
+const getHealth: RequestHandler = (request, response) => {
   const details =
     typeof request.query.details === 'boolean' ? request.query.details : false
-  const data = getHealthReport({ details }, request.id)
+  const data = healthService.getHealthReport({ details }, request.id)
 
   sendResponse(response, {
     statusCode: 200,
@@ -20,17 +16,17 @@ export const getHealth: RequestHandler = (request, response) => {
   })
 }
 
-export const getLiveness: RequestHandler = (_request, response) => {
+const getLiveness: RequestHandler = (_request, response) => {
   sendResponse(response, {
     statusCode: 200,
     success: true,
     message: 'Service is live.',
-    data: getLivenessReport(),
+    data: healthService.getLivenessReport(),
   })
 }
 
-export const getReadiness: RequestHandler = (_request, response) => {
-  const readiness = getReadinessReport()
+const getReadiness: RequestHandler = (_request, response) => {
+  const readiness = healthService.getReadinessReport()
 
   sendResponse(response, {
     statusCode: readiness.statusCode,
@@ -41,4 +37,10 @@ export const getReadiness: RequestHandler = (_request, response) => {
         : 'Service is not ready.',
     data: readiness.body,
   })
+}
+
+export const healthController = {
+  getHealth,
+  getLiveness,
+  getReadiness,
 }
