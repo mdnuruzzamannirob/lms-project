@@ -8,2772 +8,3078 @@ v2.0 --- Feature-Complete \| 35 Collections \| Mongoose ODM
 
 Total: 35 Collections across 9 Groups
 
-  -----------------------------------------------------------------------------------
-  **\#**   **Collection**          **Group**      **Purpose**
-  -------- ----------------------- -------------- -----------------------------------
-  1        users                   Auth           Registered members
+---
 
-  2        email_verify_tokens     Auth           Email verification tokens (TTL)
+**\#** **Collection** **Group** **Purpose**
 
-  3        password_reset_tokens   Auth           Password reset tokens (TTL)
+---
 
-  4        login_history           Auth           User & staff login history
+1 users Auth Registered members
 
-  5        device_tokens           Auth           FCM push notification device tokens
+2 email_verify_tokens Auth Email verification tokens (TTL)
 
-  6        plans                   Subscription   Membership plan definitions
+3 password_reset_tokens Auth Password reset tokens (TTL)
 
-  7        subscriptions           Subscription   User subscription records
+4 login_history Auth User & staff login history
 
-  8        payments                Subscription   Payment transactions
+5 device_tokens Auth FCM push notification device tokens
 
-  9        refunds                 Subscription   Refund records
+6 plans Subscription Membership plan definitions
 
-  10       webhook_logs            Subscription   Payment gateway webhook logs
+7 subscriptions Subscription User subscription records
 
-  11       coupons                 Marketing      Discount coupon codes
+8 payments Subscription Payment transactions
 
-  12       coupon_usages           Marketing      Coupon usage tracking
+9 refunds Subscription Refund records
 
-  13       flash_sales             Marketing      Flash sale / limited-time offers
+10 webhook_logs Subscription Payment gateway webhook logs
 
-  14       authors                 Library        Author profiles
+11 coupons Marketing Discount coupon codes
 
-  15       categories              Library        Book categories / genres (tree)
+12 coupon_usages Marketing Coupon usage tracking
 
-  16       books                   Library        Book metadata
+13 flash_sales Marketing Flash sale / limited-time offers
 
-  17       book_files              Library        PDF / EPUB file records
+14 authors Library Author profiles
 
-  18       reading_progress        Reading        User reading progress
+15 categories Library Book categories / genres (tree)
 
-  19       reading_sessions        Reading        Per-session reading analytics
+16 books Library Book metadata
 
-  20       bookmarks               Reading        Page bookmarks
+17 book_files Library PDF / EPUB file records
 
-  21       highlights              Reading        Text highlights & notes
+18 reading_progress Reading User reading progress
 
-  22       borrows                 Reading        Book borrow records
+19 reading_sessions Reading Per-session reading analytics
 
-  23       reservations            Reading        Book reservation queue
+20 bookmarks Reading Page bookmarks
 
-  24       wishlists               Reading        User wishlist
+21 highlights Reading Text highlights & notes
 
-  25       reviews                 Reading        Book ratings & reviews
+22 borrows Reading Book borrow records
 
-  26       notifications           System         In-app notifications
+23 reservations Reading Book reservation queue
 
-  27       notification_logs       System         Email / SMS / Push delivery logs
+24 wishlists Reading User wishlist
 
-  28       search_logs             System         User search history
-                                                  (recommendations)
+25 reviews Reading Book ratings & reviews
 
-  29       roles                   RBAC           Staff role definitions
+26 notifications System In-app notifications
 
-  30       permissions             RBAC           Permission definitions (seeded)
+27 notification_logs System Email / SMS / Push delivery logs
 
-  31       staff                   RBAC           Staff / librarian accounts
+28 search_logs System User search history
+(recommendations)
 
-  32       staff_invite_tokens     RBAC           Invitation tokens (TTL)
+29 roles RBAC Staff role definitions
 
-  33       staff_activity_logs     RBAC           Staff action audit logs (TTL)
+30 permissions RBAC Permission definitions (seeded)
 
-  34       admin_activity_logs     RBAC           Admin (super) action audit logs
+31 staff RBAC Staff / librarian accounts
 
-  35       settings                System         Global system config (singleton)
+32 staff_invite_tokens RBAC Invitation tokens (TTL)
 
-  36       report_jobs             Reports        Generated report queue & storage
-  -----------------------------------------------------------------------------------
+33 staff_activity_logs RBAC Staff action audit logs (TTL)
 
-  -----------------------------------------------------------------------
-  **🔐 Group 1 --- Auth & User Management** --- 5 collections
-  -----------------------------------------------------------------------
+34 admin_activity_logs RBAC Admin (super) action audit logs
 
-  -----------------------------------------------------------------------
+35 settings System Global system config (singleton)
+
+36 report_jobs Reports Generated report queue & storage
+
+---
+
+---
+
+**🔐 Group 1 --- Auth & User Management** --- 5 collections
+
+---
+
+---
 
 ## 1. users
 
-*Core collection. Every registered member lives here.*
+_Core collection. Every registered member lives here._
 
-  ------------------------------------------------------------------------------------
-  **Field**              **Type**        **Required**   **Notes / Validation**
-  ---------------------- --------------- -------------- ------------------------------
-  \_id                   ObjectId        Auto           Primary key
+---
 
-  name                   String          Yes            Full name. trim, min:2,
-                                                        max:100
+**Field** **Type** **Required** **Notes / Validation**
 
-  email                  String          Yes            Unique, lowercase, trim
+---
 
-  phone                  String          No             International format. For SMS
-                                                        notifications
+\_id ObjectId Auto Primary key
 
-  password_hash          String          No             null if Google/Facebook login
-                                                        only
+name String Yes Full name. trim, min:2,
+max:100
 
-  avatar_url             String          No             Cloudinary URL
+email String Yes Unique, lowercase, trim
 
-  birthday               Date            No             For birthday coupon auto-apply
+phone String No International format. For SMS
+notifications
 
-  timezone               String          Yes            Default: Asia/Dhaka. IANA
-                                                        timezone string
+password_hash String No null if Google/Facebook login
+only
 
-  language               String          Yes            Enum: en \| bn. Default: en
+avatar_url String No Cloudinary URL
 
-  status                 String          Yes            Enum: active \| suspended \|
-                                                        deleted. Default: active
+birthday Date No For birthday coupon auto-apply
 
-  email_verified         Boolean         Yes            Default: false
+timezone String Yes Default: Asia/Dhaka. IANA
+timezone string
 
-  email_verified_at      Date            No             Set when verified
+language String Yes Enum: en \| bn. Default: en
 
-  google_id              String          No             Unique sparse index
+status String Yes Enum: active \| suspended \|
+deleted. Default: active
 
-  facebook_id            String          No             Unique sparse index
+email_verified Boolean Yes Default: false
 
-  current_plan_id        ObjectId        No             Ref: plans. Denormalized for
-                                                        fast auth check
+email_verified_at Date No Set when verified
 
-  plan_expires_at        Date            No             Denormalized expiry for fast
-                                                        middleware check
+google_id String No Unique sparse index
 
-  subscription_status    String          Yes            Enum: free \| trial \| active
-                                                        \| expired. Default: free
+facebook_id String No Unique sparse index
 
-  total_books_read       Number          Yes            Denormalized counter. Default:
-                                                        0
+current_plan_id ObjectId No Ref: plans. Denormalized for
+fast auth check
 
-  total_reading_mins     Number          Yes            Cumulative reading time.
-                                                        Default: 0
+plan_expires_at Date No Denormalized expiry for fast
+middleware check
 
-  reading_streak_days    Number          Yes            Consecutive reading days.
-                                                        Default: 0
+subscription_status String Yes Enum: free \| trial \| active
+\| expired. Default: free
 
-  last_active_at         Date            No             Updated every dashboard visit
+total_books_read Number Yes Denormalized counter. Default:
+0
 
-  notification_prefs     Object          Yes            { email:true, sms:true,
-                                                        in_app:true, push:true }
+total_reading_mins Number Yes Cumulative reading time.
+Default: 0
 
-  referral_code          String          No             Unique code for future
-                                                        referral system
+reading_streak_days Number Yes Consecutive reading days.
+Default: 0
 
-  referred_by            ObjectId        No             Ref: users. For future
-                                                        referral system
+last_active_at Date No Updated every dashboard visit
 
-  onboarding_completed   Boolean         Yes            Default: false. Set after plan
-                                                        selection
+notification_prefs Object Yes { email:true, sms:true,
+in_app:true, push:true }
 
-  created_at             Date            Auto           timestamps: true
+referral_code String No Unique code for future
+referral system
 
-  updated_at             Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------------
+referred_by ObjectId No Ref: users. For future
+referral system
+
+onboarding_completed Boolean Yes Default: false. Set after plan
+selection
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { email: 1 } unique: true                                             |
-|                                                                       |
-| { google_id: 1 } unique: true, sparse: true                           |
-|                                                                       |
-| { facebook_id: 1 } unique: true, sparse: true                         |
-|                                                                       |
-| { referral_code: 1 } unique: true, sparse: true                       |
-|                                                                       |
-| { status: 1 }                                                         |
-|                                                                       |
-| { subscription_status: 1 }                                            |
-|                                                                       |
-| { current_plan_id: 1 }                                                |
-|                                                                       |
-| { plan_expires_at: 1 } --- for expiry cron                            |
+| { email: 1 } unique: true |
+| |
+| { google_id: 1 } unique: true, sparse: true |
+| |
+| { facebook_id: 1 } unique: true, sparse: true |
+| |
+| { referral_code: 1 } unique: true, sparse: true |
+| |
+| { status: 1 } |
+| |
+| { subscription_status: 1 } |
+| |
+| { current_plan_id: 1 } |
+| |
+| { plan_expires_at: 1 } --- for expiry cron |
 +=======================================================================+
 
 ## 2. email_verify_tokens
 
-  ------------------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  user_id          ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  token            String          Yes            Unique.
-                                                  crypto.randomBytes(32).toString(\'hex\')
+---
 
-  expires_at       Date            Yes            createdAt + 24 hours
+\_id ObjectId Auto Primary key
 
-  used_at          Date            No             Set when token consumed
+user_id ObjectId Yes Ref: users
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------------------
+token String Yes Unique.
+crypto.randomBytes(32).toString(\'hex\')
+
+expires_at Date Yes createdAt + 24 hours
+
+used_at Date No Set when token consumed
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { token: 1 } unique: true                                             |
-|                                                                       |
-| { user_id: 1 }                                                        |
-|                                                                       |
-| { expires_at: 1 } expireAfterSeconds: 0 (TTL)                         |
+| { token: 1 } unique: true |
+| |
+| { user_id: 1 } |
+| |
+| { expires_at: 1 } expireAfterSeconds: 0 (TTL) |
 +=======================================================================+
 
 ## 3. password_reset_tokens
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  user_id          ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  token            String          Yes            Unique. hashed before storage
+---
 
-  expires_at       Date            Yes            createdAt + 1 hour
+\_id ObjectId Auto Primary key
 
-  used_at          Date            No             Set when consumed
+user_id ObjectId Yes Ref: users
 
-  ip_address       String          No             Requester IP for security
-                                                  audit
+token String Yes Unique. hashed before storage
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+expires_at Date Yes createdAt + 1 hour
+
+used_at Date No Set when consumed
+
+ip_address String No Requester IP for security
+audit
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { token: 1 } unique: true                                             |
-|                                                                       |
-| { expires_at: 1 } expireAfterSeconds: 0 (TTL)                         |
+| { token: 1 } unique: true |
+| |
+| { expires_at: 1 } expireAfterSeconds: 0 (TTL) |
 +=======================================================================+
 
 ## 4. login_history
 
-*Tracks every login for both users and staff. Useful for security &
-analytics.*
+_Tracks every login for both users and staff. Useful for security &
+analytics._
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  actor_id         ObjectId        Yes            Ref: users OR staff
+**Field** **Type** **Required** **Notes / Validation**
 
-  actor_type       String          Yes            Enum: user \| staff
+---
 
-  method           String          Yes            Enum: email \| google \|
-                                                  facebook
+\_id ObjectId Auto Primary key
 
-  ip_address       String          No             Login IP address
+actor_id ObjectId Yes Ref: users OR staff
 
-  user_agent       String          No             Browser / device info
+actor_type String Yes Enum: user \| staff
 
-  device_type      String          No             Enum: desktop \| mobile \|
-                                                  tablet
+method String Yes Enum: email \| google \|
+facebook
 
-  country          String          No             Geo-detected from IP
-                                                  (optional)
+ip_address String No Login IP address
 
-  status           String          Yes            Enum: success \| failed
+user_agent String No Browser / device info
 
-  fail_reason      String          No             e.g. wrong_password \|
-                                                  account_suspended
+device_type String No Enum: desktop \| mobile \|
+tablet
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+country String No Geo-detected from IP
+(optional)
+
+status String Yes Enum: success \| failed
+
+fail_reason String No e.g. wrong_password \|
+account_suspended
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { actor_id: 1, actor_type: 1, created_at: -1 }                        |
-|                                                                       |
-| { created_at: 1 } expireAfterSeconds: 7776000 (TTL --- 90 days)       |
+| { actor_id: 1, actor_type: 1, created_at: -1 } |
+| |
+| { created_at: 1 } expireAfterSeconds: 7776000 (TTL --- 90 days) |
 +=======================================================================+
 
 ## 5. device_tokens
 
-*FCM device tokens for push notifications. One user can have multiple
-devices.*
+_FCM device tokens for push notifications. One user can have multiple
+devices._
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  user_id          ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  token            String          Yes            FCM registration token. Unique
+---
 
-  platform         String          Yes            Enum: web \| android \| ios
+\_id ObjectId Auto Primary key
 
-  device_name      String          No             e.g. Chrome on Windows
+user_id ObjectId Yes Ref: users
 
-  is_active        Boolean         Yes            Default: true. Set false on
-                                                  FCM token error
+token String Yes FCM registration token. Unique
 
-  last_used_at     Date            No             Updated when notification sent
+platform String Yes Enum: web \| android \| ios
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+device_name String No e.g. Chrome on Windows
+
+is_active Boolean Yes Default: true. Set false on
+FCM token error
+
+last_used_at Date No Updated when notification sent
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { token: 1 } unique: true                                             |
-|                                                                       |
-| { user_id: 1, is_active: 1 }                                          |
+| { token: 1 } unique: true |
+| |
+| { user_id: 1, is_active: 1 } |
 +=======================================================================+
 
-  -----------------------------------------------------------------------
-  **💳 Group 2 --- Subscription & Payments** --- 5 collections
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+**💳 Group 2 --- Subscription & Payments** --- 5 collections
+
+---
+
+---
 
 ## 6. plans
 
-  ------------------------------------------------------------------------------------
-  **Field**              **Type**        **Required**   **Notes / Validation**
-  ---------------------- --------------- -------------- ------------------------------
-  \_id                   ObjectId        Auto           Primary key
+---
 
-  name                   String          Yes            e.g. Free, Basic, Standard,
-                                                        Premium
+**Field** **Type** **Required** **Notes / Validation**
 
-  slug                   String          Yes            Unique: free \| basic \|
-                                                        standard \| premium
+---
 
-  description            String          No             Marketing description shown on
-                                                        pricing page
+\_id ObjectId Auto Primary key
 
-  color                  String          No             Hex color for UI badge e.g.
-                                                        #7F77DD
+name String Yes e.g. Free, Basic, Standard,
+Premium
 
-  sort_order             Number          Yes            Display order on pricing page.
-                                                        Default: 0
+slug String Yes Unique: free \| basic \|
+standard \| premium
 
-  price_monthly          Number          Yes            0 for free plan
+description String No Marketing description shown on
+pricing page
 
-  price_yearly           Number          Yes            0 for free plan
+color String No Hex color for UI badge e.g.
+#7F77DD
 
-  currency               String          Yes            Default: BDT
+sort_order Number Yes Display order on pricing page.
+Default: 0
 
-  borrow_limit           Number          Yes            Max concurrent borrows. 0 =
-                                                        disabled
+price_monthly Number Yes 0 for free plan
 
-  borrow_duration_days   Number          Yes            Days per borrow. 0 = not
-                                                        allowed
+price_yearly Number Yes 0 for free plan
 
-  book_access_limit      Number          Yes            -1 = unlimited. 0 = preview
-                                                        only
+currency String Yes Default: BDT
 
-  monthly_read_limit     Number          Yes            -1 = unlimited. For free plan
-                                                        quota
+borrow_limit Number Yes Max concurrent borrows. 0 =
+disabled
 
-  offline_access         Boolean         Yes            Download for offline. Default:
-                                                        false
+borrow_duration_days Number Yes Days per borrow. 0 = not
+allowed
 
-  is_free                Boolean         Yes            true only for Free plan
+book_access_limit Number Yes -1 = unlimited. 0 = preview
+only
 
-  is_active              Boolean         Yes            Default: true
+monthly_read_limit Number Yes -1 = unlimited. For free plan
+quota
 
-  features               \[String\]      No             Bullet point feature list for
-                                                        pricing UI
+offline_access Boolean Yes Download for offline. Default:
+false
 
-  created_at             Date            Auto           timestamps: true
+is_free Boolean Yes true only for Free plan
 
-  updated_at             Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------------
+is_active Boolean Yes Default: true
+
+features \[String\] No Bullet point feature list for
+pricing UI
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 ## 7. subscriptions
 
-  --------------------------------------------------------------------------------
-  **Field**          **Type**        **Required**   **Notes / Validation**
-  ------------------ --------------- -------------- ------------------------------
-  \_id               ObjectId        Auto           Primary key
+---
 
-  user_id            ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  plan_id            ObjectId        Yes            Ref: plans
+---
 
-  previous_plan_id   ObjectId        No             Ref: plans. Set on
-                                                    upgrade/downgrade
+\_id ObjectId Auto Primary key
 
-  billing_cycle      String          Yes            Enum: monthly \| yearly
+user_id ObjectId Yes Ref: users
 
-  status             String          Yes            Enum: active \| cancelled \|
-                                                    expired \| trial \| paused
+plan_id ObjectId Yes Ref: plans
 
-  is_trial           Boolean         Yes            Default: false
+previous_plan_id ObjectId No Ref: plans. Set on
+upgrade/downgrade
 
-  trial_ends_at      Date            No             Set if is_trial: true
+billing_cycle String Yes Enum: monthly \| yearly
 
-  starts_at          Date            Yes            Subscription start date
+status String Yes Enum: active \| cancelled \|
+expired \| trial \| paused
 
-  ends_at            Date            Yes            Subscription end date
+is_trial Boolean Yes Default: false
 
-  auto_renew         Boolean         Yes            Default: true
+trial_ends_at Date No Set if is_trial: true
 
-  renewal_count      Number          Yes            How many times renewed.
-                                                    Default: 0
+starts_at Date Yes Subscription start date
 
-  cancelled_at       Date            No             Set when user cancels
+ends_at Date Yes Subscription end date
 
-  cancel_reason      String          No             Optional cancellation reason
+auto_renew Boolean Yes Default: true
 
-  created_at         Date            Auto           timestamps: true
+renewal_count Number Yes How many times renewed.
+Default: 0
 
-  updated_at         Date            Auto           timestamps: true
-  --------------------------------------------------------------------------------
+cancelled_at Date No Set when user cancels
+
+cancel_reason String No Optional cancellation reason
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { user_id: 1, status: 1 }                                             |
-|                                                                       |
-| { ends_at: 1 } --- expiry cron                                        |
+| { user_id: 1, status: 1 } |
+| |
+| { ends_at: 1 } --- expiry cron |
 +=======================================================================+
 
 ## 8. payments
 
-  --------------------------------------------------------------------------------
-  **Field**          **Type**        **Required**   **Notes / Validation**
-  ------------------ --------------- -------------- ------------------------------
-  \_id               ObjectId        Auto           Primary key
+---
 
-  user_id            ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  subscription_id    ObjectId        Yes            Ref: subscriptions
+---
 
-  coupon_id          ObjectId        No             Ref: coupons --- if discount
-                                                    applied
+\_id ObjectId Auto Primary key
 
-  flash_sale_id      ObjectId        No             Ref: flash_sales --- if sale
-                                                    applied
+user_id ObjectId Yes Ref: users
 
-  amount             Number          Yes            Final charged amount
+subscription_id ObjectId Yes Ref: subscriptions
 
-  original_amount    Number          Yes            Amount before any discount
+coupon_id ObjectId No Ref: coupons --- if discount
+applied
 
-  discount_amount    Number          Yes            Total discount applied.
-                                                    Default: 0
+flash_sale_id ObjectId No Ref: flash_sales --- if sale
+applied
 
-  currency           String          Yes            BDT \| USD \| etc.
+amount Number Yes Final charged amount
 
-  gateway            String          Yes            Enum: bkash \| nagad \| stripe
-                                                    \| paypal
+original_amount Number Yes Amount before any discount
 
-  gateway_txn_id     String          No             Gateway transaction reference
-                                                    ID
+discount_amount Number Yes Total discount applied.
+Default: 0
 
-  gateway_response   Object          No             Full raw response for audit
+currency String Yes BDT \| USD \| etc.
 
-  status             String          Yes            Enum: pending \| success \|
-                                                    failed \| refunded
+gateway String Yes Enum: bkash \| nagad \| stripe
+\| paypal
 
-  failure_reason     String          No             e.g. insufficient_funds \|
-                                                    card_declined
+gateway_txn_id String No Gateway transaction reference
+ID
 
-  invoice_number     String          No             Human-readable e.g.
-                                                    INV-2025-00001
+gateway_response Object No Full raw response for audit
 
-  invoice_url        String          No             Generated PDF invoice
-                                                    Cloudinary URL
+status String Yes Enum: pending \| success \|
+failed \| refunded
 
-  paid_at            Date            No             Set when status → success
+failure_reason String No e.g. insufficient_funds \|
+card_declined
 
-  created_at         Date            Auto           timestamps: true
+invoice_number String No Human-readable e.g.
+INV-2025-00001
 
-  updated_at         Date            Auto           timestamps: true
-  --------------------------------------------------------------------------------
+invoice_url String No Generated PDF invoice
+Cloudinary URL
+
+paid_at Date No Set when status → success
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { user_id: 1 }                                                        |
-|                                                                       |
-| { subscription_id: 1 }                                                |
-|                                                                       |
-| { gateway_txn_id: 1 } unique: true, sparse: true                      |
-|                                                                       |
-| { status: 1 }                                                         |
-|                                                                       |
-| { invoice_number: 1 } unique: true, sparse: true                      |
+| { user_id: 1 } |
+| |
+| { subscription_id: 1 } |
+| |
+| { gateway_txn_id: 1 } unique: true, sparse: true |
+| |
+| { status: 1 } |
+| |
+| { invoice_number: 1 } unique: true, sparse: true |
 +=======================================================================+
 
 ## 9. refunds
 
-*Separate collection for all refund records. Linked to original
-payment.*
+_Separate collection for all refund records. Linked to original
+payment._
 
-  ---------------------------------------------------------------------------------
-  **Field**           **Type**        **Required**   **Notes / Validation**
-  ------------------- --------------- -------------- ------------------------------
-  \_id                ObjectId        Auto           Primary key
+---
 
-  payment_id          ObjectId        Yes            Ref: payments --- original
-                                                     payment
+**Field** **Type** **Required** **Notes / Validation**
 
-  user_id             ObjectId        Yes            Ref: users
+---
 
-  processed_by        ObjectId        Yes            Ref: staff --- who approved
-                                                     refund
+\_id ObjectId Auto Primary key
 
-  amount              Number          Yes            Refund amount
+payment_id ObjectId Yes Ref: payments --- original
+payment
 
-  currency            String          Yes            Same as original payment
+user_id ObjectId Yes Ref: users
 
-  reason              String          Yes            Admin-entered refund reason
+processed_by ObjectId Yes Ref: staff --- who approved
+refund
 
-  gateway             String          Yes            Same gateway as original
-                                                     payment
+amount Number Yes Refund amount
 
-  gateway_refund_id   String          No             Gateway\'s refund transaction
-                                                     ID
+currency String Yes Same as original payment
 
-  status              String          Yes            Enum: pending \| processed \|
-                                                     failed
+reason String Yes Admin-entered refund reason
 
-  processed_at        Date            No             Set when refund completes
+gateway String Yes Same gateway as original
+payment
 
-  created_at          Date            Auto           timestamps: true
+gateway_refund_id String No Gateway\'s refund transaction
+ID
 
-  updated_at          Date            Auto           timestamps: true
-  ---------------------------------------------------------------------------------
+status String Yes Enum: pending \| processed \|
+failed
+
+processed_at Date No Set when refund completes
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { payment_id: 1 }                                                     |
-|                                                                       |
-| { user_id: 1 }                                                        |
-|                                                                       |
-| { status: 1 }                                                         |
+| { payment_id: 1 } |
+| |
+| { user_id: 1 } |
+| |
+| { status: 1 } |
 +=======================================================================+
 
 ## 10. webhook_logs
 
-*Stores every incoming payment gateway webhook for debugging and
-idempotency.*
+_Stores every incoming payment gateway webhook for debugging and
+idempotency._
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  gateway          String          Yes            Enum: bkash \| nagad \| stripe
-                                                  \| paypal
+**Field** **Type** **Required** **Notes / Validation**
 
-  event_type       String          Yes            e.g. payment.success,
-                                                  subscription.cancelled
+---
 
-  gateway_txn_id   String          No             Payment reference from gateway
+\_id ObjectId Auto Primary key
 
-  payload          Object          Yes            Full raw webhook payload
+gateway String Yes Enum: bkash \| nagad \| stripe
+\| paypal
 
-  status           String          Yes            Enum: received \| processed \|
-                                                  failed \| ignored
+event_type String Yes e.g. payment.success,
+subscription.cancelled
 
-  processed_at     Date            No             Set when successfully
-                                                  processed
+gateway_txn_id String No Payment reference from gateway
 
-  error_message    String          No             Set if processing failed
+payload Object Yes Full raw webhook payload
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+status String Yes Enum: received \| processed \|
+failed \| ignored
+
+processed_at Date No Set when successfully
+processed
+
+error_message String No Set if processing failed
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { gateway_txn_id: 1 } --- idempotency check                           |
-|                                                                       |
-| { gateway: 1, status: 1 }                                             |
-|                                                                       |
-| { created_at: 1 } expireAfterSeconds: 7776000 (TTL --- 90 days)       |
+| { gateway_txn_id: 1 } --- idempotency check |
+| |
+| { gateway: 1, status: 1 } |
+| |
+| { created_at: 1 } expireAfterSeconds: 7776000 (TTL --- 90 days) |
 +=======================================================================+
 
-  -----------------------------------------------------------------------
-  **🎁 Group 3 --- Marketing & Promotions** --- 3 collections
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+**🎁 Group 3 --- Marketing & Promotions** --- 3 collections
+
+---
+
+---
 
 ## 11. coupons
 
-  ---------------------------------------------------------------------------------
-  **Field**           **Type**        **Required**   **Notes / Validation**
-  ------------------- --------------- -------------- ------------------------------
-  \_id                ObjectId        Auto           Primary key
+---
 
-  code                String          Yes            Unique, uppercase, trim
+**Field** **Type** **Required** **Notes / Validation**
 
-  label               String          No             Internal name e.g. \'Eid Sale
-                                                     2025\'
+---
 
-  discount_type       String          Yes            Enum: percentage \| fixed
+\_id ObjectId Auto Primary key
 
-  discount_value      Number          Yes            20 = 20% or BDT 20
+code String Yes Unique, uppercase, trim
 
-  max_discount_cap    Number          No             Max discount in BDT when
-                                                     type=percentage
+label String No Internal name e.g. \'Eid Sale
+2025\'
 
-  min_amount          Number          No             Min subscription amount to
-                                                     apply
+discount_type String Yes Enum: percentage \| fixed
 
-  applicable_plans    \[ObjectId\]    No             Ref: plans. Empty = all plans
+discount_value Number Yes 20 = 20% or BDT 20
 
-  applicable_cycles   \[String\]      No             \[monthly\] or \[yearly\] or
-                                                     both
+max_discount_cap Number No Max discount in BDT when
+type=percentage
 
-  usage_limit         Number          No             null = unlimited total uses
+min_amount Number No Min subscription amount to
+apply
 
-  used_count          Number          Yes            Incremented on each use.
-                                                     Default: 0
+applicable_plans \[ObjectId\] No Ref: plans. Empty = all plans
 
-  per_user_limit      Number          Yes            Max uses per user. Default: 1
+applicable_cycles \[String\] No \[monthly\] or \[yearly\] or
+both
 
-  is_active           Boolean         Yes            Default: true
+usage_limit Number No null = unlimited total uses
 
-  is_birthday         Boolean         Yes            Auto-apply on user birthday.
-                                                     Default: false
+used_count Number Yes Incremented on each use.
+Default: 0
 
-  is_first_purchase   Boolean         Yes            Only for first-time paid
-                                                     users. Default: false
+per_user_limit Number Yes Max uses per user. Default: 1
 
-  expires_at          Date            No             null = no expiry
+is_active Boolean Yes Default: true
 
-  created_by          ObjectId        Yes            Ref: staff
+is_birthday Boolean Yes Auto-apply on user birthday.
+Default: false
 
-  created_at          Date            Auto           timestamps: true
+is_first_purchase Boolean Yes Only for first-time paid
+users. Default: false
 
-  updated_at          Date            Auto           timestamps: true
-  ---------------------------------------------------------------------------------
+expires_at Date No null = no expiry
+
+created_by ObjectId Yes Ref: staff
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { code: 1 } unique: true                                              |
-|                                                                       |
-| { is_active: 1 }                                                      |
-|                                                                       |
-| { expires_at: 1 }                                                     |
+| { code: 1 } unique: true |
+| |
+| { is_active: 1 } |
+| |
+| { expires_at: 1 } |
 +=======================================================================+
 
 ## 12. coupon_usages
 
-  --------------------------------------------------------------------------------
-  **Field**          **Type**        **Required**   **Notes / Validation**
-  ------------------ --------------- -------------- ------------------------------
-  \_id               ObjectId        Auto           Primary key
+---
 
-  coupon_id          ObjectId        Yes            Ref: coupons
+**Field** **Type** **Required** **Notes / Validation**
 
-  user_id            ObjectId        Yes            Ref: users
+---
 
-  payment_id         ObjectId        Yes            Ref: payments
+\_id ObjectId Auto Primary key
 
-  discount_applied   Number          Yes            Actual discount amount applied
+coupon_id ObjectId Yes Ref: coupons
 
-  used_at            Date            Auto           timestamps: true
-  --------------------------------------------------------------------------------
+user_id ObjectId Yes Ref: users
+
+payment_id ObjectId Yes Ref: payments
+
+discount_applied Number Yes Actual discount amount applied
+
+used_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
-  -----------------------------------------------------------------------
-  { coupon_id: 1, user_id: 1 } --- enforce per-user limit check
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+{ coupon_id: 1, user_id: 1 } --- enforce per-user limit check
+
+---
+
+---
 
 ## 13. flash_sales
 
-*Time-limited promotional sale events that apply automatic discounts
-within a time window.*
+_Time-limited promotional sale events that apply automatic discounts
+within a time window._
 
-  ---------------------------------------------------------------------------------
-  **Field**           **Type**        **Required**   **Notes / Validation**
-  ------------------- --------------- -------------- ------------------------------
-  \_id                ObjectId        Auto           Primary key
+---
 
-  title               String          Yes            e.g. Eid Sale, New Year Offer
+**Field** **Type** **Required** **Notes / Validation**
 
-  description         String          No             Shown on homepage banner
+---
 
-  banner_image_url    String          No             Cloudinary URL for promotional
-                                                     banner
+\_id ObjectId Auto Primary key
 
-  discount_type       String          Yes            Enum: percentage \| fixed
+title String Yes e.g. Eid Sale, New Year Offer
 
-  discount_value      Number          Yes            Discount amount
+description String No Shown on homepage banner
 
-  applicable_plans    \[ObjectId\]    No             Ref: plans. Empty = all plans
+banner_image_url String No Cloudinary URL for promotional
+banner
 
-  applicable_cycles   \[String\]      No             monthly \| yearly or both
+discount_type String Yes Enum: percentage \| fixed
 
-  max_redemptions     Number          No             null = unlimited
+discount_value Number Yes Discount amount
 
-  redeemed_count      Number          Yes            Default: 0
+applicable_plans \[ObjectId\] No Ref: plans. Empty = all plans
 
-  starts_at           Date            Yes            Sale start datetime
+applicable_cycles \[String\] No monthly \| yearly or both
 
-  ends_at             Date            Yes            Sale end datetime
+max_redemptions Number No null = unlimited
 
-  is_active           Boolean         Yes            Admin toggle. Default: true
+redeemed_count Number Yes Default: 0
 
-  created_by          ObjectId        Yes            Ref: staff
+starts_at Date Yes Sale start datetime
 
-  created_at          Date            Auto           timestamps: true
+ends_at Date Yes Sale end datetime
 
-  updated_at          Date            Auto           timestamps: true
-  ---------------------------------------------------------------------------------
+is_active Boolean Yes Admin toggle. Default: true
+
+created_by ObjectId Yes Ref: staff
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
-  -----------------------------------------------------------------------
-  { is_active: 1, starts_at: 1, ends_at: 1 } --- active sale lookup
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+{ is_active: 1, starts_at: 1, ends_at: 1 } --- active sale lookup
 
-  -----------------------------------------------------------------------
-  **📚 Group 4 --- Library & Content** --- 4 collections
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+---
+
+---
+
+**📚 Group 4 --- Library & Content** --- 4 collections
+
+---
+
+---
 
 ## 14. authors
 
-*Author profiles. Books reference authors by ObjectId.*
+_Author profiles. Books reference authors by ObjectId._
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  name             String          Yes            Full author name
+**Field** **Type** **Required** **Notes / Validation**
 
-  slug             String          Yes            Unique URL-friendly slug
+---
 
-  bio              String          No             Short biography
+\_id ObjectId Auto Primary key
 
-  photo_url        String          No             Cloudinary URL
+name String Yes Full author name
 
-  nationality      String          No             e.g. Bangladeshi, Indian
+slug String Yes Unique URL-friendly slug
 
-  website          String          No             Author website URL
+bio String No Short biography
 
-  book_count       Number          Yes            Denormalized count. Default: 0
+photo_url String No Cloudinary URL
 
-  is_active        Boolean         Yes            Default: true
+nationality String No e.g. Bangladeshi, Indian
 
-  created_at       Date            Auto           timestamps: true
+website String No Author website URL
 
-  updated_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+book_count Number Yes Denormalized count. Default: 0
+
+is_active Boolean Yes Default: true
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { slug: 1 } unique: true                                              |
-|                                                                       |
-| { name: \'text\' } --- text search                                    |
+| { slug: 1 } unique: true |
+| |
+| { name: \'text\' } --- text search |
 +=======================================================================+
 
 ## 15. categories
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  name             String          Yes            e.g. Fiction, Science, History
+**Field** **Type** **Required** **Notes / Validation**
 
-  name_bn          String          No             Bangla name for bilingual UI
+---
 
-  slug             String          Yes            Unique URL-friendly slug
+\_id ObjectId Auto Primary key
 
-  parent_id        ObjectId        No             Ref: categories. null = root
-                                                  category
+name String Yes e.g. Fiction, Science, History
 
-  icon_url         String          No             Category icon (Cloudinary)
+name_bn String No Bangla name for bilingual UI
 
-  book_count       Number          Yes            Denormalized. Default: 0
+slug String Yes Unique URL-friendly slug
 
-  is_active        Boolean         Yes            Default: true
+parent_id ObjectId No Ref: categories. null = root
+category
 
-  sort_order       Number          Yes            Display order. Default: 0
+icon_url String No Category icon (Cloudinary)
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+book_count Number Yes Denormalized. Default: 0
+
+is_active Boolean Yes Default: true
+
+sort_order Number Yes Display order. Default: 0
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { slug: 1 } unique: true                                              |
-|                                                                       |
-| { parent_id: 1 }                                                      |
+| { slug: 1 } unique: true |
+| |
+| { parent_id: 1 } |
 +=======================================================================+
 
 ## 16. books
 
-  --------------------------------------------------------------------------------
-  **Field**          **Type**        **Required**   **Notes / Validation**
-  ------------------ --------------- -------------- ------------------------------
-  \_id               ObjectId        Auto           Primary key
+---
 
-  title              String          Yes            trim, min:1, max:300
+**Field** **Type** **Required** **Notes / Validation**
 
-  title_bn           String          No             Bangla title (bilingual
-                                                    support)
+---
 
-  author_ids         \[ObjectId\]    Yes            Ref: authors --- supports
-                                                    co-authors
+\_id ObjectId Auto Primary key
 
-  publisher          String          No             Publisher name
+title String Yes trim, min:1, max:300
 
-  isbn               String          No             Unique sparse. ISBN-10 or
-                                                    ISBN-13
+title_bn String No Bangla title (bilingual
+support)
 
-  language           String          Yes            Enum: en \| bn \| ar \| hi \|
-                                                    \...
+author_ids \[ObjectId\] Yes Ref: authors --- supports
+co-authors
 
-  cover_url          String          No             Cloudinary URL
+publisher String No Publisher name
 
-  description        String          No             Book synopsis max:2000
+isbn String No Unique sparse. ISBN-10 or
+ISBN-13
 
-  category_ids       \[ObjectId\]    Yes            Ref: categories ---
-                                                    multi-category
+language String Yes Enum: en \| bn \| ar \| hi \|
+\...
 
-  tags               \[String\]      No             Free text tags e.g.
-                                                    \[\'romance\',\'2024\'\]
+cover_url String No Cloudinary URL
 
-  access_level       String          Yes            Enum: free \| basic \|
-                                                    standard \| premium
+description String No Book synopsis max:2000
 
-  average_rating     Number          Yes            Default: 0. Updated on review
-                                                    add/edit/delete
+category_ids \[ObjectId\] Yes Ref: categories ---
+multi-category
 
-  review_count       Number          Yes            Default: 0
+tags \[String\] No Free text tags e.g.
+\[\'romance\',\'2024\'\]
 
-  read_count         Number          Yes            Total reading starts. Default:
-                                                    0
+access_level String Yes Enum: free \| basic \|
+standard \| premium
 
-  borrow_count       Number          Yes            Total borrows ever. Default: 0
+average_rating Number Yes Default: 0. Updated on review
+add/edit/delete
 
-  wishlist_count     Number          Yes            Total wishlists. Default: 0
+review_count Number Yes Default: 0
 
-  available_copies   Number          Yes            For borrow control. Default: 1
+read_count Number Yes Total reading starts. Default:
+0
 
-  total_copies       Number          Yes            Default: 1
+borrow_count Number Yes Total borrows ever. Default: 0
 
-  total_pages        Number          No             From primary file.
-                                                    Denormalized
+wishlist_count Number Yes Total wishlists. Default: 0
 
-  avg_reading_mins   Number          Yes            Average minutes to read.
-                                                    Default: 0
+available_copies Number Yes For borrow control. Default: 1
 
-  is_featured        Boolean         Yes            Show on homepage. Default:
-                                                    false
+total_copies Number Yes Default: 1
 
-  is_available       Boolean         Yes            Visible to members. Default:
-                                                    true
+total_pages Number No From primary file.
+Denormalized
 
-  published_at       Date            No             Original publication date
+avg_reading_mins Number Yes Average minutes to read.
+Default: 0
 
-  added_by           ObjectId        Yes            Ref: staff --- uploader
+is_featured Boolean Yes Show on homepage. Default:
+false
 
-  created_at         Date            Auto           timestamps: true
+is_available Boolean Yes Visible to members. Default:
+true
 
-  updated_at         Date            Auto           timestamps: true
-  --------------------------------------------------------------------------------
+published_at Date No Original publication date
+
+added_by ObjectId Yes Ref: staff --- uploader
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { title: \'text\', description: \'text\', tags: \'text\' } --- full   |
-| text search                                                           |
-|                                                                       |
-| { author_ids: 1 }                                                     |
-|                                                                       |
-| { category_ids: 1 }                                                   |
-|                                                                       |
-| { isbn: 1 } unique: true, sparse: true                                |
-|                                                                       |
-| { access_level: 1 }                                                   |
-|                                                                       |
-| { is_featured: 1, is_available: 1 }                                   |
-|                                                                       |
-| { average_rating: -1 } --- top rated sort                             |
-|                                                                       |
-| { read_count: -1 } --- popular sort                                   |
-|                                                                       |
-| { created_at: -1 } --- newest sort                                    |
+| { title: \'text\', description: \'text\', tags: \'text\' } --- full |
+| text search |
+| |
+| { author_ids: 1 } |
+| |
+| { category_ids: 1 } |
+| |
+| { isbn: 1 } unique: true, sparse: true |
+| |
+| { access_level: 1 } |
+| |
+| { is_featured: 1, is_available: 1 } |
+| |
+| { average_rating: -1 } --- top rated sort |
+| |
+| { read_count: -1 } --- popular sort |
+| |
+| { created_at: -1 } --- newest sort |
 +=======================================================================+
 
 ## 17. book_files
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  book_id          ObjectId        Yes            Ref: books
+**Field** **Type** **Required** **Notes / Validation**
 
-  format           String          Yes            Enum: pdf \| epub
+---
 
-  file_url         String          Yes            Backblaze B2 signed URL
+\_id ObjectId Auto Primary key
 
-  file_size_kb     Number          No             File size in KB
+book_id ObjectId Yes Ref: books
 
-  total_pages      Number          No             Total page count
+format String Yes Enum: pdf \| epub
 
-  is_drm           Boolean         Yes            DRM enabled. Default: true
+file_url String Yes Backblaze B2 signed URL
 
-  is_primary       Boolean         Yes            Primary reading format.
-                                                  Default: false
+file_size_kb Number No File size in KB
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+total_pages Number No Total page count
+
+is_drm Boolean Yes DRM enabled. Default: true
+
+is_primary Boolean Yes Primary reading format.
+Default: false
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
-  -----------------------------------------------------------------------
-  { book_id: 1, format: 1 } unique: true
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+{ book_id: 1, format: 1 } unique: true
 
-  -----------------------------------------------------------------------
-  **📖 Group 5 --- Reading Activity** --- 8 collections
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+---
+
+---
+
+**📖 Group 5 --- Reading Activity** --- 8 collections
+
+---
+
+---
 
 ## 18. reading_progress
 
-*One document per user per book. Upserted (findOneAndUpdate) on each
-session save.*
+_One document per user per book. Upserted (findOneAndUpdate) on each
+session save._
 
-  ----------------------------------------------------------------------------------
-  **Field**            **Type**        **Required**   **Notes / Validation**
-  -------------------- --------------- -------------- ------------------------------
-  \_id                 ObjectId        Auto           Primary key
+---
 
-  user_id              ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  book_id              ObjectId        Yes            Ref: books
+---
 
-  book_file_id         ObjectId        Yes            Ref: book_files --- which
-                                                      format
+\_id ObjectId Auto Primary key
 
-  current_page         Number          Yes            Last page read
+user_id ObjectId Yes Ref: users
 
-  total_pages          Number          Yes            Copied from book_files for
-                                                      fast %
+book_id ObjectId Yes Ref: books
 
-  percent_complete     Number          Yes            Computed:
-                                                      (current/total)\*100. 0--100
+book_file_id ObjectId Yes Ref: book_files --- which
+format
 
-  total_reading_mins   Number          Yes            Cumulative minutes for this
-                                                      book. Default: 0
+current_page Number Yes Last page read
 
-  is_completed         Boolean         Yes            Default: false
+total_pages Number Yes Copied from book_files for
+fast %
 
-  completed_at         Date            No             Set when percent_complete
-                                                      reaches 100
+percent_complete Number Yes Computed:
+(current/total)\*100. 0--100
 
-  last_read_at         Date            Yes            Updated each save
+total_reading_mins Number Yes Cumulative minutes for this
+book. Default: 0
 
-  created_at           Date            Auto           timestamps: true
+is_completed Boolean Yes Default: false
 
-  updated_at           Date            Auto           timestamps: true
-  ----------------------------------------------------------------------------------
+completed_at Date No Set when percent_complete
+reaches 100
+
+last_read_at Date Yes Updated each save
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { user_id: 1, book_id: 1 } unique: true                               |
-|                                                                       |
-| { user_id: 1, last_read_at: -1 } --- \'currently reading\' list       |
-|                                                                       |
-| { user_id: 1, is_completed: 1 }                                       |
+| { user_id: 1, book_id: 1 } unique: true |
+| |
+| { user_id: 1, last_read_at: -1 } --- \'currently reading\' list |
+| |
+| { user_id: 1, is_completed: 1 } |
 +=======================================================================+
 
 ## 19. reading_sessions
 
-*One document per reading session. Used for reading time analytics and
-recommendations.*
+_One document per reading session. Used for reading time analytics and
+recommendations._
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  user_id          ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  book_id          ObjectId        Yes            Ref: books
+---
 
-  book_file_id     ObjectId        Yes            Ref: book_files
+\_id ObjectId Auto Primary key
 
-  start_page       Number          Yes            Page at session start
+user_id ObjectId Yes Ref: users
 
-  end_page         Number          No             Page at session end (set on
-                                                  close)
+book_id ObjectId Yes Ref: books
 
-  duration_mins    Number          No             Session length in minutes
+book_file_id ObjectId Yes Ref: book_files
 
-  device_type      String          No             Enum: desktop \| mobile \|
-                                                  tablet
+start_page Number Yes Page at session start
 
-  started_at       Date            Yes            Session start timestamp
+end_page Number No Page at session end (set on
+close)
 
-  ended_at         Date            No             Session end (null if still
-                                                  open)
+duration_mins Number No Session length in minutes
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+device_type String No Enum: desktop \| mobile \|
+tablet
+
+started_at Date Yes Session start timestamp
+
+ended_at Date No Session end (null if still
+open)
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { user_id: 1, book_id: 1 }                                            |
-|                                                                       |
-| { user_id: 1, started_at: -1 } --- reading history                    |
-|                                                                       |
-| { book_id: 1 } --- book analytics                                     |
-|                                                                       |
-| { created_at: 1 } expireAfterSeconds: 31536000 (TTL --- 1 year)       |
+| { user_id: 1, book_id: 1 } |
+| |
+| { user_id: 1, started_at: -1 } --- reading history |
+| |
+| { book_id: 1 } --- book analytics |
+| |
+| { created_at: 1 } expireAfterSeconds: 31536000 (TTL --- 1 year) |
 +=======================================================================+
 
 ## 20. bookmarks
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  user_id          ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  book_id          ObjectId        Yes            Ref: books
+---
 
-  book_file_id     ObjectId        Yes            Ref: book_files
+\_id ObjectId Auto Primary key
 
-  page_number      Number          Yes            Bookmarked page number
+user_id ObjectId Yes Ref: users
 
-  label            String          No             Optional user label max:100
+book_id ObjectId Yes Ref: books
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+book_file_id ObjectId Yes Ref: book_files
+
+page_number Number Yes Bookmarked page number
+
+label String No Optional user label max:100
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
-  -----------------------------------------------------------------------
-  { user_id: 1, book_id: 1, page_number: 1 } unique: true
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+{ user_id: 1, book_id: 1, page_number: 1 } unique: true
+
+---
+
+---
 
 ## 21. highlights
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  user_id          ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  book_id          ObjectId        Yes            Ref: books
+---
 
-  book_file_id     ObjectId        Yes            Ref: book_files
+\_id ObjectId Auto Primary key
 
-  page_number      Number          Yes            Page of highlight
+user_id ObjectId Yes Ref: users
 
-  selected_text    String          Yes            Highlighted text content
-                                                  max:2000
+book_id ObjectId Yes Ref: books
 
-  color            String          Yes            Enum: yellow \| green \| blue
-                                                  \| pink
+book_file_id ObjectId Yes Ref: book_files
 
-  note             String          No             User note on highlight
-                                                  max:1000
+page_number Number Yes Page of highlight
 
-  created_at       Date            Auto           timestamps: true
+selected_text String Yes Highlighted text content
+max:2000
 
-  updated_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+color String Yes Enum: yellow \| green \| blue
+\| pink
+
+note String No User note on highlight
+max:1000
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { user_id: 1, book_id: 1 }                                            |
-|                                                                       |
-| { user_id: 1, book_id: 1, page_number: 1 }                            |
+| { user_id: 1, book_id: 1 } |
+| |
+| { user_id: 1, book_id: 1, page_number: 1 } |
 +=======================================================================+
 
 ## 22. borrows
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  user_id          ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  book_id          ObjectId        Yes            Ref: books
+---
 
-  book_file_id     ObjectId        Yes            Ref: book_files --- which
-                                                  format borrowed
+\_id ObjectId Auto Primary key
 
-  plan_id          ObjectId        Yes            Ref: plans --- plan at time of
-                                                  borrow
+user_id ObjectId Yes Ref: users
 
-  status           String          Yes            Enum: active \| returned \|
-                                                  expired
+book_id ObjectId Yes Ref: books
 
-  borrowed_at      Date            Yes            Borrow start time
+book_file_id ObjectId Yes Ref: book_files --- which
+format borrowed
 
-  due_at           Date            Yes            Expiry based on
-                                                  plan.borrow_duration_days
+plan_id ObjectId Yes Ref: plans --- plan at time of
+borrow
 
-  returned_at      Date            No             Set when returned early
-                                                  manually
+status String Yes Enum: active \| returned \|
+expired
 
-  reminder_sent    Boolean         Yes            Expiry reminder sent. Default:
-                                                  false
+borrowed_at Date Yes Borrow start time
 
-  created_at       Date            Auto           timestamps: true
+due_at Date Yes Expiry based on
+plan.borrow_duration_days
 
-  updated_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+returned_at Date No Set when returned early
+manually
+
+reminder_sent Boolean Yes Expiry reminder sent. Default:
+false
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { user_id: 1, status: 1 }                                             |
-|                                                                       |
-| { book_id: 1, status: 1 }                                             |
-|                                                                       |
-| { due_at: 1 } --- expiry cron                                         |
+| { user_id: 1, status: 1 } |
+| |
+| { book_id: 1, status: 1 } |
+| |
+| { due_at: 1 } --- expiry cron |
 +=======================================================================+
 
 ## 23. reservations
 
-  --------------------------------------------------------------------------------
-  **Field**          **Type**        **Required**   **Notes / Validation**
-  ------------------ --------------- -------------- ------------------------------
-  \_id               ObjectId        Auto           Primary key
+---
 
-  user_id            ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  book_id            ObjectId        Yes            Ref: books
+---
 
-  queue_position     Number          Yes            Position in queue. 1 = next to
-                                                    be notified
+\_id ObjectId Auto Primary key
 
-  status             String          Yes            Enum: waiting \| notified \|
-                                                    fulfilled \| cancelled \|
-                                                    expired
+user_id ObjectId Yes Ref: users
 
-  notified_at        Date            No             When availability notification
-                                                    was sent
+book_id ObjectId Yes Ref: books
 
-  claim_expires_at   Date            No             48hr window to claim after
-                                                    notified
+queue_position Number Yes Position in queue. 1 = next to
+be notified
 
-  created_at         Date            Auto           timestamps: true
+status String Yes Enum: waiting \| notified \|
+fulfilled \| cancelled \|
+expired
 
-  updated_at         Date            Auto           timestamps: true
-  --------------------------------------------------------------------------------
+notified_at Date No When availability notification
+was sent
+
+claim_expires_at Date No 48hr window to claim after
+notified
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { user_id: 1, book_id: 1 } unique: true                               |
-|                                                                       |
-| { book_id: 1, queue_position: 1 }                                     |
-|                                                                       |
-| { status: 1 }                                                         |
-|                                                                       |
-| { claim_expires_at: 1 } --- expiry cron                               |
+| { user_id: 1, book_id: 1 } unique: true |
+| |
+| { book_id: 1, queue_position: 1 } |
+| |
+| { status: 1 } |
+| |
+| { claim_expires_at: 1 } --- expiry cron |
 +=======================================================================+
 
 ## 24. wishlists
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  user_id          ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  book_id          ObjectId        Yes            Ref: books
+---
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+\_id ObjectId Auto Primary key
+
+user_id ObjectId Yes Ref: users
+
+book_id ObjectId Yes Ref: books
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { user_id: 1, book_id: 1 } unique: true                               |
-|                                                                       |
-| { book_id: 1 } --- wishlist_count aggregation                         |
+| { user_id: 1, book_id: 1 } unique: true |
+| |
+| { book_id: 1 } --- wishlist_count aggregation |
 +=======================================================================+
 
 ## 25. reviews
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  user_id          ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  book_id          ObjectId        Yes            Ref: books
+---
 
-  rating           Number          Yes            Integer 1--5
+\_id ObjectId Auto Primary key
 
-  review_text      String          No             Optional written review
-                                                  max:2000
+user_id ObjectId Yes Ref: users
 
-  helpful_count    Number          Yes            Other users marked helpful.
-                                                  Default: 0
+book_id ObjectId Yes Ref: books
 
-  is_visible       Boolean         Yes            Admin can hide. Default: true
+rating Number Yes Integer 1--5
 
-  is_verified      Boolean         Yes            User actually read the book.
-                                                  Default: false
+review_text String No Optional written review
+max:2000
 
-  created_at       Date            Auto           timestamps: true
+helpful_count Number Yes Other users marked helpful.
+Default: 0
 
-  updated_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+is_visible Boolean Yes Admin can hide. Default: true
+
+is_verified Boolean Yes User actually read the book.
+Default: false
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { user_id: 1, book_id: 1 } unique: true                               |
-|                                                                       |
-| { book_id: 1, is_visible: 1, rating: -1 }                             |
+| { user_id: 1, book_id: 1 } unique: true |
+| |
+| { book_id: 1, is_visible: 1, rating: -1 } |
 +=======================================================================+
 
-  -----------------------------------------------------------------------
-  **🔔 Group 6 --- Notifications & System** --- 3 collections
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+**🔔 Group 6 --- Notifications & System** --- 3 collections
+
+---
+
+---
 
 ## 26. notifications
 
-*In-app notifications. Email/SMS/Push handled by external services
-(Resend, Twilio, FCM).*
+_In-app notifications. Email/SMS/Push handled by external services
+(Resend, Twilio, FCM)._
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  user_id          ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  type             String          Yes            Enum: subscription_confirmed
-                                                  \| renewal_reminder \|
-                                                  borrow_expiry \|
-                                                  reservation_ready \| new_book
-                                                  \| offer \| account_suspended
-                                                  \| payment_failed \|
-                                                  refund_processed
+---
 
-  title            String          Yes            Short title max:150
+\_id ObjectId Auto Primary key
 
-  body             String          Yes            Full message max:500
+user_id ObjectId Yes Ref: users
 
-  link             String          No             Deep-link URL within dashboard
+type String Yes Enum: subscription_confirmed
+\| renewal_reminder \|
+borrow_expiry \|
+reservation_ready \| new_book
+\| offer \| account_suspended
+\| payment_failed \|
+refund_processed
 
-  metadata         Object          No             Extra data e.g. { book_id,
-                                                  plan_id } for rich UI
+title String Yes Short title max:150
 
-  is_read          Boolean         Yes            Default: false
+body String Yes Full message max:500
 
-  read_at          Date            No             Set when user opens
-                                                  notification
+link String No Deep-link URL within dashboard
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+metadata Object No Extra data e.g. { book_id,
+plan_id } for rich UI
+
+is_read Boolean Yes Default: false
+
+read_at Date No Set when user opens
+notification
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { user_id: 1, is_read: 1, created_at: -1 }                            |
-|                                                                       |
-| { created_at: 1 } expireAfterSeconds: 7776000 (TTL --- 90 days)       |
+| { user_id: 1, is_read: 1, created_at: -1 } |
+| |
+| { created_at: 1 } expireAfterSeconds: 7776000 (TTL --- 90 days) |
 +=======================================================================+
 
 ## 27. notification_logs
 
-*Delivery audit log for every email, SMS, and push notification sent.
-For debugging and compliance.*
+_Delivery audit log for every email, SMS, and push notification sent.
+For debugging and compliance._
 
-  -------------------------------------------------------------------------------
-  **Field**         **Type**        **Required**   **Notes / Validation**
-  ----------------- --------------- -------------- ------------------------------
-  \_id              ObjectId        Auto           Primary key
+---
 
-  user_id           ObjectId        Yes            Ref: users
+**Field** **Type** **Required** **Notes / Validation**
 
-  channel           String          Yes            Enum: email \| sms \| push
+---
 
-  type              String          Yes            Same type enum as
-                                                   notifications
+\_id ObjectId Auto Primary key
 
-  recipient         String          Yes            Email address, phone number,
-                                                   or FCM token
+user_id ObjectId Yes Ref: users
 
-  subject           String          No             Email subject line
+channel String Yes Enum: email \| sms \| push
 
-  body              String          Yes            Message content sent
+type String Yes Same type enum as
+notifications
 
-  provider          String          Yes            resend \| twilio \|
-                                                   ssl_wireless \| fcm
+recipient String Yes Email address, phone number,
+or FCM token
 
-  provider_msg_id   String          No             Provider\'s message ID for
-                                                   tracking
+subject String No Email subject line
 
-  status            String          Yes            Enum: sent \| delivered \|
-                                                   failed \| bounced
+body String Yes Message content sent
 
-  error_message     String          No             Provider error if failed
+provider String Yes resend \| twilio \|
+ssl_wireless \| fcm
 
-  sent_at           Date            Yes            Timestamp of send attempt
+provider_msg_id String No Provider\'s message ID for
+tracking
 
-  created_at        Date            Auto           timestamps: true
-  -------------------------------------------------------------------------------
+status String Yes Enum: sent \| delivered \|
+failed \| bounced
+
+error_message String No Provider error if failed
+
+sent_at Date Yes Timestamp of send attempt
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { user_id: 1, channel: 1, created_at: -1 }                            |
-|                                                                       |
-| { status: 1 }                                                         |
-|                                                                       |
-| { created_at: 1 } expireAfterSeconds: 7776000 (TTL --- 90 days)       |
+| { user_id: 1, channel: 1, created_at: -1 } |
+| |
+| { status: 1 } |
+| |
+| { created_at: 1 } expireAfterSeconds: 7776000 (TTL --- 90 days) |
 +=======================================================================+
 
 ## 28. search_logs
 
-*Tracks user search queries. Used for search analytics and improving
-recommendations.*
+_Tracks user search queries. Used for search analytics and improving
+recommendations._
 
-  -------------------------------------------------------------------------------
-  **Field**         **Type**        **Required**   **Notes / Validation**
-  ----------------- --------------- -------------- ------------------------------
-  \_id              ObjectId        Auto           Primary key
+---
 
-  user_id           ObjectId        No             Ref: users. null = anonymous
-                                                   search
+**Field** **Type** **Required** **Notes / Validation**
 
-  query             String          Yes            Search query text
+---
 
-  filters           Object          No             Applied filters e.g. {
-                                                   category, language }
+\_id ObjectId Auto Primary key
 
-  results_count     Number          Yes            Number of results returned
+user_id ObjectId No Ref: users. null = anonymous
+search
 
-  clicked_book_id   ObjectId        No             Ref: books. Which result user
-                                                   clicked
+query String Yes Search query text
 
-  created_at        Date            Auto           timestamps: true
-  -------------------------------------------------------------------------------
+filters Object No Applied filters e.g. {
+category, language }
+
+results_count Number Yes Number of results returned
+
+clicked_book_id ObjectId No Ref: books. Which result user
+clicked
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { user_id: 1, created_at: -1 }                                        |
-|                                                                       |
-| { query: \'text\' } --- popular searches analytics                    |
-|                                                                       |
-| { created_at: 1 } expireAfterSeconds: 15552000 (TTL --- 180 days)     |
+| { user_id: 1, created_at: -1 } |
+| |
+| { query: \'text\' } --- popular searches analytics |
+| |
+| { created_at: 1 } expireAfterSeconds: 15552000 (TTL --- 180 days) |
 +=======================================================================+
 
-  -----------------------------------------------------------------------
-  **👑 Group 7 --- RBAC & Staff System** --- 6 collections
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+**👑 Group 7 --- RBAC & Staff System** --- 6 collections
+
+---
+
+---
 
 ## 29. permissions
 
-*Seeded on first deploy. Never deleted by admin --- only toggled.*
+_Seeded on first deploy. Never deleted by admin --- only toggled._
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  name             String          Yes            Unique. Format: module.action
-                                                  e.g. books.create
+**Field** **Type** **Required** **Notes / Validation**
 
-  module           String          Yes            Enum: books \| members \|
-                                                  subscriptions \| borrows \|
-                                                  notifications \| coupons \|
-                                                  flash_sales \| reports \|
-                                                  settings
+---
 
-  action           String          Yes            Enum: view \| create \| edit
-                                                  \| delete \| export \| send \|
-                                                  refund \| suspend \| manage
+\_id ObjectId Auto Primary key
 
-  description      String          No             Human-readable description
+name String Yes Unique. Format: module.action
+e.g. books.create
 
-  is_active        Boolean         Yes            Default: true
-  ------------------------------------------------------------------------------
+module String Yes Enum: books \| members \|
+subscriptions \| borrows \|
+notifications \| coupons \|
+flash_sales \| reports \|
+settings
+
+action String Yes Enum: view \| create \| edit
+\| delete \| export \| send \|
+refund \| suspend \| manage
+
+description String No Human-readable description
+
+is_active Boolean Yes Default: true
+
+---
 
 **Complete Seed Data**
 
 +-----------------------------------------------------------------------+
-| books.view books.create books.edit books.delete books.upload          |
-|                                                                       |
-| members.view members.edit members.delete members.suspend              |
-|                                                                       |
-| subscriptions.view subscriptions.edit subscriptions.refund            |
-| subscriptions.manage                                                  |
-|                                                                       |
-| borrows.view borrows.manage                                           |
-|                                                                       |
-| notifications.send                                                    |
-|                                                                       |
-| coupons.view coupons.create coupons.edit coupons.delete               |
-|                                                                       |
-| flash_sales.view flash_sales.create flash_sales.edit                  |
-| flash_sales.delete                                                    |
-|                                                                       |
-| reports.view reports.export                                           |
-|                                                                       |
-| settings.view settings.edit                                           |
+| books.view books.create books.edit books.delete books.upload |
+| |
+| members.view members.edit members.delete members.suspend |
+| |
+| subscriptions.view subscriptions.edit subscriptions.refund |
+| subscriptions.manage |
+| |
+| borrows.view borrows.manage |
+| |
+| notifications.send |
+| |
+| coupons.view coupons.create coupons.edit coupons.delete |
+| |
+| flash_sales.view flash_sales.create flash_sales.edit |
+| flash_sales.delete |
+| |
+| reports.view reports.export |
+| |
+| settings.view settings.edit |
 +=======================================================================+
 
 ## 30. roles
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  name             String          Yes            Unique role name e.g. Book
-                                                  Manager
+**Field** **Type** **Required** **Notes / Validation**
 
-  description      String          No             Role description
+---
 
-  permissions      \[ObjectId\]    Yes            Ref: permissions --- embedded
-                                                  for fast check
+\_id ObjectId Auto Primary key
 
-  staff_count      Number          Yes            Denormalized. Default: 0
+name String Yes Unique role name e.g. Book
+Manager
 
-  is_active        Boolean         Yes            Default: true
+description String No Role description
 
-  created_by       ObjectId        Yes            Ref: staff (admin)
+permissions \[ObjectId\] Yes Ref: permissions --- embedded
+for fast check
 
-  created_at       Date            Auto           timestamps: true
+staff_count Number Yes Denormalized. Default: 0
 
-  updated_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+is_active Boolean Yes Default: true
+
+created_by ObjectId Yes Ref: staff (admin)
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
-  -----------------------------------------------------------------------
-  { name: 1 } unique: true
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+{ name: 1 } unique: true
+
+---
+
+---
 
 ## 31. staff
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  name             String          Yes            Full name
+**Field** **Type** **Required** **Notes / Validation**
 
-  email            String          Yes            Unique, lowercase
+---
 
-  password_hash    String          No             null until invite accepted
+\_id ObjectId Auto Primary key
 
-  role_id          ObjectId        Yes            Ref: roles
+name String Yes Full name
 
-  status           String          Yes            Enum: pending \| active \|
-                                                  suspended \| deleted
+email String Yes Unique, lowercase
 
-  invited_by       ObjectId        Yes            Ref: staff (admin who invited)
+password_hash String No null until invite accepted
 
-  two_fa_enabled   Boolean         Yes            2FA toggle. Default: false
+role_id ObjectId Yes Ref: roles
 
-  two_fa_secret    String          No             TOTP secret (encrypted at
-                                                  rest)
+status String Yes Enum: pending \| active \|
+suspended \| deleted
 
-  joined_at        Date            No             Set when invite accepted
+invited_by ObjectId Yes Ref: staff (admin who invited)
 
-  last_login_at    Date            No             Updated each login
+two_factor Object Yes Embedded 2FA state object
+with enabled, secret,
+pending_secret,
+last_verified_at
 
-  last_login_ip    String          No             IP of last successful login
+joined_at Date No Set when invite accepted
 
-  created_at       Date            Auto           timestamps: true
+last_login_at Date No Updated each login
 
-  updated_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+last_login_ip String No IP of last successful login
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { email: 1 } unique: true                                             |
-|                                                                       |
-| { role_id: 1 }                                                        |
-|                                                                       |
-| { status: 1 }                                                         |
+| { email: 1 } unique: true |
+| |
+| { role_id: 1 } |
+| |
+| { status: 1 } |
 +=======================================================================+
 
 ## 32. staff_invite_tokens
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  staff_id         ObjectId        Yes            Ref: staff
+**Field** **Type** **Required** **Notes / Validation**
 
-  token            String          Yes            Unique. crypto random hex
-                                                  (hashed)
+---
 
-  expires_at       Date            Yes            createdAt + 48 hours
+\_id ObjectId Auto Primary key
 
-  used_at          Date            No             Set when staff accepts invite
+staff_id ObjectId Yes Ref: staff
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+token String Yes Unique. crypto random hex
+(hashed)
+
+expires_at Date Yes createdAt + 48 hours
+
+used_at Date No Set when staff accepts invite
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { token: 1 } unique: true                                             |
-|                                                                       |
-| { expires_at: 1 } expireAfterSeconds: 0 (TTL)                         |
+| { token: 1 } unique: true |
+| |
+| { expires_at: 1 } expireAfterSeconds: 0 (TTL) |
 +=======================================================================+
 
 ## 33. staff_activity_logs
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  staff_id         ObjectId        Yes            Ref: staff
+**Field** **Type** **Required** **Notes / Validation**
 
-  action           String          Yes            Permission name e.g.
-                                                  books.create
+---
 
-  module           String          Yes            Module acted on
+\_id ObjectId Auto Primary key
 
-  target_id        ObjectId        No             ID of affected document
+staff_id ObjectId Yes Ref: staff
 
-  target_type      String          No             e.g. Book \| User \| Coupon \|
-                                                  FlashSale
+action String Yes Permission name e.g.
+books.create
 
-  description      String          Yes            Human-readable e.g. \'Added
-                                                  book: রবীন্দ্র রচনাবলী\'
+module String Yes Module acted on
 
-  ip_address       String          No             Staff IP at action time
+target_id ObjectId No ID of affected document
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+target_type String No e.g. Book \| User \| Coupon \|
+FlashSale
+
+description String Yes Human-readable e.g. \'Added
+book: রবীন্দ্র রচনাবলী\'
+
+ip_address String No Staff IP at action time
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { staff_id: 1, created_at: -1 }                                       |
-|                                                                       |
-| { created_at: 1 } expireAfterSeconds: 15552000 (TTL --- 180 days)     |
+| { staff_id: 1, created_at: -1 } |
+| |
+| { created_at: 1 } expireAfterSeconds: 15552000 (TTL --- 180 days) |
 +=======================================================================+
 
 ## 34. admin_activity_logs
 
-*Separate audit log for Super Admin actions --- higher sensitivity,
-longer retention.*
+_Separate audit log for Super Admin actions --- higher sensitivity,
+longer retention._
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  action           String          Yes            e.g. role.created \|
-                                                  staff.deleted \| plan.edited
-                                                  \| settings.updated
+**Field** **Type** **Required** **Notes / Validation**
 
-  module           String          Yes            Module acted on
+---
 
-  target_id        ObjectId        No             ID of affected document
+\_id ObjectId Auto Primary key
 
-  target_type      String          No             e.g. Role \| Staff \| Plan \|
-                                                  Settings
+action String Yes e.g. role.created \|
+staff.deleted \| plan.edited
+\| settings.updated
 
-  description      String          Yes            Human-readable action summary
+module String Yes Module acted on
 
-  before_data      Object          No             Snapshot of document before
-                                                  change
+target_id ObjectId No ID of affected document
 
-  after_data       Object          No             Snapshot of document after
-                                                  change
+target_type String No e.g. Role \| Staff \| Plan \|
+Settings
 
-  ip_address       String          No             Admin IP
+description String Yes Human-readable action summary
 
-  created_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+before_data Object No Snapshot of document before
+change
+
+after_data Object No Snapshot of document after
+change
+
+ip_address String No Admin IP
+
+created_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { module: 1, created_at: -1 }                                         |
-|                                                                       |
-| { created_at: 1 } expireAfterSeconds: 63072000 (TTL --- 2 years)      |
+| { module: 1, created_at: -1 } |
+| |
+| { created_at: 1 } expireAfterSeconds: 63072000 (TTL --- 2 years) |
 +=======================================================================+
 
-  -----------------------------------------------------------------------
-  **📊 Group 8 --- Reports** --- 1 collection
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+**📊 Group 8 --- Reports** --- 1 collection
+
+---
+
+---
 
 ## 35. report_jobs
 
-*Queues and stores generated reports. PDF/Excel exports are async ---
-queued, generated, then downloadable.*
+_Queues and stores generated reports. PDF/Excel exports are async ---
+queued, generated, then downloadable._
 
-  ------------------------------------------------------------------------------
-  **Field**        **Type**        **Required**   **Notes / Validation**
-  ---------------- --------------- -------------- ------------------------------
-  \_id             ObjectId        Auto           Primary key
+---
 
-  requested_by     ObjectId        Yes            Ref: staff --- who requested
-                                                  the report
+**Field** **Type** **Required** **Notes / Validation**
 
-  type             String          Yes            Enum: revenue_monthly \|
-                                                  revenue_yearly \| top_books \|
-                                                  active_users \| inactive_users
-                                                  \| subscriptions \|
-                                                  coupon_usage \| staff_activity
-                                                  \| borrow_stats \|
-                                                  reading_analytics
+---
 
-  format           String          Yes            Enum: pdf \| excel
+\_id ObjectId Auto Primary key
 
-  filters          Object          No             Applied filters e.g. { from:
-                                                  Date, to: Date, plan_id }
+requested_by ObjectId Yes Ref: staff --- who requested
+the report
 
-  status           String          Yes            Enum: queued \| processing \|
-                                                  completed \| failed
+type String Yes Enum: revenue_monthly \|
+revenue_yearly \| top_books \|
+active_users \| inactive_users
+\| subscriptions \|
+coupon_usage \| staff_activity
+\| borrow_stats \|
+reading_analytics
 
-  file_url         String          No             Cloudinary/S3 URL. Set when
-                                                  completed
+format String Yes Enum: pdf \| excel
 
-  file_size_kb     Number          No             Generated file size
+filters Object No Applied filters e.g. { from:
+Date, to: Date, plan_id }
 
-  row_count        Number          No             Number of data rows in report
+status String Yes Enum: queued \| processing \|
+completed \| failed
 
-  error_message    String          No             Set if generation failed
+file_url String No Cloudinary/S3 URL. Set when
+completed
 
-  expires_at       Date            No             Download link expiry (7 days
-                                                  after generation)
+file_size_kb Number No Generated file size
 
-  completed_at     Date            No             Set when file ready
+row_count Number No Number of data rows in report
 
-  created_at       Date            Auto           timestamps: true
+error_message String No Set if generation failed
 
-  updated_at       Date            Auto           timestamps: true
-  ------------------------------------------------------------------------------
+expires_at Date No Download link expiry (7 days
+after generation)
+
+completed_at Date No Set when file ready
+
+created_at Date Auto timestamps: true
+
+updated_at Date Auto timestamps: true
+
+---
 
 **Indexes**
 
 +-----------------------------------------------------------------------+
-| { requested_by: 1, created_at: -1 }                                   |
-|                                                                       |
-| { status: 1 } --- processing queue                                    |
-|                                                                       |
-| { expires_at: 1 } expireAfterSeconds: 0 (TTL --- auto-delete expired  |
-| reports)                                                              |
+| { requested_by: 1, created_at: -1 } |
+| |
+| { status: 1 } --- processing queue |
+| |
+| { expires_at: 1 } expireAfterSeconds: 0 (TTL --- auto-delete expired |
+| reports) |
 +=======================================================================+
 
-  -----------------------------------------------------------------------
-  **⚙️ Group 9 --- System Settings** --- 1 collection --- singleton
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
+**⚙️ Group 9 --- System Settings** --- 1 collection --- singleton
+
+---
+
+---
 
 ## 36. settings
 
-*Single document. Use findOne(). Never insert more than one document in
-this collection.*
+_Single document. Use findOne(). Never insert more than one document in
+this collection._
 
-  -----------------------------------------------------------------------------------
-  **Field**             **Type**        **Required**   **Notes / Validation**
-  --------------------- --------------- -------------- ------------------------------
-  \_id                  ObjectId        Auto           Primary key (singleton)
+---
 
-  library_name          String          Yes            e.g. MyLibrary
+**Field** **Type** **Required** **Notes / Validation**
 
-  library_name_bn       String          No             Bangla name
+---
 
-  library_logo_url      String          No             Cloudinary URL
+\_id ObjectId Auto Primary key (singleton)
 
-  library_address       String          No             Physical/mailing address
+library_name String Yes e.g. MyLibrary
 
-  support_email         String          Yes            Primary support contact
+library_name_bn String No Bangla name
 
-  support_phone         String          No             Support phone number
+library_logo_url String No Cloudinary URL
 
-  default_language      String          Yes            Enum: en \| bn. Default: en
+library_address String No Physical/mailing address
 
-  default_currency      String          Yes            BDT \| USD. Default: BDT
+support_email String Yes Primary support contact
 
-  default_timezone      String          Yes            Default: Asia/Dhaka
+support_phone String No Support phone number
 
-  trial_duration_days   Number          Yes            Default: 7
+default_language String Yes Enum: en \| bn. Default: en
 
-  maintenance_mode      Boolean         Yes            Disable access for users.
-                                                       Default: false
+default_currency String Yes BDT \| USD. Default: BDT
 
-  maintenance_message   String          No             Shown to users during
-                                                       maintenance
+default_timezone String Yes Default: Asia/Dhaka
 
-  new_user_auto_trial   Boolean         Yes            Auto-start trial on
-                                                       registration. Default: true
+trial_duration_days Number Yes Default: 7
 
-  report_schedule       Object          No             { monthly_revenue: \'0 9 1 \*
-                                                       \*\' } --- cron expressions
+maintenance_mode Boolean Yes Disable access for users.
+Default: false
 
-  sslcommerz            Object          No             { store_id, store_passwd,
-                                                       is_live } --- encrypted
+maintenance_message String No Shown to users during
+maintenance
 
-  stripe                Object          No             { publishable_key, secret_key,
-                                                       webhook_secret }
+new_user_auto_trial Boolean Yes Auto-start trial on
+registration. Default: true
 
-  paypal                Object          No             { client_id, client_secret,
-                                                       mode: sandbox\|live }
+report_schedule Object No { monthly_revenue: \'0 9 1 \*
+\*\' } --- cron expressions
 
-  email_provider        String          No             Enum: resend \| sendgrid \|
-                                                       nodemailer
+sslcommerz Object No { store_id, store_passwd,
+is_live } --- encrypted
 
-  email_config          Object          No             Provider API keys (encrypted)
+stripe Object No { publishable_key, secret_key,
+webhook_secret }
 
-  sms_provider          String          No             Enum: twilio \| ssl_wireless
-                                                       \| alpha_sms
+paypal Object No { client_id, client_secret,
+mode: sandbox\|live }
 
-  sms_config            Object          No             Provider credentials
-                                                       (encrypted)
+email_provider String No Enum: resend \| sendgrid \|
+nodemailer
 
-  fcm_server_key        String          No             Firebase Cloud Messaging
-                                                       server key
+email_config Object No Provider API keys (encrypted)
 
-  cloudinary_config     Object          No             { cloud_name, api_key,
-                                                       api_secret }
+sms_provider String No Enum: twilio \| ssl_wireless
+\| alpha_sms
 
-  storage_config        Object          No             Backblaze B2 config { key_id,
-                                                       app_key, bucket }
+sms_config Object No Provider credentials
+(encrypted)
 
-  email_templates       Object          No             Custom HTML per notification
-                                                       type
+fcm_server_key String No Firebase Cloud Messaging
+server key
 
-  sms_templates         Object          No             Custom SMS text per
-                                                       notification type
+cloudinary_config Object No { cloud_name, api_key,
+api_secret }
 
-  updated_at            Date            Auto           timestamps: true
-  -----------------------------------------------------------------------------------
+storage_config Object No Backblaze B2 config { key_id,
+app_key, bucket }
 
-  -----------------------------------------------------------------------
-  **📊 Admin Dashboard --- Reports: Complete Design** --- Data sources ·
-  Aggregation · Filters · Output
-  -----------------------------------------------------------------------
+email_templates Object No Custom HTML per notification
+type
 
-  -----------------------------------------------------------------------
+sms_templates Object No Custom SMS text per
+notification type
 
-*Every report in the Admin Dashboard is generated by MongoDB Aggregation
+updated_at Date Auto timestamps: true
+
+---
+
+---
+
+**📊 Admin Dashboard --- Reports: Complete Design** --- Data sources ·
+Aggregation · Filters · Output
+
+---
+
+---
+
+_Every report in the Admin Dashboard is generated by MongoDB Aggregation
 Pipelines. Reports can be viewed live on-screen or exported as PDF/Excel
 via the report_jobs queue. Below is the complete design for each
-report.*
+report._
 
 ## How Reports Work
 
-  ------------------------------------------------------------------------
-  **Step**    **What happens**
-  ----------- ------------------------------------------------------------
-  1\. Request Admin/Staff clicks \'Generate Report\' with filters (date
-              range, plan, etc.)
+---
 
-  2\. Queue   A new document is inserted into report_jobs with status:
-              queued
+**Step** **What happens**
 
-  3\. Cron    Report Generator cron picks up queued jobs every 2 minutes
-  job         
+---
 
-  4\.         MongoDB aggregation pipeline runs against the relevant
-  Aggregate   collections
+1\. Request Admin/Staff clicks \'Generate Report\' with filters (date
+range, plan, etc.)
 
-  5\.         Result is formatted into PDF (pdfkit) or Excel (exceljs)
-  Generate    file
+2\. Queue A new document is inserted into report_jobs with status:
+queued
 
-  6\. Upload  Generated file is uploaded to Cloudinary / Backblaze B2
+3\. Cron Report Generator cron picks up queued jobs every 2 minutes
+job
 
-  7\. Notify  report_jobs.status → completed, file_url saved, staff
-              notified in-app
+4\. MongoDB aggregation pipeline runs against the relevant
+Aggregate collections
 
-  8\.         Staff clicks download link --- valid for 7 days (expires_at
-  Download    TTL)
-  ------------------------------------------------------------------------
+5\. Result is formatted into PDF (pdfkit) or Excel (exceljs)
+Generate file
+
+6\. Upload Generated file is uploaded to Cloudinary / Backblaze B2
+
+7\. Notify report_jobs.status → completed, file_url saved, staff
+notified in-app
+
+8\. Staff clicks download link --- valid for 7 days (expires_at
+Download TTL)
+
+---
 
 ## Report 1 --- Monthly Revenue
 
-*Shows total revenue, transaction count, discount given, and refunds ---
-broken down by month.*
+_Shows total revenue, transaction count, discount given, and refunds ---
+broken down by month._
 
 **Data Source**
 
-  -----------------------------------------------------------------------
-  **Collection**     **Fields Used**
-  ------------------ ----------------------------------------------------
-  payments           amount, original_amount, discount_amount, currency,
-                     gateway, status, paid_at
+---
 
-  refunds            amount, status, processed_at
+**Collection** **Fields Used**
 
-  users              name, email (for per-user breakdown)
+---
 
-  plans              name (for plan-wise revenue breakdown)
+payments amount, original_amount, discount_amount, currency,
+gateway, status, paid_at
 
-  subscriptions      plan_id, billing_cycle
-  -----------------------------------------------------------------------
+refunds amount, status, processed_at
+
+users name, email (for per-user breakdown)
+
+plans name (for plan-wise revenue breakdown)
+
+subscriptions plan_id, billing_cycle
+
+---
 
 **Filters Available**
 
-  --------------------------------------------------------------------------
-  **Filter**    **Type**       **Description**
-  ------------- -------------- ---------------------------------------------
-  Date Range    Date picker    from_date to to_date --- defaults to current
-                               month
+---
 
-  Gateway       Multi-select   bkash \| nagad \| stripe \| paypal \| all
+**Filter** **Type** **Description**
 
-  Currency      Select         BDT \| USD \| all
+---
 
-  Plan          Multi-select   Filter by subscription plan
+Date Range Date picker from_date to to_date --- defaults to current
+month
 
-  Billing Cycle Select         monthly \| yearly \| all
-  --------------------------------------------------------------------------
+Gateway Multi-select bkash \| nagad \| stripe \| paypal \| all
+
+Currency Select BDT \| USD \| all
+
+Plan Multi-select Filter by subscription plan
+
+Billing Cycle Select monthly \| yearly \| all
+
+---
 
 **Aggregation Pipeline (MongoDB)**
 
 +-----------------------------------------------------------------------+
-| db.payments.aggregate(\[                                              |
-|                                                                       |
-| { \$match: {                                                          |
-|                                                                       |
-| status: \'success\',                                                  |
-|                                                                       |
-| paid_at: { \$gte: from_date, \$lte: to_date }                         |
-|                                                                       |
-| }},                                                                   |
-|                                                                       |
-| { \$lookup: { from: \'subscriptions\', localField:                    |
-| \'subscription_id\',                                                  |
-|                                                                       |
-| foreignField: \'\_id\', as: \'sub\' }},                               |
-|                                                                       |
-| { \$unwind: \'\$sub\' },                                              |
-|                                                                       |
-| { \$lookup: { from: \'plans\', localField: \'sub.plan_id\',           |
-|                                                                       |
-| foreignField: \'\_id\', as: \'plan\' }},                              |
-|                                                                       |
-| { \$group: {                                                          |
-|                                                                       |
-| \_id: { year: { \$year: \'\$paid_at\' }, month: { \$month:            |
-| \'\$paid_at\' } },                                                    |
-|                                                                       |
-| total_revenue: { \$sum: \'\$amount\' },                               |
-|                                                                       |
-| total_discount: { \$sum: \'\$discount_amount\' },                     |
-|                                                                       |
-| transaction_count: { \$sum: 1 },                                      |
-|                                                                       |
-| by_gateway: { \$push: { g: \'\$gateway\', a: \'\$amount\' } },        |
-|                                                                       |
-| by_plan: { \$push: { p: \'\$plan.name\', a: \'\$amount\' } }          |
-|                                                                       |
-| }},                                                                   |
-|                                                                       |
-| { \$sort: { \'\_id.year\': -1, \'\_id.month\': -1 } }                 |
-|                                                                       |
-| \])                                                                   |
+| db.payments.aggregate(\[ |
+| |
+| { \$match: { |
+| |
+| status: \'success\', |
+| |
+| paid_at: { \$gte: from_date, \$lte: to_date } |
+| |
+| }}, |
+| |
+| { \$lookup: { from: \'subscriptions\', localField: |
+| \'subscription_id\', |
+| |
+| foreignField: \'\_id\', as: \'sub\' }}, |
+| |
+| { \$unwind: \'\$sub\' }, |
+| |
+| { \$lookup: { from: \'plans\', localField: \'sub.plan_id\', |
+| |
+| foreignField: \'\_id\', as: \'plan\' }}, |
+| |
+| { \$group: { |
+| |
+| \_id: { year: { \$year: \'\$paid_at\' }, month: { \$month: |
+| \'\$paid_at\' } }, |
+| |
+| total_revenue: { \$sum: \'\$amount\' }, |
+| |
+| total_discount: { \$sum: \'\$discount_amount\' }, |
+| |
+| transaction_count: { \$sum: 1 }, |
+| |
+| by_gateway: { \$push: { g: \'\$gateway\', a: \'\$amount\' } }, |
+| |
+| by_plan: { \$push: { p: \'\$plan.name\', a: \'\$amount\' } } |
+| |
+| }}, |
+| |
+| { \$sort: { \'\_id.year\': -1, \'\_id.month\': -1 } } |
+| |
+| \]) |
 +=======================================================================+
 
 **Output Columns**
 
-  -----------------------------------------------------------------------
-  **Column**          **Description**
-  ------------------- ---------------------------------------------------
-  Month / Year        e.g. January 2025
+---
 
-  Gross Revenue       Sum of original_amount
+**Column** **Description**
 
-  Discount Given      Sum of discount_amount
+---
 
-  Net Revenue         Sum of amount (after discount)
+Month / Year e.g. January 2025
 
-  Refunds             Total refunded amount from refunds collection
+Gross Revenue Sum of original_amount
 
-  Final Revenue       Net Revenue minus Refunds
+Discount Given Sum of discount_amount
 
-  Transactions        Total successful payment count
+Net Revenue Sum of amount (after discount)
 
-  Avg. Order Value    Net Revenue / Transactions
+Refunds Total refunded amount from refunds collection
 
-  By Gateway          Breakdown: bKash / Nagad / Stripe / PayPal
+Final Revenue Net Revenue minus Refunds
 
-  By Plan             Breakdown: Free / Basic / Standard / Premium
+Transactions Total successful payment count
 
-  By Billing Cycle    Monthly vs Yearly split
-  -----------------------------------------------------------------------
+Avg. Order Value Net Revenue / Transactions
+
+By Gateway Breakdown: bKash / Nagad / Stripe / PayPal
+
+By Plan Breakdown: Free / Basic / Standard / Premium
+
+By Billing Cycle Monthly vs Yearly split
+
+---
 
 ## Report 2 --- Yearly Revenue
 
-*Same as Monthly Revenue but grouped by year. Includes year-over-year
-growth %.*
+_Same as Monthly Revenue but grouped by year. Includes year-over-year
+growth %._
 
 **Extra Output Columns**
 
-  -----------------------------------------------------------------------
-  **Column**          **Description**
-  ------------------- ---------------------------------------------------
-  YoY Growth %        ((this_year - last_year) / last_year) \* 100
+---
 
-  Best Month          Month with highest revenue in that year
+**Column** **Description**
 
-  Worst Month         Month with lowest revenue in that year
+---
 
-  Avg Monthly         Total yearly revenue / 12
-  -----------------------------------------------------------------------
+YoY Growth % ((this_year - last_year) / last_year) \* 100
+
+Best Month Month with highest revenue in that year
+
+Worst Month Month with lowest revenue in that year
+
+Avg Monthly Total yearly revenue / 12
+
+---
 
 ## Report 3 --- Top Books Report
 
-*Ranks books by read count, borrow count, wishlist count, review count,
-and average rating.*
+_Ranks books by read count, borrow count, wishlist count, review count,
+and average rating._
 
 **Data Source**
 
-  -----------------------------------------------------------------------
-  **Collection**     **Fields Used**
-  ------------------ ----------------------------------------------------
-  books              title, author_ids, cover_url, read_count,
-                     borrow_count, wishlist_count, average_rating,
-                     review_count, access_level
+---
 
-  reading_sessions   book_id, duration_mins, created_at --- for reading
-                     time analytics
+**Collection** **Fields Used**
 
-  reviews            book_id, rating --- for rating distribution
+---
 
-  authors            name --- for author name display
+books title, author_ids, cover_url, read_count,
+borrow_count, wishlist_count, average_rating,
+review_count, access_level
 
-  categories         name --- for category display
-  -----------------------------------------------------------------------
+reading_sessions book_id, duration_mins, created_at --- for reading
+time analytics
+
+reviews book_id, rating --- for rating distribution
+
+authors name --- for author name display
+
+categories name --- for category display
+
+---
 
 **Filters Available**
 
-  --------------------------------------------------------------------------
-  **Filter**    **Type**       **Description**
-  ------------- -------------- ---------------------------------------------
-  Date Range    Date picker    Filter by when reading sessions occurred
+---
 
-  Category      Multi-select   Filter by book category
+**Filter** **Type** **Description**
 
-  Language      Multi-select   Filter by book language
+---
 
-  Access Level  Multi-select   free \| basic \| standard \| premium
+Date Range Date picker Filter by when reading sessions occurred
 
-  Sort By       Select         read_count \| borrow_count \| average_rating
-                               \| wishlist_count
+Category Multi-select Filter by book category
 
-  Limit         Number         Top 10 / 25 / 50 / 100
-  --------------------------------------------------------------------------
+Language Multi-select Filter by book language
+
+Access Level Multi-select free \| basic \| standard \| premium
+
+Sort By Select read_count \| borrow_count \| average_rating
+\| wishlist_count
+
+Limit Number Top 10 / 25 / 50 / 100
+
+---
 
 **Aggregation Pipeline**
 
 +-----------------------------------------------------------------------+
-| db.reading_sessions.aggregate(\[                                      |
-|                                                                       |
-| { \$match: { created_at: { \$gte: from_date, \$lte: to_date } } },    |
-|                                                                       |
-| { \$group: {                                                          |
-|                                                                       |
-| \_id: \'\$book_id\',                                                  |
-|                                                                       |
-| session_count: { \$sum: 1 },                                          |
-|                                                                       |
-| total_read_mins: { \$sum: \'\$duration_mins\' },                      |
-|                                                                       |
-| unique_readers: { \$addToSet: \'\$user_id\' }                         |
-|                                                                       |
-| }},                                                                   |
-|                                                                       |
-| { \$lookup: { from: \'books\', localField: \'\_id\',                  |
-|                                                                       |
-| foreignField: \'\_id\', as: \'book\' }},                              |
-|                                                                       |
-| { \$unwind: \'\$book\' },                                             |
-|                                                                       |
-| { \$project: {                                                        |
-|                                                                       |
-| title: \'\$book.title\',                                              |
-|                                                                       |
-| read_count: \'\$book.read_count\',                                    |
-|                                                                       |
-| borrow_count: \'\$book.borrow_count\',                                |
-|                                                                       |
-| average_rating: \'\$book.average_rating\',                            |
-|                                                                       |
-| session_count: 1,                                                     |
-|                                                                       |
-| total_read_mins: 1,                                                   |
-|                                                                       |
-| unique_readers: { \$size: \'\$unique_readers\' }                      |
-|                                                                       |
-| }},                                                                   |
-|                                                                       |
-| { \$sort: { read_count: -1 } },                                       |
-|                                                                       |
-| { \$limit: 50 }                                                       |
-|                                                                       |
-| \])                                                                   |
+| db.reading_sessions.aggregate(\[ |
+| |
+| { \$match: { created_at: { \$gte: from_date, \$lte: to_date } } }, |
+| |
+| { \$group: { |
+| |
+| \_id: \'\$book_id\', |
+| |
+| session_count: { \$sum: 1 }, |
+| |
+| total_read_mins: { \$sum: \'\$duration_mins\' }, |
+| |
+| unique_readers: { \$addToSet: \'\$user_id\' } |
+| |
+| }}, |
+| |
+| { \$lookup: { from: \'books\', localField: \'\_id\', |
+| |
+| foreignField: \'\_id\', as: \'book\' }}, |
+| |
+| { \$unwind: \'\$book\' }, |
+| |
+| { \$project: { |
+| |
+| title: \'\$book.title\', |
+| |
+| read_count: \'\$book.read_count\', |
+| |
+| borrow_count: \'\$book.borrow_count\', |
+| |
+| average_rating: \'\$book.average_rating\', |
+| |
+| session_count: 1, |
+| |
+| total_read_mins: 1, |
+| |
+| unique_readers: { \$size: \'\$unique_readers\' } |
+| |
+| }}, |
+| |
+| { \$sort: { read_count: -1 } }, |
+| |
+| { \$limit: 50 } |
+| |
+| \]) |
 +=======================================================================+
 
 **Output Columns**
 
-  -----------------------------------------------------------------------
-  **Column**       **Description**
-  ---------------- ------------------------------------------------------
-  Rank             1, 2, 3 \...
+---
 
-  Book Title       With cover thumbnail
+**Column** **Description**
 
-  Author           Author name(s)
+---
 
-  Category         Category name
+Rank 1, 2, 3 \...
 
-  Access Level     free \| basic \| standard \| premium
+Book Title With cover thumbnail
 
-  Total Reads      books.read_count
+Author Author name(s)
 
-  Total Borrows    books.borrow_count
+Category Category name
 
-  Wishlisted       books.wishlist_count
+Access Level free \| basic \| standard \| premium
 
-  Avg Rating       books.average_rating (★ display)
+Total Reads books.read_count
 
-  Review Count     books.review_count
+Total Borrows books.borrow_count
 
-  Unique Readers   Distinct users who read
+Wishlisted books.wishlist_count
 
-  Avg Read Time    Total reading minutes / session count
-  -----------------------------------------------------------------------
+Avg Rating books.average_rating (★ display)
+
+Review Count books.review_count
+
+Unique Readers Distinct users who read
+
+Avg Read Time Total reading minutes / session count
+
+---
 
 ## Report 4 --- User Analytics Report
 
-*Comprehensive user activity --- new registrations, active vs inactive,
-reading habits, plan distribution.*
+_Comprehensive user activity --- new registrations, active vs inactive,
+reading habits, plan distribution._
 
 **Data Source**
 
-  -----------------------------------------------------------------------
-  **Collection**     **Fields Used**
-  ------------------ ----------------------------------------------------
-  users              name, email, status, subscription_status,
-                     current_plan_id, reading_streak_days,
-                     total_books_read, total_reading_mins, created_at,
-                     last_active_at
+---
 
-  subscriptions      plan_id, status, billing_cycle, created_at
+**Collection** **Fields Used**
 
-  reading_sessions   user_id, duration_mins, created_at
+---
 
-  reading_progress   user_id, is_completed, percent_complete
+users name, email, status, subscription_status,
+current_plan_id, reading_streak_days,
+total_books_read, total_reading_mins, created_at,
+last_active_at
 
-  reviews            user_id --- to count active reviewers
+subscriptions plan_id, status, billing_cycle, created_at
 
-  login_history      actor_id, created_at --- for login frequency
-  -----------------------------------------------------------------------
+reading_sessions user_id, duration_mins, created_at
+
+reading_progress user_id, is_completed, percent_complete
+
+reviews user_id --- to count active reviewers
+
+login_history actor_id, created_at --- for login frequency
+
+---
 
 **Filters Available**
 
-  --------------------------------------------------------------------------
-  **Filter**      **Type**       **Description**
-  --------------- -------------- -------------------------------------------
-  Date Range      Date picker    Registration date range
+---
 
-  Status          Multi-select   active \| suspended \| deleted
+**Filter** **Type** **Description**
 
-  Subscription    Multi-select   free \| trial \| active \| expired
-  Status                         
+---
 
-  Plan            Multi-select   Filter by current plan
+Date Range Date picker Registration date range
 
-  Activity        Select         active (read in last 30 days) \| inactive
-                                 (no activity 30+ days)
+Status Multi-select active \| suspended \| deleted
 
-  Language        Select         en \| bn
-  --------------------------------------------------------------------------
+Subscription Multi-select free \| trial \| active \| expired
+Status
+
+Plan Multi-select Filter by current plan
+
+Activity Select active (read in last 30 days) \| inactive
+(no activity 30+ days)
+
+Language Select en \| bn
+
+---
 
 **Sub-reports Included**
 
-  ----------------------------------------------------------------------------
-  **Sub-report**     **Description**           **Aggregation Source**
-  ------------------ ------------------------- -------------------------------
-  New Registrations  Daily/weekly/monthly new  users.created_at
-                     signups chart             
+---
 
-  Plan Distribution  Pie chart: how many users users.current_plan_id
-                     on each plan              
+**Sub-report** **Description** **Aggregation Source**
 
-  Active vs Inactive Users who read in last 30 reading_sessions.created_at
-                     days vs not               
+---
 
-  Top Readers        Users with highest        users.total_reading_mins
-                     total_reading_mins        
+New Registrations Daily/weekly/monthly new users.created_at
+signups chart
 
-  Reading Streak     Users with streak \>= 7,  users.reading_streak_days
-                     30, 60 days               
+Plan Distribution Pie chart: how many users users.current_plan_id
+on each plan
 
-  Completion Rate    \% users who completed at reading_progress.is_completed
-                     least 1 book              
+Active vs Inactive Users who read in last 30 reading_sessions.created_at
+days vs not
 
-  Churn Analysis     Users who cancelled       subscriptions.cancelled_at
-                     subscription this period  
+Top Readers Users with highest users.total_reading_mins
+total_reading_mins
 
-  Login Frequency    Avg logins per user per   login_history
-                     month                     
-  ----------------------------------------------------------------------------
+Reading Streak Users with streak \>= 7, users.reading_streak_days
+30, 60 days
+
+Completion Rate \% users who completed at reading_progress.is_completed
+least 1 book
+
+Churn Analysis Users who cancelled subscriptions.cancelled_at
+subscription this period
+
+Login Frequency Avg logins per user per login_history
+month
+
+---
 
 **Output Columns (User List)**
 
-  -----------------------------------------------------------------------
-  **Column**       **Description**
-  ---------------- ------------------------------------------------------
-  Name             User full name
+---
 
-  Email            User email
+**Column** **Description**
 
-  Registered       Registration date
+---
 
-  Plan             Current active plan
+Name User full name
 
-  Status           active \| suspended
+Email User email
 
-  Books Read       users.total_books_read
+Registered Registration date
 
-  Reading Time     users.total_reading_mins (formatted as hrs)
+Plan Current active plan
 
-  Streak           users.reading_streak_days days
+Status active \| suspended
 
-  Last Active      users.last_active_at
+Books Read users.total_books_read
 
-  Login Count      Total logins from login_history
+Reading Time users.total_reading_mins (formatted as hrs)
 
-  Reviews Written  Count from reviews collection
-  -----------------------------------------------------------------------
+Streak users.reading_streak_days days
+
+Last Active users.last_active_at
+
+Login Count Total logins from login_history
+
+Reviews Written Count from reviews collection
+
+---
 
 ## Report 5 --- Subscription Report
 
-*Tracks MRR, ARR, new subscriptions, cancellations, upgrades,
-downgrades, and churn rate.*
+_Tracks MRR, ARR, new subscriptions, cancellations, upgrades,
+downgrades, and churn rate._
 
 **Data Source**
 
-  -----------------------------------------------------------------------
-  **Collection**     **Fields Used**
-  ------------------ ----------------------------------------------------
-  subscriptions      All fields --- primary source
+---
 
-  plans              name, price_monthly, price_yearly
+**Collection** **Fields Used**
 
-  users              name, email
+---
 
-  payments           amount --- for actual revenue tied to subscription
-  -----------------------------------------------------------------------
+subscriptions All fields --- primary source
+
+plans name, price_monthly, price_yearly
+
+users name, email
+
+payments amount --- for actual revenue tied to subscription
+
+---
 
 **Key Metrics Calculated**
 
-  -----------------------------------------------------------------------
-  **Metric**               **Formula / Logic**
-  ------------------------ ----------------------------------------------
-  MRR (Monthly Recurring   SUM(active monthly subs × price) + SUM(active
-  Revenue)                 yearly subs × price / 12)
+---
 
-  ARR (Annual Recurring    MRR × 12
-  Revenue)                 
+**Metric** **Formula / Logic**
 
-  New Subscriptions        COUNT where status=active AND starts_at in
-                           date range
+---
 
-  Cancellations            COUNT where cancelled_at in date range
+MRR (Monthly Recurring SUM(active monthly subs × price) + SUM(active
+Revenue) yearly subs × price / 12)
 
-  Churn Rate %             (Cancellations / Total Active at period start)
-                           × 100
+ARR (Annual Recurring MRR × 12
+Revenue)
 
-  Upgrades                 COUNT where previous_plan_id is set AND new
-                           plan price \> old
+New Subscriptions COUNT where status=active AND starts_at in
+date range
 
-  Downgrades               COUNT where previous_plan_id is set AND new
-                           plan price \< old
+Cancellations COUNT where cancelled_at in date range
 
-  Trial Conversions        COUNT where is_trial was true and status =
-                           active now
+Churn Rate % (Cancellations / Total Active at period start)
+× 100
 
-  Renewal Rate %           (Renewed subs / subs that were due for
-                           renewal) × 100
+Upgrades COUNT where previous_plan_id is set AND new
+plan price \> old
 
-  Avg Subscription Age     AVG(now - starts_at) for all active
-                           subscriptions
-  -----------------------------------------------------------------------
+Downgrades COUNT where previous_plan_id is set AND new
+plan price \< old
+
+Trial Conversions COUNT where is_trial was true and status =
+active now
+
+Renewal Rate % (Renewed subs / subs that were due for
+renewal) × 100
+
+Avg Subscription Age AVG(now - starts_at) for all active
+subscriptions
+
+---
 
 **Output Columns (Subscription List)**
 
-  -----------------------------------------------------------------------
-  **Column**    **Description**
-  ------------- ---------------------------------------------------------
-  User          Name + email
+---
 
-  Plan          Current plan name
+**Column** **Description**
 
-  Billing Cycle monthly \| yearly
+---
 
-  Status        active \| trial \| cancelled \| expired
+User Name + email
 
-  Start Date    subscriptions.starts_at
+Plan Current plan name
 
-  End Date      subscriptions.ends_at
+Billing Cycle monthly \| yearly
 
-  Renewals      subscriptions.renewal_count
+Status active \| trial \| cancelled \| expired
 
-  Total Paid    SUM of all payments for this subscription
+Start Date subscriptions.starts_at
 
-  Cancelled At  subscriptions.cancelled_at
+End Date subscriptions.ends_at
 
-  Cancel Reason subscriptions.cancel_reason
-  -----------------------------------------------------------------------
+Renewals subscriptions.renewal_count
+
+Total Paid SUM of all payments for this subscription
+
+Cancelled At subscriptions.cancelled_at
+
+Cancel Reason subscriptions.cancel_reason
+
+---
 
 ## Report 6 --- Active & Inactive Users Report
 
-*Identifies engaged users vs users at risk of churning. Useful for
-re-engagement campaigns.*
+_Identifies engaged users vs users at risk of churning. Useful for
+re-engagement campaigns._
 
 **Definition of Active vs Inactive**
 
-  -----------------------------------------------------------------------
-  **Status**         **Definition**
-  ------------------ ----------------------------------------------------
-  Active             Had at least 1 reading_session in the last 30 days
+---
 
-  Semi-Active        Had reading_session 31--90 days ago but not in last
-                     30
+**Status** **Definition**
 
-  Inactive           No reading_session in 90+ days
+---
 
-  Never Read         Has subscription but zero reading_sessions ever
-  -----------------------------------------------------------------------
+Active Had at least 1 reading_session in the last 30 days
+
+Semi-Active Had reading_session 31--90 days ago but not in last
+30
+
+Inactive No reading_session in 90+ days
+
+Never Read Has subscription but zero reading_sessions ever
+
+---
 
 **Aggregation Pipeline**
 
 +-----------------------------------------------------------------------+
-| db.users.aggregate(\[                                                 |
-|                                                                       |
-| { \$match: { subscription_status: { \$in: \[\'active\',\'trial\'\] }  |
-| } },                                                                  |
-|                                                                       |
-| { \$lookup: {                                                         |
-|                                                                       |
-| from: \'reading_sessions\',                                           |
-|                                                                       |
-| let: { uid: \'\$\_id\' },                                             |
-|                                                                       |
-| pipeline: \[                                                          |
-|                                                                       |
-| { \$match: { \$expr: { \$eq: \[\'\$user_id\', \'\$\$uid\'\] } } },    |
-|                                                                       |
-| { \$sort: { created_at: -1 } },                                       |
-|                                                                       |
-| { \$limit: 1 }                                                        |
-|                                                                       |
-| \],                                                                   |
-|                                                                       |
-| as: \'last_session\'                                                  |
-|                                                                       |
-| }},                                                                   |
-|                                                                       |
-| { \$addFields: {                                                      |
-|                                                                       |
-| last_read: { \$arrayElemAt: \[\'\$last_session.created_at\', 0\] },   |
-|                                                                       |
-| days_since_read: {                                                    |
-|                                                                       |
-| \$divide: \[{ \$subtract: \[new Date(), \'\$last_read\'\] },          |
-| 86400000\]                                                            |
-|                                                                       |
-| }                                                                     |
-|                                                                       |
-| }},                                                                   |
-|                                                                       |
-| { \$addFields: {                                                      |
-|                                                                       |
-| activity_status: { \$switch: { branches: \[                           |
-|                                                                       |
+| db.users.aggregate(\[ |
+| |
+| { \$match: { subscription_status: { \$in: \[\'active\',\'trial\'\] } |
+| } }, |
+| |
+| { \$lookup: { |
+| |
+| from: \'reading_sessions\', |
+| |
+| let: { uid: \'\$\_id\' }, |
+| |
+| pipeline: \[ |
+| |
+| { \$match: { \$expr: { \$eq: \[\'\$user_id\', \'\$\$uid\'\] } } }, |
+| |
+| { \$sort: { created_at: -1 } }, |
+| |
+| { \$limit: 1 } |
+| |
+| \], |
+| |
+| as: \'last_session\' |
+| |
+| }}, |
+| |
+| { \$addFields: { |
+| |
+| last_read: { \$arrayElemAt: \[\'\$last_session.created_at\', 0\] }, |
+| |
+| days_since_read: { |
+| |
+| \$divide: \[{ \$subtract: \[new Date(), \'\$last_read\'\] }, |
+| 86400000\] |
+| |
+| } |
+| |
+| }}, |
+| |
+| { \$addFields: { |
+| |
+| activity_status: { \$switch: { branches: \[ |
+| |
 | { case: { \$lte: \[\'\$days_since_read\', 30\] }, then: \'active\' }, |
-|                                                                       |
-| { case: { \$lte: \[\'\$days_since_read\', 90\] }, then:               |
-| \'semi_active\' },                                                    |
-|                                                                       |
+| |
+| { case: { \$lte: \[\'\$days_since_read\', 90\] }, then: |
+| \'semi_active\' }, |
+| |
 | { case: { \$gt: \[\'\$days_since_read\', 90\] }, then: \'inactive\' } |
-|                                                                       |
-| \], default: \'never_read\' }}                                        |
-|                                                                       |
-| }}                                                                    |
-|                                                                       |
-| \])                                                                   |
+| |
+| \], default: \'never_read\' }} |
+| |
+| }} |
+| |
+| \]) |
 +=======================================================================+
 
 ## Report 7 --- Coupon Usage Report
 
-*Shows which coupons are being used, by whom, how often, and how much
-discount was given.*
+_Shows which coupons are being used, by whom, how often, and how much
+discount was given._
 
 **Data Source**
 
-  -----------------------------------------------------------------------
-  **Collection**     **Fields Used**
-  ------------------ ----------------------------------------------------
-  coupons            code, label, discount_type, discount_value,
-                     usage_limit, used_count, expires_at
+---
 
-  coupon_usages      coupon_id, user_id, payment_id, discount_applied,
-                     used_at
+**Collection** **Fields Used**
 
-  payments           amount, original_amount --- to calculate savings
+---
 
-  users              name, email --- who used the coupon
+coupons code, label, discount_type, discount_value,
+usage_limit, used_count, expires_at
 
-  flash_sales        title --- if flash sale discount was applied instead
-  -----------------------------------------------------------------------
+coupon_usages coupon_id, user_id, payment_id, discount_applied,
+used_at
+
+payments amount, original_amount --- to calculate savings
+
+users name, email --- who used the coupon
+
+flash_sales title --- if flash sale discount was applied instead
+
+---
 
 **Output Columns**
 
-  -----------------------------------------------------------------------
-  **Column**          **Description**
-  ------------------- ---------------------------------------------------
-  Coupon Code         coupons.code
+---
 
-  Label               Internal name e.g. Eid Sale 2025
+**Column** **Description**
 
-  Type                percentage \| fixed
+---
 
-  Discount Value      e.g. 20% or BDT 100
+Coupon Code coupons.code
 
-  Total Uses          coupon_usages count for this coupon
+Label Internal name e.g. Eid Sale 2025
 
-  Usage Limit         coupons.usage_limit
+Type percentage \| fixed
 
-  Remaining Uses      usage_limit - used_count
+Discount Value e.g. 20% or BDT 100
 
-  Total Discount      SUM(coupon_usages.discount_applied)
-  Given               
+Total Uses coupon_usages count for this coupon
 
-  Total Revenue       SUM(payments.amount) where coupon applied
-  Impact              
+Usage Limit coupons.usage_limit
 
-  Unique Users        DISTINCT count of user_id in coupon_usages
+Remaining Uses usage_limit - used_count
 
-  Expires At          coupons.expires_at
+Total Discount SUM(coupon_usages.discount_applied)
+Given
 
-  Status              active \| expired \| exhausted
-  -----------------------------------------------------------------------
+Total Revenue SUM(payments.amount) where coupon applied
+Impact
+
+Unique Users DISTINCT count of user_id in coupon_usages
+
+Expires At coupons.expires_at
+
+Status active \| expired \| exhausted
+
+---
 
 ## Report 8 --- Borrow & Reservation Stats
 
-*Tracks book borrowing patterns, return rates, overdue stats, and
-reservation queue health.*
+_Tracks book borrowing patterns, return rates, overdue stats, and
+reservation queue health._
 
 **Data Source**
 
-  -----------------------------------------------------------------------
-  **Collection**     **Fields Used**
-  ------------------ ----------------------------------------------------
-  borrows            All fields --- primary source
+---
 
-  reservations       All fields --- reservation analytics
+**Collection** **Fields Used**
 
-  books              title, author_ids, available_copies
+---
 
-  users              name, email
+borrows All fields --- primary source
 
-  plans              name --- to see which plans borrow most
-  -----------------------------------------------------------------------
+reservations All fields --- reservation analytics
+
+books title, author_ids, available_copies
+
+users name, email
+
+plans name --- to see which plans borrow most
+
+---
 
 **Key Metrics**
 
-  -----------------------------------------------------------------------
-  **Metric**            **Description**
-  --------------------- -------------------------------------------------
-  Total Borrows         COUNT of all borrows in date range
+---
 
-  Active Borrows        COUNT where status = active
+**Metric** **Description**
 
-  Returned On Time      COUNT where returned_at \<= due_at
+---
 
-  Expired (Overdue)     COUNT where status = expired
+Total Borrows COUNT of all borrows in date range
 
-  Avg Borrow Duration   AVG(due_at - borrowed_at) in days
+Active Borrows COUNT where status = active
 
-  Most Borrowed Books   books ranked by borrow_count in period
+Returned On Time COUNT where returned_at \<= due_at
 
-  Most Borrowing Users  users ranked by borrow count
+Expired (Overdue) COUNT where status = expired
 
-  Total Reservations    COUNT from reservations collection
+Avg Borrow Duration AVG(due_at - borrowed_at) in days
 
-  Avg Queue Size        AVG queue_position per book
+Most Borrowed Books books ranked by borrow_count in period
 
-  Avg Wait Time         AVG(notified_at - created_at) for fulfilled
-                        reservations
+Most Borrowing Users users ranked by borrow count
 
-  Fulfillment Rate      fulfilled / total reservations × 100
-  -----------------------------------------------------------------------
+Total Reservations COUNT from reservations collection
+
+Avg Queue Size AVG queue_position per book
+
+Avg Wait Time AVG(notified_at - created_at) for fulfilled
+reservations
+
+Fulfillment Rate fulfilled / total reservations × 100
+
+---
 
 ## Report 9 --- Staff Activity Report
 
-*Audit log report --- who did what, when, and how much. Used for
-accountability and performance review.*
+_Audit log report --- who did what, when, and how much. Used for
+accountability and performance review._
 
 **Data Source**
 
-  --------------------------------------------------------------------------
-  **Collection**        **Fields Used**
-  --------------------- ----------------------------------------------------
-  staff_activity_logs   All fields --- primary source
+---
 
-  admin_activity_logs   All fields --- for admin actions
+**Collection** **Fields Used**
 
-  staff                 name, email, role_id
+---
 
-  roles                 name --- role display
-  --------------------------------------------------------------------------
+staff_activity_logs All fields --- primary source
+
+admin_activity_logs All fields --- for admin actions
+
+staff name, email, role_id
+
+roles name --- role display
+
+---
 
 **Filters Available**
 
-  --------------------------------------------------------------------------
-  **Filter**    **Type**       **Description**
-  ------------- -------------- ---------------------------------------------
-  Date Range    Date picker    Filter by action date
+---
 
-  Staff Member  Multi-select   Filter by specific staff
+**Filter** **Type** **Description**
 
-  Module        Multi-select   books \| members \| subscriptions \| coupons
-                               \| reports \| settings
+---
 
-  Action        Multi-select   view \| create \| edit \| delete \| export \|
-                               send \| refund
-  --------------------------------------------------------------------------
+Date Range Date picker Filter by action date
+
+Staff Member Multi-select Filter by specific staff
+
+Module Multi-select books \| members \| subscriptions \| coupons
+\| reports \| settings
+
+Action Multi-select view \| create \| edit \| delete \| export \|
+send \| refund
+
+---
 
 **Output Columns**
 
-  -----------------------------------------------------------------------
-  **Column**    **Description**
-  ------------- ---------------------------------------------------------
-  Staff Name    staff.name
+---
 
-  Role          roles.name
+**Column** **Description**
 
-  Action        e.g. books.create --- human readable
+---
 
-  Module        Which section
+Staff Name staff.name
 
-  Target        What was affected e.g. \'Book: রবীন্দ্র রচনাবলী\'
+Role roles.name
 
-  Description   Full human-readable description
+Action e.g. books.create --- human readable
 
-  IP Address    staff_activity_logs.ip_address
+Module Which section
 
-  Date & Time   created_at formatted
-  -----------------------------------------------------------------------
+Target What was affected e.g. \'Book: রবীন্দ্র রচনাবলী\'
+
+Description Full human-readable description
+
+IP Address staff_activity_logs.ip_address
+
+Date & Time created_at formatted
+
+---
 
 **Summary Metrics**
 
-  -----------------------------------------------------------------------
-  **Metric**          **Description**
-  ------------------- ---------------------------------------------------
-  Total Actions       Total log entries in date range
+---
 
-  Actions by Staff    Breakdown per staff member --- who is most active
+**Metric** **Description**
 
-  Actions by Module   Which module had most activity
+---
 
-  Actions by Type     create vs edit vs delete breakdown
+Total Actions Total log entries in date range
 
-  Most Active Day     Day with highest action count
+Actions by Staff Breakdown per staff member --- who is most active
 
-  Most Active Time    Hour of day with highest activity
-  -----------------------------------------------------------------------
+Actions by Module Which module had most activity
+
+Actions by Type create vs edit vs delete breakdown
+
+Most Active Day Day with highest action count
+
+Most Active Time Hour of day with highest activity
+
+---
 
 ## Report 10 --- Reading Analytics Report
 
-*Deep-dive into how members are reading --- time spent, completion
-rates, popular genres, device usage.*
+_Deep-dive into how members are reading --- time spent, completion
+rates, popular genres, device usage._
 
 **Data Source**
 
-  -----------------------------------------------------------------------
-  **Collection**     **Fields Used**
-  ------------------ ----------------------------------------------------
-  reading_sessions   All fields --- primary source
+---
 
-  reading_progress   percent_complete, is_completed, total_reading_mins
+**Collection** **Fields Used**
 
-  books              title, category_ids, language, access_level
+---
 
-  categories         name --- for genre analytics
+reading_sessions All fields --- primary source
 
-  users              total_books_read, total_reading_mins,
-                     reading_streak_days
-  -----------------------------------------------------------------------
+reading_progress percent_complete, is_completed, total_reading_mins
+
+books title, category_ids, language, access_level
+
+categories name --- for genre analytics
+
+users total_books_read, total_reading_mins,
+reading_streak_days
+
+---
 
 **Sub-reports Included**
 
-  -----------------------------------------------------------------------
-  **Sub-report**        **Description**
-  --------------------- -------------------------------------------------
-  Total Reading Time    SUM of all reading_sessions.duration_mins in date
-                        range
+---
 
-  Avg Session Length    AVG(duration_mins) per session
+**Sub-report** **Description**
 
-  Completion Rate       Books where is_completed=true / total books
-                        started × 100
+---
 
-  Peak Reading Hours    GROUP BY hour of day from
-                        reading_sessions.started_at
+Total Reading Time SUM of all reading_sessions.duration_mins in date
+range
 
-  Peak Reading Days     GROUP BY day of week --- when do people read most
+Avg Session Length AVG(duration_mins) per session
 
-  Popular Genres        TOP categories by session count
+Completion Rate Books where is_completed=true / total books
+started × 100
 
-  Language Breakdown    Sessions by book language (EN vs BN vs others)
+Peak Reading Hours GROUP BY hour of day from
+reading_sessions.started_at
 
-  Format Preference     PDF vs EPUB usage from book_files.format
+Peak Reading Days GROUP BY day of week --- when do people read most
 
-  Device Breakdown      desktop vs mobile vs tablet from
-                        reading_sessions.device_type
+Popular Genres TOP categories by session count
 
-  Reading Streak Stats  Distribution of users.reading_streak_days
+Language Breakdown Sessions by book language (EN vs BN vs others)
 
-  Dropout Analysis      Books with high start rate but low completion
-                        rate
+Format Preference PDF vs EPUB usage from book_files.format
 
-  New vs Return Readers First-time book starts vs returning to same book
-  -----------------------------------------------------------------------
+Device Breakdown desktop vs mobile vs tablet from
+reading_sessions.device_type
+
+Reading Streak Stats Distribution of users.reading_streak_days
+
+Dropout Analysis Books with high start rate but low completion
+rate
+
+New vs Return Readers First-time book starts vs returning to same book
+
+---
 
 **Aggregation Pipeline --- Peak Reading Hours**
 
 +-----------------------------------------------------------------------+
-| db.reading_sessions.aggregate(\[                                      |
-|                                                                       |
-| { \$match: { created_at: { \$gte: from_date, \$lte: to_date } } },    |
-|                                                                       |
-| { \$addFields: {                                                      |
-|                                                                       |
-| hour: { \$hour: { date: \'\$started_at\', timezone: \'Asia/Dhaka\' }  |
-| },                                                                    |
-|                                                                       |
-| day_of_week: { \$dayOfWeek: { date: \'\$started_at\', timezone:       |
-| \'Asia/Dhaka\' } }                                                    |
-|                                                                       |
-| }},                                                                   |
-|                                                                       |
-| { \$group: {                                                          |
-|                                                                       |
-| \_id: { hour: \'\$hour\', day: \'\$day_of_week\' },                   |
-|                                                                       |
-| session_count: { \$sum: 1 },                                          |
-|                                                                       |
-| total_mins: { \$sum: \'\$duration_mins\' }                            |
-|                                                                       |
-| }},                                                                   |
-|                                                                       |
-| { \$sort: { session_count: -1 } }                                     |
-|                                                                       |
-| \])                                                                   |
+| db.reading_sessions.aggregate(\[ |
+| |
+| { \$match: { created_at: { \$gte: from_date, \$lte: to_date } } }, |
+| |
+| { \$addFields: { |
+| |
+| hour: { \$hour: { date: \'\$started_at\', timezone: \'Asia/Dhaka\' } |
+| }, |
+| |
+| day_of_week: { \$dayOfWeek: { date: \'\$started_at\', timezone: |
+| \'Asia/Dhaka\' } } |
+| |
+| }}, |
+| |
+| { \$group: { |
+| |
+| \_id: { hour: \'\$hour\', day: \'\$day_of_week\' }, |
+| |
+| session_count: { \$sum: 1 }, |
+| |
+| total_mins: { \$sum: \'\$duration_mins\' } |
+| |
+| }}, |
+| |
+| { \$sort: { session_count: -1 } } |
+| |
+| \]) |
 +=======================================================================+
 
 ## Admin Dashboard Overview (Live --- No Export)
 
-*The main dashboard page shows live counters and charts. These are NOT
+_The main dashboard page shows live counters and charts. These are NOT
 report_jobs --- they run as direct API queries on page load with
-lightweight aggregations.*
+lightweight aggregations._
 
-  ------------------------------------------------------------------------
-  **Widget**            **Data Source**     **Query Type**
-  --------------------- ------------------- ------------------------------
-  Total Members         users               COUNT where status=active
+---
 
-  Active Subscriptions  users               COUNT where
-                                            subscription_status=active
+**Widget** **Data Source** **Query Type**
 
-  New Members Today     users               COUNT where created_at \>=
-                                            today 00:00
+---
 
-  MRR                   subscriptions       Calculated from active sub
-                                            prices
+Total Members users COUNT where status=active
 
-  Revenue This Month    payments            SUM amount where paid_at in
-                                            current month
+Active Subscriptions users COUNT where
+subscription_status=active
 
-  Total Books           books               COUNT where is_available=true
+New Members Today users COUNT where created_at \>=
+today 00:00
 
-  Books Added This      books               COUNT where created_at in
-  Month                                     current month
+MRR subscriptions Calculated from active sub
+prices
 
-  Active Borrows        borrows             COUNT where status=active
+Revenue This Month payments SUM amount where paid_at in
+current month
 
-  Pending Reservations  reservations        COUNT where status=waiting
+Total Books books COUNT where is_available=true
 
-  Pending Reports       report_jobs         COUNT where
-                                            status=queued\|processing
+Books Added This books COUNT where created_at in
+Month current month
 
-  Registration Chart    users               GROUP BY date for last 30 days
+Active Borrows borrows COUNT where status=active
 
-  Revenue Chart         payments            GROUP BY date for last 30 days
+Pending Reservations reservations COUNT where status=waiting
 
-  Popular Books Chart   books               TOP 5 by read_count
+Pending Reports report_jobs COUNT where
+status=queued\|processing
 
-  Plan Distribution Pie users               GROUP BY current_plan_id
+Registration Chart users GROUP BY date for last 30 days
 
-  Failed Payments       payments            COUNT where status=failed,
-                                            last 7 days
+Revenue Chart payments GROUP BY date for last 30 days
 
-  Subscription Expiring subscriptions       COUNT where ends_at within 7
-                                            days
-  ------------------------------------------------------------------------
+Popular Books Chart books TOP 5 by read_count
+
+Plan Distribution Pie users GROUP BY current_plan_id
+
+Failed Payments payments COUNT where status=failed,
+last 7 days
+
+Subscription Expiring subscriptions COUNT where ends_at within 7
+days
+
+---
 
 ## Report Export Formats
 
-  ---------------------------------------------------------------------------
-  **Format**   **Library**           **Contents**
-  ------------ --------------------- ----------------------------------------
-  PDF          pdfkit (Node.js ---   Header with library logo, filters
-               Free)                 applied, summary metrics, data table,
-                                     page numbers, generated date
+---
 
-  Excel        exceljs (Node.js ---  Summary sheet + data sheet. Formatted
-               Free)                 headers, column widths auto-fit, number
-                                     formatting, date formatting
-  ---------------------------------------------------------------------------
+**Format** **Library** **Contents**
+
+---
+
+PDF pdfkit (Node.js --- Header with library logo, filters
+Free) applied, summary metrics, data table,
+page numbers, generated date
+
+Excel exceljs (Node.js --- Summary sheet + data sheet. Formatted
+Free) headers, column widths auto-fit, number
+formatting, date formatting
+
+---
 
 ## Report Permissions (RBAC)
 
-  -----------------------------------------------------------------------
-  **Permission**     **Who Can Access**
-  ------------------ ----------------------------------------------------
-  reports.view       Can view report dashboard and live widgets. Cannot
-                     export.
+---
 
-  reports.export     Can request PDF/Excel export via report_jobs queue.
+**Permission** **Who Can Access**
 
-  No permission      Cannot see Reports section at all --- hidden from
-                     sidebar.
-  -----------------------------------------------------------------------
+---
 
-  -----------------------------------------------------------------------
-  **⏱️ TTL Indexes & Auto-expiry Summary**
-  -----------------------------------------------------------------------
+reports.view Can view report dashboard and live widgets. Cannot
+export.
 
-  -----------------------------------------------------------------------
+reports.export Can request PDF/Excel export via report_jobs queue.
 
-  ------------------------------------------------------------------------------
-  **Collection**          **TTL Field** **Duration**   **Effect**
-  ----------------------- ------------- -------------- -------------------------
-  email_verify_tokens     expires_at    At date (0s)   Auto-delete expired
-                                                       tokens
+No permission Cannot see Reports section at all --- hidden from
+sidebar.
 
-  password_reset_tokens   expires_at    At date (0s)   Auto-delete expired
-                                                       tokens
+---
 
-  staff_invite_tokens     expires_at    At date (0s)   Auto-delete expired
-                                                       invites
+---
 
-  login_history           created_at    90 days        Rolling window of login
-                                                       history
+**⏱️ TTL Indexes & Auto-expiry Summary**
 
-  webhook_logs            created_at    90 days        Auto-cleanup webhook logs
+---
 
-  notifications           created_at    90 days        Auto-delete old in-app
-                                                       notifications
+---
 
-  notification_logs       created_at    90 days        Auto-delete delivery logs
+---
 
-  reading_sessions        created_at    1 year         Auto-cleanup old session
-                                                       data
+**Collection** **TTL Field** **Duration** **Effect**
 
-  search_logs             created_at    180 days       Auto-cleanup search
-                                                       history
+---
 
-  staff_activity_logs     created_at    180 days       Auto-cleanup staff logs
+email_verify_tokens expires_at At date (0s) Auto-delete expired
+tokens
 
-  admin_activity_logs     created_at    2 years        Longer retention for
-                                                       admin audit
+password_reset_tokens expires_at At date (0s) Auto-delete expired
+tokens
 
-  report_jobs             expires_at    At date (0s)   Auto-delete expired
-                                                       report files
-  ------------------------------------------------------------------------------
+staff_invite_tokens expires_at At date (0s) Auto-delete expired
+invites
 
-  -----------------------------------------------------------------------
-  **🔄 Background Cron Jobs Required**
-  -----------------------------------------------------------------------
+login_history created_at 90 days Rolling window of login
+history
 
-  -----------------------------------------------------------------------
+webhook_logs created_at 90 days Auto-cleanup webhook logs
 
-  ------------------------------------------------------------------------
-  **Job**             **Schedule**   **What it does**
-  ------------------- -------------- -------------------------------------
-  Subscription expiry Every hour     Mark subs expired, reset
-                                     user.subscription_status to free
+notifications created_at 90 days Auto-delete old in-app
+notifications
 
-  Borrow expiry       Every hour     Mark borrows expired, increment
-                                     book.available_copies
+notification_logs created_at 90 days Auto-delete delivery logs
 
-  Reservation         Every 30 min   When borrow expires → notify next
-  notifier                           user in queue
+reading_sessions created_at 1 year Auto-cleanup old session
+data
 
-  Reservation claim   Every 30 min   Cancel reservations where claim
-  expiry                             window (48hr) passed
+search_logs created_at 180 days Auto-cleanup search
+history
 
-  Renewal reminder    Daily at 9AM   Email+SMS users whose subscription
-                                     expires in 3 days
+staff_activity_logs created_at 180 days Auto-cleanup staff logs
 
-  Birthday coupon     Daily at 8AM   Apply birthday coupon for users with
-  sender                             birthday today
+admin_activity_logs created_at 2 years Longer retention for
+admin audit
 
-  Flash sale          Every 5 min    Activate/deactivate flash sales based
-  activator                          on starts_at/ends_at
+report_jobs expires_at At date (0s) Auto-delete expired
+report files
 
-  Reading streak      Daily at       Reset streak if user didn\'t read
-  updater             midnight       yesterday
+---
 
-  Report generator    Every 2 min    Pick queued report_jobs, generate
-                                     file, update status
+---
 
-  Device token        Weekly         Remove FCM tokens that have been
-  cleanup                            inactive 90+ days
-  ------------------------------------------------------------------------
+**🔄 Background Cron Jobs Required**
 
-*Digital Library Management System --- MongoDB Database Design v3.0*
+---
 
-*36 Collections \| 10 Reports \| Mongoose ODM \| MongoDB Atlas Free
-Tier*
+---
+
+---
+
+**Job** **Schedule** **What it does**
+
+---
+
+Subscription expiry Every hour Mark subs expired, reset
+user.subscription_status to free
+
+Borrow expiry Every hour Mark borrows expired, increment
+book.available_copies
+
+Reservation Every 30 min When borrow expires → notify next
+notifier user in queue
+
+Reservation claim Every 30 min Cancel reservations where claim
+expiry window (48hr) passed
+
+Renewal reminder Daily at 9AM Email+SMS users whose subscription
+expires in 3 days
+
+Birthday coupon Daily at 8AM Apply birthday coupon for users with
+sender birthday today
+
+Flash sale Every 5 min Activate/deactivate flash sales based
+activator on starts_at/ends_at
+
+Reading streak Daily at Reset streak if user didn\'t read
+updater midnight yesterday
+
+Report generator Every 2 min Pick queued report_jobs, generate
+file, update status
+
+Device token Weekly Remove FCM tokens that have been
+cleanup inactive 90+ days
+
+---
+
+_Digital Library Management System --- MongoDB Database Design v3.0_
+
+_36 Collections \| 10 Reports \| Mongoose ODM \| MongoDB Atlas Free
+Tier_

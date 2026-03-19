@@ -363,8 +363,8 @@ Build the backend as a strict TypeScript modular monolith on Node.js + Express +
 
 **Route plan per module**
 
-- auth: POST /auth/register, /auth/login, /auth/google, /auth/facebook, /auth/logout, /auth/verify-email, /auth/resend-verification, /auth/forgot-password, /auth/reset-password; GET /auth/me, /auth/me/login-history; PATCH /auth/me, /auth/me/password, /auth/me/notification-prefs.
-- staff-auth: POST /staff/login, /staff/accept-invite, /staff/logout, /staff/2fa/enable, /staff/2fa/verify, /staff/2fa/disable; GET /staff/me; PATCH /staff/me/password.
+- auth: POST /auth/register, /auth/login, /auth/google, /auth/facebook, /auth/logout, /auth/verify-email, /auth/resend-verification, /auth/forgot-password, /auth/reset-password, /auth/2fa/enable, /auth/2fa/verify, /auth/2fa/disable, /auth/2fa/challenge; GET /auth/me, /auth/me/login-history, /auth/2fa/backup-codes; PATCH /auth/me, /auth/me/password, /auth/me/notification-prefs.
+- staff-auth: POST /staff/login, /staff/accept-invite, /staff/logout, /staff/2fa/setup, /staff/2fa/enable, /staff/2fa/verify, /staff/2fa/disable; GET /staff/me; PATCH /staff/me/password.
 - onboarding: GET /onboarding/plans; POST /onboarding/select, /onboarding/complete.
 - plans: GET /plans, /plans/:id; POST /plans; PUT /plans/:id; PATCH /plans/:id/toggle.
 - subscriptions: GET /subscriptions/my, /subscriptions/my/history, /subscriptions, /subscriptions/:id; POST /subscriptions; PATCH /subscriptions/my/cancel, /subscriptions/my/renew, /subscriptions/my/upgrade, /subscriptions/my/downgrade, /subscriptions/:id.

@@ -324,6 +324,270 @@
       "name": "auth",
       "item": [
         {
+          "name": "GET /api/v1/auth/2fa/backup-codes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/2fa/backup-codes?otp=Otp%20sample&page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "2fa",
+                "backup-codes"
+              ],
+              "query": [
+                {
+                  "key": "otp",
+                  "value": "Otp sample",
+                  "disabled": false,
+                  "description": "Query parameter 'otp'."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/auth/2fa/challenge",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/2fa/challenge",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "2fa",
+                "challenge"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tempToken\": \"Temp Token sample\",\n  \"otp\": \"Otp sample\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /api/v1/auth/2fa/disable",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/2fa/disable",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "2fa",
+                "disable"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"otp\": \"Otp sample\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/auth/2fa/enable",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/2fa/enable",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "2fa",
+                "enable"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/auth/2fa/verify",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/2fa/verify",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "2fa",
+                "verify"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"otp\": \"Otp sample\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "GET /api/v1/auth/facebook",
           "request": {
             "method": "GET",
@@ -601,7 +865,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const json = pm.response.json();",
-                  "const token = json?.data?.tokens?.accessToken;",
+                  "const token = json?.data?.accessToken ?? json?.data?.tokens?.accessToken;",
                   "if (token) { pm.collectionVariables.set(\"userToken\", token); }"
                 ]
               }
@@ -975,7 +1239,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const json = pm.response.json();",
-                  "const token = json?.data?.tokens?.accessToken;",
+                  "const token = json?.data?.accessToken ?? json?.data?.tokens?.accessToken;",
                   "if (token) { pm.collectionVariables.set(\"userToken\", token); }"
                 ]
               }
@@ -8525,7 +8789,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"password\": \"P@ssw0rd123!\",\n  \"code\": \"Code sample\"\n}",
+              "raw": "{\n  \"otp\": \"Otp sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -8549,17 +8813,12 @@
           "name": "POST /api/v1/staff/2fa/enable",
           "request": {
             "method": "POST",
-            "header": [],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{staffToken}}",
-                  "type": "string"
-                }
-              ]
-            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/staff/2fa/enable",
               "host": [
@@ -8572,19 +8831,64 @@
                 "2fa",
                 "enable"
               ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tempToken\": \"Temp Token sample\",\n  \"otp\": \"Otp sample\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
           "event": [
             {
-              "listen": "prerequest",
+              "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if (!pm.collectionVariables.get(\"staffToken\")) { throw new Error(\"Missing staffToken collection variable.\"); }"
+                  "const json = pm.response.json();",
+                  "const token = json?.data?.accessToken ?? json?.data?.tokens?.accessToken;",
+                  "if (token) { pm.collectionVariables.set(\"staffToken\", token); }"
                 ]
               }
             }
           ]
+        },
+        {
+          "name": "POST /api/v1/staff/2fa/setup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/staff/2fa/setup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "staff",
+                "2fa",
+                "setup"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tempToken\": \"Temp Token sample\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
         },
         {
           "name": "POST /api/v1/staff/2fa/verify",
@@ -8596,16 +8900,6 @@
                 "value": "application/json"
               }
             ],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{staffToken}}",
-                  "type": "string"
-                }
-              ]
-            },
             "url": {
               "raw": "{{baseUrl}}/api/v1/staff/2fa/verify",
               "host": [
@@ -8621,7 +8915,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"Code sample\"\n}",
+              "raw": "{\n  \"tempToken\": \"Temp Token sample\",\n  \"otp\": \"Otp sample\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -8631,21 +8925,12 @@
           },
           "event": [
             {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (!pm.collectionVariables.get(\"staffToken\")) { throw new Error(\"Missing staffToken collection variable.\"); }"
-                ]
-              }
-            },
-            {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
                   "const json = pm.response.json();",
-                  "const token = json?.data?.tokens?.accessToken;",
+                  "const token = json?.data?.accessToken ?? json?.data?.tokens?.accessToken;",
                   "if (token) { pm.collectionVariables.set(\"staffToken\", token); }"
                 ]
               }
@@ -8724,7 +9009,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "const json = pm.response.json();",
-                  "const token = json?.data?.tokens?.accessToken;",
+                  "const token = json?.data?.accessToken ?? json?.data?.tokens?.accessToken;",
                   "if (token) { pm.collectionVariables.set(\"staffToken\", token); }"
                 ]
               }

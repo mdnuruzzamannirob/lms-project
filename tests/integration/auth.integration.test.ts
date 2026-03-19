@@ -22,7 +22,13 @@ describe('Auth integration flow', () => {
       password,
     })
 
+    expect(loggedIn.requiresTwoFactor).toBe(false)
+    if (loggedIn.requiresTwoFactor) {
+      throw new Error(
+        'Expected login without 2FA challenge in integration test.',
+      )
+    }
     expect(loggedIn.user.email).toBe(email)
-    expect(loggedIn.tokens.accessToken.length).toBeGreaterThan(20)
+    expect(loggedIn.accessToken.length).toBeGreaterThan(20)
   })
 })

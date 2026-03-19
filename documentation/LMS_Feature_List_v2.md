@@ -6,45 +6,53 @@ Version 2.0 \| Web-Based SaaS \| Global Market
 
 # System Overview
 
-  -----------------------------------------------------------------------
-  **Item**                   **Detail**
-  -------------------------- --------------------------------------------
-  Product Type               Web-Based SaaS Digital Library
+---
 
-  Target Market              Global (Bangladesh + International)
+**Item** **Detail**
 
-  Platform                   Web (Mobile Responsive)
+---
 
-  Languages                  English + Bangla
+Product Type Web-Based SaaS Digital Library
 
-  Library Type               Digital / E-Book Only
+Target Market Global (Bangladesh + International)
 
-  Business Model             Freemium + Subscription
+Platform Web (Mobile Responsive)
 
-  Payment                    bKash, Nagad, Stripe, PayPal
+Languages English + Bangla
 
-  E-Book Formats             PDF + EPUB
+Library Type Digital / E-Book Only
 
-  Notifications              Email, SMS, In-App, Push
+Business Model Freemium + Subscription
 
-  Authentication             Email/Password, Google, Facebook
-  -----------------------------------------------------------------------
+Payment bKash, Nagad, Stripe, PayPal
+
+E-Book Formats PDF + EPUB
+
+Notifications Email, SMS, In-App, Push
+
+Authentication Email/Password, Google, Facebook
+
+---
 
 # User Structure
 
-  -----------------------------------------------------------------------
-  **Role**           **Access Level** **Description**
-  ------------------ ---------------- -----------------------------------
-  Super Admin (You)  Full Access      CEO --- Controls everything
-                                      including roles, staff, revenue,
-                                      settings
+---
 
-  Librarian / Staff  RBAC Based       Invited by Admin --- access only
-                                      per assigned role permissions
+**Role** **Access Level** **Description**
 
-  Member / User      User Dashboard   Registered customers who subscribe
-                                      and read books
-  -----------------------------------------------------------------------
+---
+
+Super Admin (You) Full Access CEO --- Controls everything
+including roles, staff, revenue,
+settings
+
+Librarian / Staff RBAC Based Invited by Admin --- access only
+per assigned role permissions
+
+Member / User User Dashboard Registered customers who subscribe
+and read books
+
+---
 
 # Module 1 --- Public Homepage
 
@@ -129,19 +137,23 @@ selection.
 
 ## Plans
 
-  -----------------------------------------------------------------------
-  **Plan**      **Access**                            **Billing**
-  ------------- ------------------------------------- -------------------
-  Free          Limited books, preview only, basic    Free forever
-                features                              
+---
 
-  Basic         Limited book access, bookmarks        Monthly / Yearly
+**Plan** **Access** **Billing**
 
-  Standard      All books, borrow, reserve, discounts Monthly / Yearly
+---
 
-  Premium       Unlimited + offline + all features +  Monthly / Yearly
-                priority support                      
-  -----------------------------------------------------------------------
+Free Limited books, preview only, basic Free forever
+features
+
+Basic Limited book access, bookmarks Monthly / Yearly
+
+Standard All books, borrow, reserve, discounts Monthly / Yearly
+
+Premium Unlimited + offline + all features + Monthly / Yearly
+priority support
+
+---
 
 ## Payment Gateways
 
@@ -322,31 +334,35 @@ upgrade prompts.
 
 # Module 7 --- Notification System
 
-  ------------------------------------------------------------------------
-  **Event**                  **Email**   **SMS**   **In-App**   **Push**
-  -------------------------- ----------- --------- ------------ ----------
-  Registration & Email       Yes         No        Yes          No
-  Verification                                                  
+---
 
-  Subscription Confirmed     Yes         Yes       Yes          Yes
+**Event** **Email** **SMS** **In-App** **Push**
 
-  Payment Receipt            Yes         Yes       Yes          No
+---
 
-  Renewal Reminder (3 days   Yes         Yes       Yes          Yes
-  before)                                                       
+Registration & Email Yes No Yes No
+Verification
 
-  Subscription Expired       Yes         Yes       Yes          Yes
+Subscription Confirmed Yes Yes Yes Yes
 
-  Borrow Expiry Reminder     Yes         No        Yes          Yes
+Payment Receipt Yes Yes Yes No
 
-  Reserved Book Available    Yes         Yes       Yes          Yes
+Renewal Reminder (3 days Yes Yes Yes Yes
+before)
 
-  New Book Added             Yes         No        Yes          Yes
+Subscription Expired Yes Yes Yes Yes
 
-  New Offer / Discount       Yes         No        Yes          Yes
+Borrow Expiry Reminder Yes No Yes Yes
 
-  Account Suspended          Yes         Yes       Yes          No
-  ------------------------------------------------------------------------
+Reserved Book Available Yes Yes Yes Yes
+
+New Book Added Yes No Yes Yes
+
+New Offer / Discount Yes No Yes Yes
+
+Account Suspended Yes Yes Yes No
+
+---
 
 # Module 8 --- Staff / Librarian System
 
@@ -370,7 +386,11 @@ upgrade prompts.
 
 - Email + Password only (no Google/Facebook)
 
-- Two-Factor Authentication (optional)
+- Two-Factor Authentication is mandatory for staff access
+
+- First successful password check returns a setup temp token if 2FA is not configured
+
+- Staff must complete /staff/2fa/setup and /staff/2fa/enable before receiving access token
 
 - Cannot access User dashboard
 
@@ -412,42 +432,50 @@ upgrade prompts.
 
 ## Permission List
 
-  -----------------------------------------------------------------------
-  **Module**            **Permissions Available**
-  --------------------- -------------------------------------------------
-  Books                 View, Add, Edit, Delete, Upload PDF/EPUB, Set
-                        Featured
+---
 
-  Members / Users       View, Edit, Suspend, Delete
+**Module** **Permissions Available**
 
-  Subscriptions         View, Modify, Cancel, Process Refund
+---
 
-  Borrow & Reserve      View, Manage, Override
+Books View, Add, Edit, Delete, Upload PDF/EPUB, Set
+Featured
 
-  Notifications         Send to users, Send bulk
+Members / Users View, Edit, Suspend, Delete
 
-  Discounts & Coupons   View, Create, Edit, Delete
+Subscriptions View, Modify, Cancel, Process Refund
 
-  Reports               View, Export PDF/Excel
+Borrow & Reserve View, Manage, Override
 
-  Settings              View, Modify (Admin only by default)
-  -----------------------------------------------------------------------
+Notifications Send to users, Send bulk
+
+Discounts & Coupons View, Create, Edit, Delete
+
+Reports View, Export PDF/Excel
+
+Settings View, Modify (Admin only by default)
+
+---
 
 ## Example Roles
 
-  -----------------------------------------------------------------------
-  **Role Name**         **Permissions Included**
-  --------------------- -------------------------------------------------
-  Book Manager          Books (full), Reports (view only)
+---
 
-  Member Support        Members, Subscriptions, Borrow/Reserve,
-                        Notifications
+**Role Name** **Permissions Included**
 
-  Senior Librarian      Books, Members, Subscriptions, Borrow/Reserve,
-                        Notifications, Discounts, Reports
+---
 
-  Report Analyst        Reports (view + export) only
-  -----------------------------------------------------------------------
+Book Manager Books (full), Reports (view only)
+
+Member Support Members, Subscriptions, Borrow/Reserve,
+Notifications
+
+Senior Librarian Books, Members, Subscriptions, Borrow/Reserve,
+Notifications, Discounts, Reports
+
+Report Analyst Reports (view + export) only
+
+---
 
 # Module 10 --- Admin Dashboard
 
@@ -567,37 +595,41 @@ Full access for Super Admin (you) only.
 
 # System Page & URL Structure
 
-  -----------------------------------------------------------------------------------
-  **URL**                             **Visible To**   **Purpose**
-  ----------------------------------- ---------------- ------------------------------
-  yourdomain.com                      Everyone         Public Homepage
+---
 
-  yourdomain.com/login                All users        User Login
+**URL** **Visible To** **Purpose**
 
-  yourdomain.com/register             New users        User Registration
+---
 
-  yourdomain.com/verify-email         Registered users Email Verification
+yourdomain.com Everyone Public Homepage
 
-  yourdomain.com/onboarding           Verified users   Plan Selection
+yourdomain.com/login All users User Login
 
-  yourdomain.com/dashboard            Members          User Dashboard
+yourdomain.com/register New users User Registration
 
-  yourdomain.com/dashboard/books      Members          Book Catalogue
+yourdomain.com/verify-email Registered users Email Verification
 
-  yourdomain.com/dashboard/read/:id   Members          Online Reader
+yourdomain.com/onboarding Verified users Plan Selection
 
-  yourdomain.com/dashboard/library    Members          My Library
+yourdomain.com/dashboard Members User Dashboard
 
-  yourdomain.com/dashboard/settings   Members          Account Settings
+yourdomain.com/dashboard/books Members Book Catalogue
 
-  yourdomain.com/staff/login          Staff only       Staff Login
+yourdomain.com/dashboard/read/:id Members Online Reader
 
-  yourdomain.com/staff/dashboard      Staff only       Staff Panel (RBAC)
+yourdomain.com/dashboard/library Members My Library
 
-  yourdomain.com/admin/login          Admin only       Admin Login
+yourdomain.com/dashboard/settings Members Account Settings
 
-  yourdomain.com/admin/dashboard      Admin only       Full Admin Panel
-  -----------------------------------------------------------------------------------
+yourdomain.com/staff/login Staff only Staff Login
+
+yourdomain.com/staff/dashboard Staff only Staff Panel (RBAC)
+
+yourdomain.com/admin/login Admin only Admin Login
+
+yourdomain.com/admin/dashboard Admin only Full Admin Panel
+
+---
 
 # Recommended Tech Stack
 
@@ -606,182 +638,228 @@ upgrades only needed when scaling.
 
 ## Core Stack (Free)
 
-  ---------------------------------------------------------------------------
-  **Layer**        **Technology**        **Free Plan Details**
-  ---------------- --------------------- ------------------------------------
-  Frontend         Next.js + Tailwind    100% Free --- Open Source
-                   CSS                   
+---
 
-  Backend          Node.js + Express.js  100% Free --- Open Source
+**Layer** **Technology** **Free Plan Details**
 
-  ODM              Mongoose              100% Free --- MongoDB ODM for
-                                         Node.js
+---
 
-  Database         MongoDB Atlas (Free   Free 512MB shared cluster --- enough
-                   Tier)                 to start
+Frontend Next.js + Tailwind 100% Free --- Open Source
+CSS
 
-  Authentication   JWT + Passport.js     100% Free --- Open Source
+Backend Node.js + Express.js 100% Free --- Open Source
 
-  Social Login     Passport Google +     100% Free --- OAuth 2.0
-                   Facebook Strategy     
-  ---------------------------------------------------------------------------
+ODM Mongoose 100% Free --- MongoDB ODM for
+Node.js
+
+Database MongoDB Atlas (Free Free 512MB shared cluster --- enough
+Tier) to start
+
+Authentication JWT + Passport.js 100% Free --- Open Source
+
+Social Login Passport Google + 100% Free --- OAuth 2.0
+Facebook Strategy
+
+---
 
 ## File Storage (Free)
 
-  -----------------------------------------------------------------------
-  **Tool**           **Free Limit**           **Use For**
-  ------------------ ------------------------ ---------------------------
-  Cloudinary (Free   25GB storage + 25GB      Book covers, profile images
-  Tier)              bandwidth/month          
+---
 
-  Backblaze B2 (Free 10GB free storage        PDF / EPUB file storage
-  Tier)                                       
+**Tool** **Free Limit** **Use For**
 
-  Supabase Storage   1GB storage, 2GB         Alternative for files
-  (Free)             bandwidth                
-  -----------------------------------------------------------------------
+---
+
+Cloudinary (Free 25GB storage + 25GB Book covers, profile images
+Tier) bandwidth/month
+
+Backblaze B2 (Free 10GB free storage PDF / EPUB file storage
+Tier)
+
+Supabase Storage 1GB storage, 2GB Alternative for files
+(Free) bandwidth
+
+---
 
 ## Email (Free)
 
-  -----------------------------------------------------------------------
-  **Tool**           **Free Limit**         **Use For**
-  ------------------ ---------------------- -----------------------------
-  Resend (Free Tier) 3,000 emails/month     Verification, receipts,
-                     free                   reminders
+---
 
-  Nodemailer + Gmail Unlimited (Gmail       Development & small scale
-  SMTP               limits apply)          
+**Tool** **Free Limit** **Use For**
 
-  Brevo              300 emails/day free    Transactional emails
-  (ex-Sendinblue)                           
-  -----------------------------------------------------------------------
+---
+
+Resend (Free Tier) 3,000 emails/month Verification, receipts,
+free reminders
+
+Nodemailer + Gmail Unlimited (Gmail Development & small scale
+SMTP limits apply)
+
+Brevo 300 emails/day free Transactional emails
+(ex-Sendinblue)
+
+---
 
 ## SMS (Free / Low Cost)
 
-  -----------------------------------------------------------------------
-  **Tool**           **Free Plan**         **Use For**
-  ------------------ --------------------- ------------------------------
-  Twilio (Trial)     Free trial credit     SMS for Bangladesh +
-                     (\~\$15)              International
+---
 
-  SSL Wireless       Pay-as-you-go, no     Bangladesh SMS only
-  (Bangladesh)       monthly fee           
+**Tool** **Free Plan** **Use For**
 
-  Alpha SMS          Pay-as-you-go, cheap  Bangladesh SMS only
-  (Bangladesh)       BDT rate              
-  -----------------------------------------------------------------------
+---
+
+Twilio (Trial) Free trial credit SMS for Bangladesh +
+(\~\$15) International
+
+SSL Wireless Pay-as-you-go, no Bangladesh SMS only
+(Bangladesh) monthly fee
+
+Alpha SMS Pay-as-you-go, cheap Bangladesh SMS only
+(Bangladesh) BDT rate
+
+---
 
 ## Push Notifications (Free)
 
-  -----------------------------------------------------------------------
-  **Tool**           **Free Limit**        **Use For**
-  ------------------ --------------------- ------------------------------
-  Firebase FCM       Completely Free ---   Browser + Mobile push
-  (Google)           no limit              notifications
+---
 
-  Web Push API       Completely Free ---   Browser push (no third party
-  (Native)           browser built-in      needed)
-  -----------------------------------------------------------------------
+**Tool** **Free Limit** **Use For**
+
+---
+
+Firebase FCM Completely Free --- Browser + Mobile push
+(Google) no limit notifications
+
+Web Push API Completely Free --- Browser push (no third party
+(Native) browser built-in needed)
+
+---
 
 ## Payment (Free Integration)
 
-  ------------------------------------------------------------------------
-  **Gateway**           **Integration Cost**  **Transaction Fee**
-  --------------------- --------------------- ----------------------------
-  SSLCommerz (bKash,    Free sandbox + free   \% per transaction only
-  Nagad, Card)          integration           
+---
 
-  Stripe                Free to integrate     2.9% + \$0.30 per
-                                              transaction
+**Gateway** **Integration Cost** **Transaction Fee**
 
-  PayPal                Free to integrate     \% per transaction only
-  ------------------------------------------------------------------------
+---
+
+SSLCommerz (bKash, Free sandbox + free \% per transaction only
+Nagad, Card) integration
+
+Stripe Free to integrate 2.9% + \$0.30 per
+transaction
+
+PayPal Free to integrate \% per transaction only
+
+---
 
 ## Hosting (Free Tier)
 
-  ------------------------------------------------------------------------
-  **Tool**         **Free Plan**            **Use For**
-  ---------------- ------------------------ ------------------------------
-  Vercel (Free     Unlimited deployments,   Next.js Frontend Hosting
-  Tier)            100GB bandwidth          
+---
 
-  Render (Free     750 hrs/month free       Node.js + Express Backend
-  Tier)                                     
+**Tool** **Free Plan** **Use For**
 
-  Railway          \$5 free credit/month    Backend + DB alternative
-  (Starter)                                 
+---
 
-  MongoDB Atlas    512MB free cluster       Database Hosting
-  ------------------------------------------------------------------------
+Vercel (Free Unlimited deployments, Next.js Frontend Hosting
+Tier) 100GB bandwidth
+
+Render (Free 750 hrs/month free Node.js + Express Backend
+Tier)
+
+Railway \$5 free credit/month Backend + DB alternative
+(Starter)
+
+MongoDB Atlas 512MB free cluster Database Hosting
+
+---
 
 ## Book Reader (Free & Open Source)
 
-  -----------------------------------------------------------------------
-  **Tool**           **License**           **Use For**
-  ------------------ --------------------- ------------------------------
-  PDF.js (Mozilla)   Apache 2.0 --- Free   In-browser PDF reading
+---
 
-  Epub.js            MIT License --- Free  In-browser EPUB reading
-  -----------------------------------------------------------------------
+**Tool** **License** **Use For**
+
+---
+
+PDF.js (Mozilla) Apache 2.0 --- Free In-browser PDF reading
+
+Epub.js MIT License --- Free In-browser EPUB reading
+
+---
 
 ## Other Dev Tools (Free)
 
-  -----------------------------------------------------------------------
-  **Tool**         **Free Plan**          **Use For**
-  ---------------- ---------------------- -------------------------------
-  Git + GitHub     Free for public &      Version control
-                   private repos          
+---
 
-  Postman          Free tier available    API testing
+**Tool** **Free Plan** **Use For**
 
-  VS Code          Completely Free        Code editor
+---
 
-  Figma (Free      3 projects free        UI/UX Design
-  Tier)                                   
-  -----------------------------------------------------------------------
+Git + GitHub Free for public & Version control
+private repos
 
-  -----------------------------------------------------------------------
-  **💡 Upgrade Path --- When to Pay**
-  -----------------------------------------------------------------------
+Postman Free tier available API testing
 
-  -----------------------------------------------------------------------
+VS Code Completely Free Code editor
 
-  -----------------------------------------------------------------------
-  **When**           **Upgrade To**             **Estimated Cost**
-  ------------------ -------------------------- -------------------------
-  500+ users active  MongoDB Atlas M10 Cluster  \~\$57/month
+Figma (Free 3 projects free UI/UX Design
+Tier)
 
-  High file storage  Cloudinary Paid / AWS S3   \~\$5-20/month
-  needed                                        
+---
 
-  High email volume  Resend Pro / SendGrid      \~\$20/month
+---
 
-  Custom domain +    Vercel Pro / Own VPS       \~\$20/month
-  SSL                                           
+**💡 Upgrade Path --- When to Pay**
 
-  Production backend Render Pro / DigitalOcean  \~\$7-25/month
-  -----------------------------------------------------------------------
+---
+
+---
+
+---
+
+**When** **Upgrade To** **Estimated Cost**
+
+---
+
+500+ users active MongoDB Atlas M10 Cluster \~\$57/month
+
+High file storage Cloudinary Paid / AWS S3 \~\$5-20/month
+needed
+
+High email volume Resend Pro / SendGrid \~\$20/month
+
+Custom domain + Vercel Pro / Own VPS \~\$20/month
+SSL
+
+Production backend Render Pro / DigitalOcean \~\$7-25/month
+
+---
 
 # Development Phases
 
-  ----------------------------------------------------------------------------
-  **Phase**   **Duration**   **Deliverables**
-  ----------- -------------- -------------------------------------------------
-  Phase 1     Month 1        Homepage, Auth, Email Verification, Onboarding,
-                             Plan Selection
+---
 
-  Phase 2     Month 2        Book Management, Online Reader (PDF+EPUB), Book
-                             Catalogue
+**Phase** **Duration** **Deliverables**
 
-  Phase 3     Month 3        Borrow System, Reservation, Notification System
+---
 
-  Phase 4     Month 4        Admin Panel, RBAC, Staff System, Activity Logs
+Phase 1 Month 1 Homepage, Auth, Email Verification, Onboarding,
+Plan Selection
 
-  Phase 5     Month 5        Discount/Coupon, Payment Integration, Reports
+Phase 2 Month 2 Book Management, Online Reader (PDF+EPUB), Book
+Catalogue
 
-  Phase 6     Month 6        Testing, Bug Fixes, Performance Optimization,
-                             Launch
-  ----------------------------------------------------------------------------
+Phase 3 Month 3 Borrow System, Reservation, Notification System
+
+Phase 4 Month 4 Admin Panel, RBAC, Staff System, Activity Logs
+
+Phase 5 Month 5 Discount/Coupon, Payment Integration, Reports
+
+Phase 6 Month 6 Testing, Bug Fixes, Performance Optimization,
+Launch
+
+---
 
 # Future Modules (Phase 2 Roadmap)
 
@@ -799,7 +877,7 @@ upgrades only needed when scaling.
 
 - Publisher / Author portal for content submission
 
-*Digital Library Management System --- Confidential Feature Document
-v2.0*
+_Digital Library Management System --- Confidential Feature Document
+v2.0_
 
-*All rights reserved. For internal planning use only.*
+_All rights reserved. For internal planning use only._

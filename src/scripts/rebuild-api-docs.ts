@@ -1049,7 +1049,7 @@ const buildDocs = async () => {
           type: 'text/javascript',
           exec: [
             'const json = pm.response.json();',
-            'const token = json?.data?.tokens?.accessToken;',
+            'const token = json?.data?.accessToken ?? json?.data?.tokens?.accessToken;',
             'if (token) { pm.collectionVariables.set("userToken", token); }',
           ],
         },
@@ -1057,6 +1057,7 @@ const buildDocs = async () => {
     }
     if (
       route.fullPath === `${apiPrefix}/staff/login` ||
+      route.fullPath === `${apiPrefix}/staff/2fa/enable` ||
       route.fullPath === `${apiPrefix}/staff/2fa/verify`
     ) {
       event.push({
@@ -1065,7 +1066,7 @@ const buildDocs = async () => {
           type: 'text/javascript',
           exec: [
             'const json = pm.response.json();',
-            'const token = json?.data?.tokens?.accessToken;',
+            'const token = json?.data?.accessToken ?? json?.data?.tokens?.accessToken;',
             'if (token) { pm.collectionVariables.set("staffToken", token); }',
           ],
         },

@@ -506,33 +506,33 @@ http://localhost:5000/api/v1
 
 ## 10. 🧩 Module Overview
 
-| Module          | Description                                          | Key routes                                                                                               |
-| --------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `auth`          | User auth and account lifecycle                      | `POST /auth/register`, `POST /auth/login`, `GET /auth/me`                                                |
-| `staff-auth`    | Staff auth and 2FA flows                             | `POST /staff/login`, `POST /staff/2fa/verify`, `GET /staff/me`                                           |
-| `onboarding`    | New user onboarding and plan selection               | `GET /onboarding/plans`, `POST /onboarding/select`, `POST /onboarding/complete`                          |
-| `authors`       | Author catalog records                               | `GET /authors`, `POST /authors`, `PUT /authors/{id}`                                                     |
-| `categories`    | Category taxonomy and CRUD                           | `GET /categories`, `POST /categories`, `DELETE /categories/{id}`                                         |
-| `plans`         | Public/admin subscription plans                      | `GET /plans`, `POST /plans`, `PATCH /plans/{id}/toggle`                                                  |
-| `subscriptions` | Subscription lifecycle and admin controls            | `GET /subscriptions/my`, `PATCH /subscriptions/my/renew`, `PATCH /subscriptions/{id}`                    |
-| `books`         | Book catalog + admin content/file management         | `GET /books`, `POST /admin/books`, `POST /admin/books/{id}/files`                                        |
-| `reading`       | Reading progress, sessions, bookmarks, highlights    | `POST /reading/{bookId}/start`, `PATCH /reading/{bookId}/progress`, `POST /books/{bookId}/bookmarks`     |
-| `borrows`       | Borrow request/return and state updates              | `POST /borrows`, `POST /borrows/{id}/return`, `GET /borrows/my`                                          |
-| `reservations`  | Reservation queue and claim windows                  | `POST /reservations`, `PATCH /reservations/{id}`, `GET /reservations/my`                                 |
-| `wishlist`      | User saved book list                                 | `GET /wishlist`, `POST /wishlist/{bookId}`, `DELETE /wishlist/{bookId}`                                  |
-| `reviews`       | Reviews and admin moderation                         | `POST /books/{bookId}/reviews`, `PATCH /books/{bookId}/reviews/{id}`, `PATCH /admin/reviews/{id}/toggle` |
-| `payments`      | Payment execution, verification, refund and webhooks | `POST /payments/initiate`, `POST /payments/verify`, `POST /webhooks/{gateway}`                           |
-| `promotions`    | Coupons and flash sales                              | `POST /coupons/validate`, `POST /coupons`, `PATCH /flash-sales/{id}/toggle`                              |
-| `search`        | Search UX and analytics logging                      | `GET /search`, `GET /search/suggestions`, `POST /search/log-click`                                       |
-| `dashboard`     | User dashboard metrics                               | `GET /dashboard`, `GET /dashboard/stats`, `GET /dashboard/recommendations`                               |
-| `notifications` | In-app and bulk notifications                        | `GET /notifications`, `PATCH /notifications/{id}/read`, `POST /notifications/bulk-send`                  |
-| `rbac`          | Permission and role administration                   | `GET /admin/permissions`, `POST /admin/roles`, `PUT /admin/roles/{id}`                                   |
-| `staff`         | Staff account management                             | `POST /admin/staff/invite`, `PATCH /admin/staff/{id}/role`, `GET /admin/staff/{id}/activity`             |
-| `members`       | Member administration and insight                    | `GET /admin/members`, `GET /admin/members/{userId}/payments`, `PATCH /admin/members/{userId}/suspend`    |
-| `audit`         | Audit/event logs and export                          | `GET /admin/audit/logs`, `GET /admin/audit/logs/export`, `POST /admin/audit/activity`                    |
-| `reports`       | Async report jobs and artifacts                      | `POST /admin/reports`, `GET /admin/reports/{reportId}`, `GET /admin/reports/{reportId}/download`         |
-| `settings`      | Global/system settings                               | `GET /admin/settings`, `PUT /admin/settings`, `GET /admin/settings/maintenance`                          |
-| `health`        | Service liveness and readiness                       | `GET /health`, `GET /health/live`, `GET /health/ready`                                                   |
+| Module          | Description                                          | Key routes                                                                                                        |
+| --------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `auth`          | User auth and account lifecycle with optional 2FA    | `POST /auth/register`, `POST /auth/login`, `POST /auth/2fa/challenge`, `GET /auth/me`                             |
+| `staff-auth`    | Staff auth with mandatory 2FA setup and verification | `POST /staff/login`, `POST /staff/2fa/setup`, `POST /staff/2fa/enable`, `POST /staff/2fa/verify`, `GET /staff/me` |
+| `onboarding`    | New user onboarding and plan selection               | `GET /onboarding/plans`, `POST /onboarding/select`, `POST /onboarding/complete`                                   |
+| `authors`       | Author catalog records                               | `GET /authors`, `POST /authors`, `PUT /authors/{id}`                                                              |
+| `categories`    | Category taxonomy and CRUD                           | `GET /categories`, `POST /categories`, `DELETE /categories/{id}`                                                  |
+| `plans`         | Public/admin subscription plans                      | `GET /plans`, `POST /plans`, `PATCH /plans/{id}/toggle`                                                           |
+| `subscriptions` | Subscription lifecycle and admin controls            | `GET /subscriptions/my`, `PATCH /subscriptions/my/renew`, `PATCH /subscriptions/{id}`                             |
+| `books`         | Book catalog + admin content/file management         | `GET /books`, `POST /admin/books`, `POST /admin/books/{id}/files`                                                 |
+| `reading`       | Reading progress, sessions, bookmarks, highlights    | `POST /reading/{bookId}/start`, `PATCH /reading/{bookId}/progress`, `POST /books/{bookId}/bookmarks`              |
+| `borrows`       | Borrow request/return and state updates              | `POST /borrows`, `POST /borrows/{id}/return`, `GET /borrows/my`                                                   |
+| `reservations`  | Reservation queue and claim windows                  | `POST /reservations`, `PATCH /reservations/{id}`, `GET /reservations/my`                                          |
+| `wishlist`      | User saved book list                                 | `GET /wishlist`, `POST /wishlist/{bookId}`, `DELETE /wishlist/{bookId}`                                           |
+| `reviews`       | Reviews and admin moderation                         | `POST /books/{bookId}/reviews`, `PATCH /books/{bookId}/reviews/{id}`, `PATCH /admin/reviews/{id}/toggle`          |
+| `payments`      | Payment execution, verification, refund and webhooks | `POST /payments/initiate`, `POST /payments/verify`, `POST /webhooks/{gateway}`                                    |
+| `promotions`    | Coupons and flash sales                              | `POST /coupons/validate`, `POST /coupons`, `PATCH /flash-sales/{id}/toggle`                                       |
+| `search`        | Search UX and analytics logging                      | `GET /search`, `GET /search/suggestions`, `POST /search/log-click`                                                |
+| `dashboard`     | User dashboard metrics                               | `GET /dashboard`, `GET /dashboard/stats`, `GET /dashboard/recommendations`                                        |
+| `notifications` | In-app and bulk notifications                        | `GET /notifications`, `PATCH /notifications/{id}/read`, `POST /notifications/bulk-send`                           |
+| `rbac`          | Permission and role administration                   | `GET /admin/permissions`, `POST /admin/roles`, `PUT /admin/roles/{id}`                                            |
+| `staff`         | Staff account management                             | `POST /admin/staff/invite`, `PATCH /admin/staff/{id}/role`, `GET /admin/staff/{id}/activity`                      |
+| `members`       | Member administration and insight                    | `GET /admin/members`, `GET /admin/members/{userId}/payments`, `PATCH /admin/members/{userId}/suspend`             |
+| `audit`         | Audit/event logs and export                          | `GET /admin/audit/logs`, `GET /admin/audit/logs/export`, `POST /admin/audit/activity`                             |
+| `reports`       | Async report jobs and artifacts                      | `POST /admin/reports`, `GET /admin/reports/{reportId}`, `GET /admin/reports/{reportId}/download`                  |
+| `settings`      | Global/system settings                               | `GET /admin/settings`, `PUT /admin/settings`, `GET /admin/settings/maintenance`                                   |
+| `health`        | Service liveness and readiness                       | `GET /health`, `GET /health/live`, `GET /health/ready`                                                            |
 
 ## 11. 💳 Payment Gateways
 
