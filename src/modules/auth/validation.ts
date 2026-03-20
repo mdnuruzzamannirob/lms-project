@@ -11,13 +11,23 @@ export const authValidation = {
     email: z.string().trim().email(),
     password: z.string().min(8).max(72),
   }),
-  twoFactorChallengeBody: z.object({
-    tempToken: z.string().trim().min(20),
-    otp: z
-      .string()
-      .trim()
-      .regex(/^\d{6}$/, 'OTP must be 6 digits'),
-  }),
+  twoFactorChallengeBody: z
+    .object({
+      tempToken: z.string().trim().min(20),
+      otp: z
+        .string()
+        .trim()
+        .regex(/^\d{6}$/, 'OTP must be 6 digits')
+        .optional(),
+      emailOtp: z
+        .string()
+        .trim()
+        .regex(/^\d{6}$/, 'OTP must be 6 digits')
+        .optional(),
+    })
+    .refine((value) => Boolean(value.otp || value.emailOtp), {
+      message: 'Either otp or emailOtp is required',
+    }),
   twoFactorVerifyBody: z.object({
     otp: z
       .string()
@@ -45,9 +55,22 @@ export const authValidation = {
   forgotPasswordBody: z.object({
     email: z.string().trim().email(),
   }),
+  resendResetOtpBody: z.object({
+    email: z.string().trim().email(),
+  }),
+  verifyResetOtpBody: z.object({
+    email: z.string().trim().email(),
+    otp: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, 'OTP must be 6 digits'),
+  }),
   resetPasswordBody: z.object({
-    token: z.string().trim().min(10),
+    resetToken: z.string().trim().min(10),
     newPassword: z.string().min(8).max(72),
+  }),
+  sendEmailOtpBody: z.object({
+    tempToken: z.string().trim().min(20),
   }),
   updateMeBody: z
     .object({

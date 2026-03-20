@@ -1,5 +1,6 @@
 export * from './constants'
 export * from './controller'
+export * from './emailOtp.model'
 export * from './interface'
 export * from './model'
 export { authRouter } from './router'

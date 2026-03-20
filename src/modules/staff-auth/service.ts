@@ -1,19 +1,25 @@
-import type { Request } from 'express'
+import type { Request, Response } from 'express'
 import speakeasy from 'speakeasy'
 
 import { AppError } from '../../common/errors/AppError'
-import { auditService } from '../../common/services/audit.service'
+import { emailService } from '../../common/services/email.service'
 import {
   compareScryptHash,
   hashStringSha256,
   hashWithScrypt,
 } from '../../common/utils/crypto'
+import { createEmailOtp, verifyEmailOtp } from '../../common/utils/otp'
 import {
+  clearStaffRefreshCookie,
+  clearStaffSessionCookie,
+  generateStaffRefreshToken,
   signAccessToken,
   signTempToken,
+  verifyStaffRefreshToken,
   verifyTempToken,
 } from '../../common/utils/token'
 import { config } from '../../config'
+import { EmailOtpModel } from '../auth/emailOtp.model'
 import { RoleModel } from '../rbac/model'
 import { StaffModel } from '../staff/model'
 import { staffService } from '../staff/service'
@@ -39,12 +45,6 @@ const issueStaffToken = async (staffId: string): Promise<string> => {
     throw new AppError('Staff account not found or inactive.', 401)
   }
 
-  const role = await RoleModel.findById(staff.roleId)
-
-  if (!role) {
-    throw new AppError('Staff role is not configured.', 500)
-  }
-
   return signAccessToken(
     {
       id: staff._id.toString(),
@@ -52,13 +52,57 @@ const issueStaffToken = async (staffId: string): Promise<string> => {
       actorType: 'staff',
       type: 'staff',
       email: staff.email,
-      roleId: staff.roleId.toString(),
-      role: staff.isSuperAdmin ? 'super-admin' : role.name,
-      permissions: staff.isSuperAdmin ? ['*'] : role.permissions,
     },
     config.jwt.staffSecret,
     config.jwt.accessExpiresIn,
   )
+}
+
+const issueStaffTokens = async (
+  staffId: string,
+): Promise<{ accessToken: string; refreshToken: string }> => {
+  const staff = await StaffModel.findById(staffId)
+
+  if (!staff || !staff.isActive) {
+    throw new AppError('Staff account not found or inactive.', 401)
+  }
+
+  const payload = {
+    id: staff._id.toString(),
+    sub: staff._id.toString(),
+    actorType: 'staff' as const,
+    type: 'staff' as const,
+    email: staff.email,
+  }
+
+  return {
+    accessToken: signAccessToken(
+      payload,
+      config.jwt.staffSecret,
+      config.jwt.accessExpiresIn,
+    ),
+    refreshToken: generateStaffRefreshToken(payload),
+  }
+}
+
+const assertStaffResendOtpWindow = async (staffId: string): Promise<void> => {
+  const latestOtp = await EmailOtpModel.findOne({
+    actorId: staffId,
+    actorType: 'staff',
+    purpose: 'password-reset',
+  })
+    .sort({ _id: -1 })
+    .lean()
+
+  if (!latestOtp) {
+    return
+  }
+
+  const elapsedMs = Date.now() - new Date(latestOtp.createdAt).getTime()
+
+  if (elapsedMs < 60_000) {
+    throw new AppError('Please wait before requesting a new code', 429)
+  }
 }
 
 const buildStaffAuthResponse = async (staffId: string) => {
@@ -68,9 +112,9 @@ const buildStaffAuthResponse = async (staffId: string) => {
     throw new AppError('Staff account not found or inactive.', 401)
   }
 
-  const role = await RoleModel.findById(staff.roleId)
+  const role = staff.roleId ? await RoleModel.findById(staff.roleId) : null
 
-  if (!role) {
+  if (!staff.isSuperAdmin && !role) {
     throw new AppError('Staff role is not configured.', 500)
   }
 
@@ -78,11 +122,10 @@ const buildStaffAuthResponse = async (staffId: string) => {
     id: staff._id.toString(),
     name: staff.name,
     email: staff.email,
-    role: staff.isSuperAdmin ? 'super-admin' : role.name,
-    roleId: staff.roleId.toString(),
-    permissions: staff.isSuperAdmin ? ['*'] : role.permissions,
+    role: staff.isSuperAdmin ? 'super-admin' : role!.name,
+    ...(staff.roleId ? { roleId: staff.roleId.toString() } : {}),
+    permissions: staff.isSuperAdmin ? ['*'] : role!.permissions,
     twoFactorEnabled: staff.twoFactor.enabled,
-    isSuperAdmin: staff.isSuperAdmin,
     isActive: staff.isActive,
     createdAt: staff.createdAt.toISOString(),
     updatedAt: staff.updatedAt.toISOString(),
@@ -199,8 +242,9 @@ export const staffAuthService = {
     }
   },
 
-  logout: async (): Promise<void> => {
-    return
+  logout: async (response: Response): Promise<void> => {
+    clearStaffSessionCookie(response)
+    clearStaffRefreshCookie(response)
   },
 
   getMyProfile: async (staffId: string) => {
@@ -281,13 +325,19 @@ export const staffAuthService = {
     staff.twoFactor.lastVerifiedAt = new Date()
     await staff.save()
 
+    const tokens = await issueStaffTokens(staff._id.toString())
+
     return {
-      token: await issueStaffToken(staff._id.toString()),
+      token: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
       staff: await buildStaffAuthResponse(staff._id.toString()),
     }
   },
 
-  verifyTwoFactor: async (staffId: string, payload: { otp: string }) => {
+  verifyTwoFactor: async (
+    staffId: string,
+    payload: { otp?: string; emailOtp?: string },
+  ) => {
     const staff = await StaffModel.findById(staffId)
 
     if (!staff || !staff.isActive) {
@@ -298,7 +348,16 @@ export const staffAuthService = {
       throw new AppError('2FA is not enabled on this account.', 401)
     }
 
-    const isOtpValid = verifyStaffTotp(staff.twoFactor.secret, payload.otp)
+    const isOtpValid = payload.emailOtp
+      ? await verifyEmailOtp(
+          staff._id.toString(),
+          'staff',
+          'login',
+          payload.emailOtp,
+        )
+      : payload.otp
+        ? verifyStaffTotp(staff.twoFactor.secret, payload.otp)
+        : false
 
     if (!isOtpValid) {
       throw new AppError('Invalid 2FA code.', 401)
@@ -309,56 +368,172 @@ export const staffAuthService = {
 
     await logStaffActivity(staff._id.toString(), 'staff.2fa_verify')
 
+    const tokens = await issueStaffTokens(staff._id.toString())
+
     return {
-      token: await issueStaffToken(staff._id.toString()),
+      token: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
       staff: await buildStaffAuthResponse(staff._id.toString()),
     }
   },
 
-  disableTwoFactor: async (
-    staffId: string,
-    payload: { otp: string },
-    request?: Request,
-  ) => {
+  sendStaffEmailOtp: async (staffId: string) => {
     const staff = await StaffModel.findById(staffId)
+
+    if (!staff || !staff.isActive || !staff.twoFactor.enabled) {
+      throw new AppError('Staff account not found or inactive.', 401)
+    }
+
+    const otp = await createEmailOtp(staff._id.toString(), 'staff', 'login')
+
+    await emailService.sendEmail({
+      to: staff.email,
+      subject: 'Your Stackread staff login code',
+      text: `Your login code is: ${otp}`,
+    })
+
+    return { sent: true }
+  },
+
+  disableTwoFactor: async () => {
+    throw new AppError(
+      'Staff 2FA cannot be disabled. Contact admin to reset.',
+      403,
+    )
+  },
+
+  forgotStaffPassword: async (email: string): Promise<{ sent: true }> => {
+    const staff = await StaffModel.findOne({ email })
+
+    if (!staff) {
+      return { sent: true }
+    }
+
+    const otp = await createEmailOtp(
+      staff._id.toString(),
+      'staff',
+      'password-reset',
+    )
+
+    await emailService.sendEmail({
+      to: staff.email,
+      subject: 'Stackread staff password reset code',
+      text: `Your password reset code is: ${otp}`,
+    })
+
+    return { sent: true }
+  },
+
+  resendStaffResetOtp: async (email: string): Promise<{ sent: true }> => {
+    const staff = await StaffModel.findOne({ email })
+
+    if (!staff) {
+      return { sent: true }
+    }
+
+    await assertStaffResendOtpWindow(staff._id.toString())
+
+    await EmailOtpModel.deleteMany({
+      actorId: staff._id,
+      actorType: 'staff',
+      purpose: 'password-reset',
+      usedAt: null,
+    })
+
+    const otp = await createEmailOtp(
+      staff._id.toString(),
+      'staff',
+      'password-reset',
+    )
+
+    await emailService.sendEmail({
+      to: staff.email,
+      subject: 'Stackread staff password reset code',
+      text: `Your password reset code is: ${otp}`,
+    })
+
+    return { sent: true }
+  },
+
+  verifyStaffResetOtp: async (
+    email: string,
+    otp: string,
+  ): Promise<{ resetToken: string }> => {
+    const staff = await StaffModel.findOne({ email })
+
+    if (!staff) {
+      throw new AppError('Invalid or expired code', 400)
+    }
+
+    const isValid = await verifyEmailOtp(
+      staff._id.toString(),
+      'staff',
+      'password-reset',
+      otp,
+    )
+
+    if (!isValid) {
+      throw new AppError('Invalid or expired code', 400)
+    }
+
+    const resetToken = signTempToken(
+      {
+        id: staff._id.toString(),
+        email: staff.email,
+        actorType: 'staff',
+        purpose: 'password-reset',
+      },
+      config.jwt.staffSecret,
+      '10m',
+    )
+
+    return { resetToken }
+  },
+
+  resetStaffPassword: async (
+    resetToken: string,
+    newPassword: string,
+  ): Promise<{ success: true }> => {
+    const decoded = verifyTempToken(resetToken, config.jwt.staffSecret)
+
+    if (decoded.actorType !== 'staff' || decoded.purpose !== 'password-reset') {
+      throw new AppError('Invalid password reset token', 400)
+    }
+
+    const staff = await StaffModel.findById(decoded.id)
 
     if (!staff) {
       throw new AppError('Staff not found.', 404)
     }
 
-    if (!staff.isSuperAdmin) {
-      throw new AppError('Only super-admin can disable their own 2FA.', 403)
-    }
-
-    if (!staff.twoFactor.enabled || !staff.twoFactor.secret) {
-      throw new AppError('2FA is not enabled for this staff account.', 400)
-    }
-
-    const isOtpValid = verifyStaffTotp(staff.twoFactor.secret, payload.otp)
-
-    if (!isOtpValid) {
-      throw new AppError('Invalid 2FA code.', 401)
-    }
-
-    staff.twoFactor.enabled = false
-    staff.twoFactor.secret = undefined
-    staff.twoFactor.pendingSecret = undefined
-    staff.twoFactor.lastVerifiedAt = new Date()
+    staff.passwordHash = await hashWithScrypt(newPassword)
     await staff.save()
-    await logStaffActivity(staff._id.toString(), 'staff.2fa.disabled', request)
 
-    await auditService.logEvent({
-      actor: { id: staff._id.toString(), type: 'staff', email: staff.email },
-      action: 'staff.2fa.disable',
-      module: 'staff-auth',
-      targetId: staff._id.toString(),
-      targetType: 'staff',
-      description: 'Staff disabled 2FA.',
-      ...(request?.id ? { requestId: request.id } : {}),
+    await EmailOtpModel.deleteMany({
+      actorId: staff._id,
+      actorType: 'staff',
+      purpose: 'password-reset',
     })
 
-    return {
-      success: true,
+    return { success: true }
+  },
+
+  refreshSession: async (
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> => {
+    const payload = verifyStaffRefreshToken(refreshToken)
+    const staffId = payload.id ?? payload.sub
+
+    if (!staffId) {
+      throw new AppError('Unauthorized. Invalid refresh token.', 401)
     }
+
+    const staff = await StaffModel.findById(staffId)
+
+    if (!staff || !staff.isActive) {
+      throw new AppError('Unauthorized. Invalid refresh token.', 401)
+    }
+
+    return issueStaffTokens(staff._id.toString())
   },
 }

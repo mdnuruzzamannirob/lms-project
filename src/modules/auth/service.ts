@@ -1,4 +1,4 @@
-import type { Request } from 'express'
+import type { Request, Response } from 'express'
 import speakeasy from 'speakeasy'
 
 import { AppError } from '../../common/errors/AppError'
@@ -10,13 +10,19 @@ import {
   hashStringSha256,
   hashWithScrypt,
 } from '../../common/utils/crypto'
+import { createEmailOtp, verifyEmailOtp } from '../../common/utils/otp'
 import {
+  clearUserRefreshCookie,
+  clearUserSessionCookie,
+  generateUserRefreshToken,
   signAccessToken,
   signTempToken,
   verifyTempToken,
+  verifyUserRefreshToken,
 } from '../../common/utils/token'
 import { config } from '../../config'
 import { authConstants } from './constants'
+import { EmailOtpModel } from './emailOtp.model'
 import type {
   AuthTokens,
   IUser,
@@ -30,7 +36,6 @@ import {
   UserEmailVerificationTokenModel,
   UserLoginHistoryModel,
   UserModel,
-  UserPasswordResetTokenModel,
 } from './model'
 import {
   buildUserJwtPayload,
@@ -82,12 +87,38 @@ const recordUserLogin = async (
 }
 
 const issueUserAccessToken = (user: IUser): AuthTokens => {
+  const tokenPayload = buildUserJwtPayload(user)
+
   return {
     accessToken: signAccessToken(
-      buildUserJwtPayload(user),
+      tokenPayload,
       config.jwt.userSecret,
       config.jwt.accessExpiresIn,
     ),
+    refreshToken: generateUserRefreshToken(tokenPayload),
+  }
+}
+
+const assertResendOtpWindow = async (
+  actorId: string,
+  actorType: 'user' | 'staff',
+): Promise<void> => {
+  const latestOtp = await EmailOtpModel.findOne({
+    actorId,
+    actorType,
+    purpose: 'password-reset',
+  })
+    .sort({ _id: -1 })
+    .lean()
+
+  if (!latestOtp) {
+    return
+  }
+
+  const elapsedMs = Date.now() - new Date(latestOtp.createdAt).getTime()
+
+  if (elapsedMs < 60_000) {
+    throw new AppError('Please wait before requesting a new code', 429)
   }
 }
 
@@ -157,6 +188,7 @@ export const authService = {
     | {
         requiresTwoFactor: false
         accessToken: string
+        refreshToken: string
         user: SanitizedUser
       }
     | {
@@ -228,6 +260,7 @@ export const authService = {
       requiresTwoFactor: false,
       user: sanitizeUser(user),
       accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     }
   },
 
@@ -317,7 +350,11 @@ export const authService = {
     return { success: true }
   },
 
-  challengeTwoFactor: async (payload: { tempToken: string; otp: string }) => {
+  challengeTwoFactor: async (payload: {
+    tempToken: string
+    otp?: string
+    emailOtp?: string
+  }) => {
     const decoded = verifyTempToken(payload.tempToken, config.jwt.userSecret)
 
     if (decoded.actorType !== 'user' || !decoded.pending2FA) {
@@ -335,7 +372,16 @@ export const authService = {
       throw new AppError('User 2FA challenge is invalid.', 401)
     }
 
-    const isOtpValid = verifyUserTotp(user.twoFactor.secret, payload.otp)
+    const isOtpValid = payload.emailOtp
+      ? await verifyEmailOtp(
+          user._id.toString(),
+          'user',
+          'login',
+          payload.emailOtp,
+        )
+      : payload.otp
+        ? verifyUserTotp(user.twoFactor.secret, payload.otp)
+        : false
 
     if (!isOtpValid) {
       throw new AppError('Invalid OTP code.', 401)
@@ -353,8 +399,33 @@ export const authService = {
         config.jwt.userSecret,
         config.jwt.accessExpiresIn,
       ),
+      refreshToken: generateUserRefreshToken(tokenPayload),
       user: sanitizeUser(user),
     }
+  },
+
+  sendUserEmailOtp: async (tempToken: string) => {
+    const decoded = verifyTempToken(tempToken, config.jwt.userSecret)
+
+    if (decoded.actorType !== 'user' || !decoded.pending2FA) {
+      throw new AppError('Invalid user 2FA challenge token.', 401)
+    }
+
+    const user = await UserModel.findById(decoded.id)
+
+    if (!user || user.email !== decoded.email || !user.twoFactor.enabled) {
+      throw new AppError('User 2FA challenge is invalid.', 401)
+    }
+
+    const otp = await createEmailOtp(user._id.toString(), 'user', 'login')
+
+    await emailService.sendEmail({
+      to: user.email,
+      subject: 'Your Stackread login code',
+      text: `Your login code is: ${otp}`,
+    })
+
+    return { sent: true }
   },
 
   getBackupCodesCount: async (userId: string, otp: string) => {
@@ -551,35 +622,105 @@ export const authService = {
     })
   },
 
-  forgotPassword: async (email: string): Promise<void> => {
+  forgotPassword: async (email: string): Promise<{ sent: true }> => {
     const user = await UserModel.findOne({ email })
 
     if (!user) {
-      return
+      return { sent: true }
     }
 
-    const resetToken = await createAndStoreToken(
+    const otp = await createEmailOtp(
       user._id.toString(),
-      UserPasswordResetTokenModel,
-      authConstants.resetTokenTtlMinutes,
+      'user',
+      'password-reset',
     )
 
     await emailService.sendEmail({
       to: user.email,
-      subject: 'LMS password reset',
-      text: `Use this reset token: ${resetToken}`,
+      subject: 'Stackread password reset code',
+      text: `Your password reset code is: ${otp}`,
     })
+
+    return { sent: true }
   },
 
-  resetPassword: async (token: string, newPassword: string): Promise<void> => {
-    const tokenHash = hashStringSha256(token)
-    const tokenDoc = await UserPasswordResetTokenModel.findOne({ tokenHash })
+  resendResetOtp: async (email: string): Promise<{ sent: true }> => {
+    const user = await UserModel.findOne({ email })
 
-    if (!tokenDoc || tokenDoc.expiresAt.getTime() < Date.now()) {
-      throw new AppError('Reset token is invalid or expired.', 400)
+    if (!user) {
+      return { sent: true }
     }
 
-    const user = await UserModel.findById(tokenDoc.userId)
+    await assertResendOtpWindow(user._id.toString(), 'user')
+
+    await EmailOtpModel.deleteMany({
+      actorId: user._id,
+      actorType: 'user',
+      purpose: 'password-reset',
+      usedAt: null,
+    })
+
+    const otp = await createEmailOtp(
+      user._id.toString(),
+      'user',
+      'password-reset',
+    )
+
+    await emailService.sendEmail({
+      to: user.email,
+      subject: 'Stackread password reset code',
+      text: `Your password reset code is: ${otp}`,
+    })
+
+    return { sent: true }
+  },
+
+  verifyResetOtp: async (
+    email: string,
+    otp: string,
+  ): Promise<{ resetToken: string }> => {
+    const user = await UserModel.findOne({ email })
+
+    if (!user) {
+      throw new AppError('Invalid or expired code', 400)
+    }
+
+    const isValid = await verifyEmailOtp(
+      user._id.toString(),
+      'user',
+      'password-reset',
+      otp,
+    )
+
+    if (!isValid) {
+      throw new AppError('Invalid or expired code', 400)
+    }
+
+    const resetToken = signTempToken(
+      {
+        id: user._id.toString(),
+        email: user.email,
+        actorType: 'user',
+        purpose: 'password-reset',
+      },
+      config.jwt.userSecret,
+      '10m',
+    )
+
+    return { resetToken }
+  },
+
+  resetPassword: async (
+    resetToken: string,
+    newPassword: string,
+  ): Promise<{ success: true }> => {
+    const decoded = verifyTempToken(resetToken, config.jwt.userSecret)
+
+    if (decoded.actorType !== 'user' || decoded.purpose !== 'password-reset') {
+      throw new AppError('Invalid password reset token', 400)
+    }
+
+    const user = await UserModel.findById(decoded.id)
 
     if (!user) {
       throw new AppError('User not found.', 404)
@@ -587,10 +728,35 @@ export const authService = {
 
     user.passwordHash = await hashWithScrypt(newPassword)
     await user.save()
-    await UserPasswordResetTokenModel.deleteMany({ userId: user._id })
+
+    await EmailOtpModel.deleteMany({
+      actorId: user._id,
+      actorType: 'user',
+      purpose: 'password-reset',
+    })
+
+    return { success: true }
   },
 
-  logout: async (): Promise<void> => {
-    return
+  refreshSession: async (refreshToken: string): Promise<AuthTokens> => {
+    const payload = verifyUserRefreshToken(refreshToken)
+    const userId = payload.id ?? payload.sub
+
+    if (!userId) {
+      throw new AppError('Unauthorized. Invalid refresh token.', 401)
+    }
+
+    const user = await UserModel.findById(userId)
+
+    if (!user) {
+      throw new AppError('Unauthorized. Invalid refresh token.', 401)
+    }
+
+    return issueUserAccessToken(user)
+  },
+
+  logout: async (response: Response): Promise<void> => {
+    clearUserSessionCookie(response)
+    clearUserRefreshCookie(response)
   },
 }

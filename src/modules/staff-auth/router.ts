@@ -8,10 +8,16 @@ import {
   changeStaffPassword,
   disableTwoFactor,
   enableTwoFactor,
+  forgotStaffPassword,
   getStaffMe,
+  refreshStaffSession,
+  resendStaffResetOtp,
+  resetStaffPassword,
+  sendStaffEmailOtp,
   setupTwoFactor,
   staffLogin,
   staffLogout,
+  verifyStaffResetOtp,
   verifyTwoFactor,
 } from './controller'
 import { staffAuthValidation } from './validation'
@@ -28,7 +34,28 @@ router.post(
   validateRequest({ body: staffAuthValidation.acceptInviteBody }),
   acceptInvite,
 )
+router.post(
+  '/forgot-password',
+  validateRequest({ body: staffAuthValidation.forgotPasswordBody }),
+  forgotStaffPassword,
+)
+router.post(
+  '/resend-reset-otp',
+  validateRequest({ body: staffAuthValidation.resendResetOtpBody }),
+  resendStaffResetOtp,
+)
+router.post(
+  '/verify-reset-otp',
+  validateRequest({ body: staffAuthValidation.verifyResetOtpBody }),
+  verifyStaffResetOtp,
+)
+router.post(
+  '/reset-password',
+  validateRequest({ body: staffAuthValidation.resetPasswordBody }),
+  resetStaffPassword,
+)
 router.post('/logout', authenticateStaff, staffLogout)
+router.post('/refresh', refreshStaffSession)
 router.get('/me', authenticateStaff, getStaffMe)
 router.patch(
   '/me/password',
@@ -54,6 +81,7 @@ router.post(
   validateRequest({ body: staffAuthValidation.staffTwoFactorVerifyBody }),
   verifyTwoFactor,
 )
+router.post('/2fa/email/send', authenticateTempToken, sendStaffEmailOtp)
 router.post(
   '/2fa/disable',
   authenticateStaff,

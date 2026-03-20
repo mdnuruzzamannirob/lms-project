@@ -3,9 +3,28 @@ import type { RequestHandler } from 'express'
 import { RoleModel } from '../../modules/rbac/model'
 import { StaffModel } from '../../modules/staff/model'
 import { AppError } from '../errors/AppError'
-import { extractBearerToken, verifyAccessToken } from '../utils/token'
+import {
+  extractBearerToken,
+  getCookieValueFromHeader,
+  verifyAccessToken,
+} from '../utils/token'
 
-const resolveTokenFromRequest = (authorizationHeader?: string): string => {
+const USER_SESSION_COOKIE_NAME =
+  process.env.SESSION_COOKIE_NAME ?? 'stackread_session'
+const STAFF_SESSION_COOKIE_NAME =
+  process.env.STAFF_SESSION_COOKIE_NAME ?? 'stackread_staff_session'
+
+const resolveTokenFromRequest = (
+  cookieHeader: string | undefined,
+  authorizationHeader: string | undefined,
+  cookieName: string,
+): string => {
+  const cookieToken = getCookieValueFromHeader(cookieHeader, cookieName)
+
+  if (cookieToken) {
+    return cookieToken
+  }
+
   const token = extractBearerToken(authorizationHeader)
 
   if (!token) {
@@ -17,7 +36,11 @@ const resolveTokenFromRequest = (authorizationHeader?: string): string => {
 
 export const authenticateUser: RequestHandler = (request, _response, next) => {
   try {
-    const token = resolveTokenFromRequest(request.header('authorization'))
+    const token = resolveTokenFromRequest(
+      request.header('cookie'),
+      request.header('authorization'),
+      USER_SESSION_COOKIE_NAME,
+    )
     const payload = verifyAccessToken(token, 'user')
     request.auth = payload
     next()
@@ -36,7 +59,11 @@ export const authenticateStaff: RequestHandler = async (
   next,
 ) => {
   try {
-    const token = resolveTokenFromRequest(request.header('authorization'))
+    const token = resolveTokenFromRequest(
+      request.header('cookie'),
+      request.header('authorization'),
+      STAFF_SESSION_COOKIE_NAME,
+    )
     const payload = verifyAccessToken(token, 'staff')
     const staffId = payload.id ?? payload.sub
 
@@ -49,6 +76,28 @@ export const authenticateStaff: RequestHandler = async (
       .lean()
 
     if (!staff || !staff.isActive) {
+      throw new AppError('Unauthorized. Invalid or expired staff token.', 401)
+    }
+
+    if (staff.isSuperAdmin) {
+      request.auth = {
+        ...payload,
+        id: staff._id.toString(),
+        sub: staff._id.toString(),
+        email: staff.email,
+        ...(staff.roleId ? { roleId: staff.roleId.toString() } : {}),
+        role: 'super-admin',
+        permissions: ['*'],
+        isSuperAdmin: true,
+        type: 'staff',
+        actorType: 'staff',
+      }
+
+      next()
+      return
+    }
+
+    if (!staff.roleId) {
       throw new AppError('Unauthorized. Invalid or expired staff token.', 401)
     }
 
@@ -66,9 +115,9 @@ export const authenticateStaff: RequestHandler = async (
       sub: staff._id.toString(),
       email: staff.email,
       roleId: staff.roleId.toString(),
-      role: staff.isSuperAdmin ? 'super-admin' : role.name,
-      permissions: staff.isSuperAdmin ? ['*'] : role.permissions,
-      isSuperAdmin: staff.isSuperAdmin,
+      role: role.name,
+      permissions: role.permissions,
+      isSuperAdmin: false,
       type: 'staff',
       actorType: 'staff',
     }
@@ -85,7 +134,11 @@ export const authenticateStaff: RequestHandler = async (
 
 export const optionalAuth: RequestHandler = (request, _response, next) => {
   try {
-    const token = extractBearerToken(request.header('authorization'))
+    const token =
+      getCookieValueFromHeader(
+        request.header('cookie'),
+        USER_SESSION_COOKIE_NAME,
+      ) ?? extractBearerToken(request.header('authorization'))
 
     if (!token) {
       next()
@@ -94,13 +147,12 @@ export const optionalAuth: RequestHandler = (request, _response, next) => {
 
     try {
       request.auth = verifyAccessToken(token, 'user')
-      next()
-      return
     } catch {
-      request.auth = verifyAccessToken(token, 'staff')
       next()
       return
     }
+
+    next()
   } catch {
     next()
   }

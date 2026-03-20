@@ -44,6 +44,7 @@ export type LoginPayload = {
 
 export type AuthTokens = {
   accessToken: string
+  refreshToken: string
 }
 
 export type SanitizedUser = {

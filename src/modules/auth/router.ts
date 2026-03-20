@@ -16,13 +16,17 @@ import {
   getMyLoginHistory,
   login,
   logout,
+  refreshSession,
   register,
+  resendResetOtp,
   resendVerification,
   resetPassword,
+  sendUserEmailOtp,
   socialCallback,
   updateMe,
   updateMyNotificationPreferences,
   verifyEmail,
+  verifyResetOtp,
   verifyTwoFactor,
 } from './controller'
 import { authValidation } from './validation'
@@ -63,6 +67,11 @@ router.post(
   '/2fa/challenge',
   validateRequest({ body: authValidation.twoFactorChallengeBody }),
   challengeTwoFactor,
+)
+router.post(
+  '/2fa/email/send',
+  validateRequest({ body: authValidation.sendEmailOtpBody }),
+  sendUserEmailOtp,
 )
 
 router.get(
@@ -114,6 +123,7 @@ router.get(
 )
 
 router.post('/logout', logout)
+router.post('/refresh', refreshSession)
 router.post(
   '/verify-email',
   validateRequest({ body: authValidation.verifyEmailBody }),
@@ -128,6 +138,16 @@ router.post(
   '/forgot-password',
   validateRequest({ body: authValidation.forgotPasswordBody }),
   forgotPassword,
+)
+router.post(
+  '/resend-reset-otp',
+  validateRequest({ body: authValidation.resendResetOtpBody }),
+  resendResetOtp,
+)
+router.post(
+  '/verify-reset-otp',
+  validateRequest({ body: authValidation.verifyResetOtpBody }),
+  verifyResetOtp,
 )
 router.post(
   '/reset-password',

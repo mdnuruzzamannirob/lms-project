@@ -25,7 +25,15 @@
     "export:openapi": "echo OpenAPI export available at documentation/OpenAPI_v1.json",
     "export:postman": "echo Postman export available at documentation/Postman_Collection_v1.json"
   },
-  "keywords": [],
+  "keywords": [
+    "stackread",
+    "library",
+    "management",
+    "system",
+    "library-management-system",
+    "library-management-system-backend",
+    "library-management-system-api"
+  ],
   "author": "Md. Nuruzzaman",
   "license": "ISC",
   "packageManager": "pnpm@10.30.2",
