@@ -55,6 +55,7 @@ export const seedSettings = async (): Promise<void> => {
     },
     { upsert: true },
   )
+  logger.info('Settings seeded successfully')
 }
 
 if (require.main === module) {

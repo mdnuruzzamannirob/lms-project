@@ -15,7 +15,6 @@ const permissionSchema = new Schema<PermissionDocument>(
       index: true,
     },
     name: { type: String, required: true, trim: true },
-    description: { type: String, required: true, trim: true },
     module: { type: String, required: true, trim: true, index: true },
   },
   {

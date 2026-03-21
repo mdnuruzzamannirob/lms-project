@@ -63,6 +63,7 @@ export const seedPlans = async (): Promise<void> => {
       ),
     ),
   )
+  logger.info(`Plans seeded — ${defaultPlans.length} plans upserted`)
 }
 
 if (require.main === module) {

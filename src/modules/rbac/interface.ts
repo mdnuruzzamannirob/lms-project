@@ -4,7 +4,6 @@ export interface IPermission {
   _id: Types.ObjectId
   key: string
   name: string
-  description: string
   module: string
   createdAt: Date
   updatedAt: Date
@@ -23,6 +22,5 @@ export interface IRole {
 export type PermissionSeed = {
   key: string
   name: string
-  description: string
   module: string
 }

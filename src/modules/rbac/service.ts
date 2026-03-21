@@ -1,243 +1,31 @@
+import {
+  ALL_PERMISSIONS,
+  PERMISSION_SEEDS,
+  type PermissionKey,
+  type PermissionSeed,
+} from '../../common/constants/permissions'
 import { AppError } from '../../common/errors/AppError'
 import { StaffModel } from '../staff/model'
-import type { PermissionSeed } from './interface'
 import { PermissionModel, RoleModel } from './model'
 
-export const defaultPermissionSeeds: PermissionSeed[] = [
-  {
-    key: 'rbac.view',
-    name: 'View RBAC',
-    description: 'View permissions and roles',
-    module: 'rbac',
-  },
-  {
-    key: 'rbac.manage',
-    name: 'Manage RBAC',
-    description: 'Create and update roles and permissions',
-    module: 'rbac',
-  },
-  {
-    key: 'staff.view',
-    name: 'View Staff',
-    description: 'Read staff list and profile',
-    module: 'staff',
-  },
-  {
-    key: 'staff.manage',
-    name: 'Manage Staff',
-    description: 'Invite, suspend, and change staff roles',
-    module: 'staff',
-  },
-  {
-    key: 'onboarding.view',
-    name: 'View Onboarding',
-    description: 'Read onboarding configuration and status',
-    module: 'onboarding',
-  },
-  {
-    key: 'onboarding.manage',
-    name: 'Manage Onboarding',
-    description: 'Manage onboarding plan options and completion',
-    module: 'onboarding',
-  },
-  {
-    key: 'plans.view',
-    name: 'View Plans',
-    description: 'View subscription plans',
-    module: 'plans',
-  },
-  {
-    key: 'plans.manage',
-    name: 'Manage Plans',
-    description: 'Create and update subscription plans',
-    module: 'plans',
-  },
-  {
-    key: 'subscriptions.view',
-    name: 'View Subscriptions',
-    description: 'View subscription records',
-    module: 'subscriptions',
-  },
-  {
-    key: 'subscriptions.manage',
-    name: 'Manage Subscriptions',
-    description: 'Create and update subscription states',
-    module: 'subscriptions',
-  },
-  {
-    key: 'payments.view',
-    name: 'View Payments',
-    description: 'View payment records and statuses',
-    module: 'payments',
-  },
-  {
-    key: 'payments.manage',
-    name: 'Manage Payments',
-    description: 'Verify and refund payments',
-    module: 'payments',
-  },
-  {
-    key: 'promotions.view',
-    name: 'View Promotions',
-    description: 'View coupons and flash sales',
-    module: 'promotions',
-  },
-  {
-    key: 'promotions.manage',
-    name: 'Manage Promotions',
-    description: 'Create and update coupons and flash sales',
-    module: 'promotions',
-  },
-  {
-    key: 'authors.view',
-    name: 'View Authors',
-    description: 'View author records',
-    module: 'authors',
-  },
-  {
-    key: 'authors.manage',
-    name: 'Manage Authors',
-    description: 'Create, update, and delete authors',
-    module: 'authors',
-  },
-  {
-    key: 'categories.view',
-    name: 'View Categories',
-    description: 'View category records and trees',
-    module: 'categories',
-  },
-  {
-    key: 'categories.manage',
-    name: 'Manage Categories',
-    description: 'Create, update, and delete categories',
-    module: 'categories',
-  },
-  {
-    key: 'books.view',
-    name: 'View Books',
-    description: 'View book records',
-    module: 'books',
-  },
-  {
-    key: 'books.manage',
-    name: 'Manage Books',
-    description: 'Create, update, delete books and manage files',
-    module: 'books',
-  },
-  {
-    key: 'borrows.view',
-    name: 'View Borrows',
-    description: 'View borrow records',
-    module: 'borrows',
-  },
-  {
-    key: 'borrows.manage',
-    name: 'Manage Borrows',
-    description: 'Manage borrow lifecycle and overrides',
-    module: 'borrows',
-  },
-  {
-    key: 'reservations.view',
-    name: 'View Reservations',
-    description: 'View reservation queues and status',
-    module: 'reservations',
-  },
-  {
-    key: 'reservations.manage',
-    name: 'Manage Reservations',
-    description: 'Manage reservation queue lifecycle',
-    module: 'reservations',
-  },
-  {
-    key: 'reviews.view',
-    name: 'View Reviews',
-    description: 'View all reviews in admin',
-    module: 'reviews',
-  },
-  {
-    key: 'reviews.manage',
-    name: 'Manage Reviews',
-    description: 'Moderate review visibility',
-    module: 'reviews',
-  },
-  {
-    key: 'notifications.view',
-    name: 'View Notifications',
-    description: 'View notification records and logs',
-    module: 'notifications',
-  },
-  {
-    key: 'notifications.manage',
-    name: 'Manage Notifications',
-    description: 'Send bulk notifications',
-    module: 'notifications',
-  },
-  {
-    key: 'search.view',
-    name: 'View Search',
-    description: 'View search logs and analytics',
-    module: 'search',
-  },
-  {
-    key: 'members.view',
-    name: 'View Members',
-    description: 'View user and member information',
-    module: 'members',
-  },
-  {
-    key: 'members.manage',
-    name: 'Manage Members',
-    description: 'Suspend, unsuspend, and manage user accounts',
-    module: 'members',
-  },
-  {
-    key: 'audit.view',
-    name: 'View Audit Logs',
-    description: 'View and export staff/admin activity logs',
-    module: 'audit',
-  },
-  {
-    key: 'audit.manage',
-    name: 'Manage Audit Logs',
-    description: 'Create and manage activity log entries',
-    module: 'audit',
-  },
-  {
-    key: 'reports.view',
-    name: 'View Reports',
-    description: 'View report jobs, statuses, and downloads',
-    module: 'reports',
-  },
-  {
-    key: 'reports.manage',
-    name: 'Manage Reports',
-    description: 'Create and process asynchronous reports',
-    module: 'reports',
-  },
-  {
-    key: 'settings.view',
-    name: 'View Settings',
-    description: 'View global application settings',
-    module: 'settings',
-  },
-  {
-    key: 'settings.manage',
-    name: 'Manage Settings',
-    description: 'Update global application settings',
-    module: 'settings',
-  },
-]
+const assertValidPermissions = (permissions: string[]): void => {
+  const invalid = permissions.filter(
+    (permission) => !ALL_PERMISSIONS.includes(permission as PermissionKey),
+  )
+
+  if (invalid.length > 0) {
+    throw new AppError(`Invalid permissions: ${invalid.join(', ')}`, 400)
+  }
+}
 
 export const rbacService = {
-  ensurePermissionSeed: async (
-    permissions: PermissionSeed[] = defaultPermissionSeeds,
-  ): Promise<void> => {
-    if (!permissions.length) {
+  ensurePermissionSeed: async (): Promise<void> => {
+    if (!PERMISSION_SEEDS.length) {
       return
     }
 
     await Promise.all(
-      permissions.map((permission) =>
+      PERMISSION_SEEDS.map((permission) =>
         PermissionModel.updateOne(
           { key: permission.key },
           { $set: permission },
@@ -256,7 +44,6 @@ export const rbacService = {
     return permissions.map((permission) => ({
       key: permission.key,
       name: permission.name,
-      description: permission.description,
       module: permission.module,
     }))
   },
@@ -319,6 +106,8 @@ export const rbacService = {
     permissions: string[]
     isSystem?: boolean
   }) => {
+    assertValidPermissions(payload.permissions)
+
     const existing = await RoleModel.findOne({ name: payload.name })
 
     if (existing) {
@@ -358,6 +147,7 @@ export const rbacService = {
     }
 
     if (payload.permissions) {
+      assertValidPermissions(payload.permissions)
       role.permissions = payload.permissions
     }
 

@@ -18,10 +18,10 @@
     "seed:plans": "tsx src/seeds/plans.seed.ts",
     "seed:settings": "tsx src/seeds/settings.seed.ts",
     "seed:super-admin": "tsx src/seeds/superAdmin.seed.ts",
-    "seed:all": "tsx src/seeds/all.seed.ts",
-    "seed": "tsx src/scripts/seed.ts",
+    "seed:all": "tsx src/scripts/seed.ts",
+    "generate:permissions": "tsx src/scripts/generate-permissions.ts",
+    "generate:docs": "tsx src/scripts/rebuild-api-docs.ts",
     "migrate": "tsx src/scripts/migrate.ts",
-    "docs:rebuild": "tsx src/scripts/rebuild-api-docs.ts",
     "export:openapi": "echo OpenAPI export available at documentation/OpenAPI_v1.json",
     "export:postman": "echo Postman export available at documentation/Postman_Collection_v1.json"
   },
