@@ -1,761 +1,480 @@
-# Stackread Backend
+# stackread-backend
 
 ![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express-5.1.0-000000?logo=express&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8.2-3178C6?logo=typescript&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-7+-47A248?logo=mongodb&logoColor=white)
-![Mongoose](https://img.shields.io/badge/Mongoose-8.13.0-880000?logo=mongoose&logoColor=white)
-![pnpm](https://img.shields.io/badge/pnpm-10.30.2-F69220?logo=pnpm&logoColor=white)
-![Vitest](https://img.shields.io/badge/Vitest-4.1.0-6E9F18?logo=vitest&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
 
-## 1. 🚀 Project Overview
+## Table of Contents
 
-**Project Name:** Stackread
-**Type:** Library Management System (LMS) backend API (modular monolith)
+- [Overview](#overview)
+- [Core Information](#core-information)
+- [Architecture](#architecture)
+- [Module Directory](#module-directory)
+- [Technology Stack](#technology-stack)
+- [API Communication](#api-communication)
+- [Quick Start](#quick-start)
+- [Development Guide](#development-guide)
+- [Available Commands](#available-commands)
+- [Database](#database)
+- [API Documentation](#api-documentation)
+- [Testing](#testing)
+- [Performance](#performance)
+- [Security](#security)
+- [Deployment](#deployment)
+- [FAQ](#faq)
+- [Contributing](#contributing)
 
-Stackread is a production-focused LMS backend built with Node.js, Express, TypeScript, and MongoDB. It powers user authentication, staff/admin operations, catalog management, subscriptions, payments, reading workflows, notifications, search, reporting, and operational observability.
+---
 
-The project follows a **modular monolithic architecture** with:
+## Overview
 
-- Strictly separated domain modules (25 modules)
-- Shared infrastructure under common/config
-- Dedicated API process and worker process
-- Built-in scheduling and background processing
+Production-grade Node.js backend for a subscription-based digital e-book platform with advanced reading features, payment processing, and content management.
 
-## 2. ✨ Features
+**Key Capabilities:**
+- Multi-tier authentication (OAuth, 2FA, JWT)
+- Payment processing (Stripe, PayPal, SSLCommerz)
+- Advanced reading platform with progress tracking and annotations
+- Flexible subscription management
+- Comprehensive admin dashboard
+- Full-text search with recommendations
+- Real-time notifications
+- Role-based access control (RBAC)
 
-### Complete Feature List by Module (25 modules)
+---
 
-1. **auth** - User registration, login, social OAuth, password reset, profile and login history.
-2. **staff-auth** - Staff login/invite acceptance/logout and 2FA lifecycle.
-3. **onboarding** - Plan selection and onboarding completion flow.
-4. **authors** - Author CRUD and catalog author management.
-5. **categories** - Category CRUD and taxonomy organization.
-6. **plans** - Subscription plan listing and plan administration.
-7. **subscriptions** - User subscription lifecycle (renew/upgrade/downgrade/cancel).
-8. **books** - Public catalog + admin book management, availability, featured flags, file metadata.
-9. **reading** - Reading progress, sessions, bookmarks, highlights, history.
-10. **borrows** - Borrow initiation, returns, and borrow state management.
-11. **reservations** - Reservation queue and claim-expiry lifecycle.
-12. **wishlist** - Save/remove books and retrieve wishlist.
-13. **reviews** - Book review CRUD and admin moderation toggle.
-14. **payments** - Payment initiation/verification/refund and gateway webhooks.
-15. **promotions** - Coupon and flash-sale management and validation.
-16. **search** - Search, suggestions, history, popular terms and click logging.
-17. **dashboard** - User dashboard metrics, recommendations, and library snapshot.
-18. **notifications** - In-app notifications, unread count, read status, bulk send.
-19. **rbac** - Permission and role management.
-20. **staff** - Staff invitation, role updates, suspension, activity views.
-21. **members** - Admin member lookup, payments/history, suspension controls.
-22. **audit** - Administrative audit/event logging and export.
-23. **reports** - Report job queueing, processing, and downloadable report artifacts.
-24. **settings** - System/global settings and maintenance configuration.
-25. **health** - Liveness/readiness/status endpoints for uptime and monitoring.
+## Core Information
 
-## 3. 🧰 Tech Stack
+| Property | Value |
+| --- | --- |
+| **Project** | stackread-backend |
+| **Version** | 1.0.0 |
+| **License** | ISC |
+| **API Version** | v1 |
+| **Modules** | 24 |
+| **Status** | Production-Ready ✅ |
 
-### Runtime, Framework, and Platform
+---
 
-| Technology |            Version | Why it was chosen                                                  |
-| ---------- | -----------------: | ------------------------------------------------------------------ |
-| Node.js    | 22.x (Docker base) | Modern runtime with native fetch and strong ecosystem support.     |
-| Express    |              5.1.0 | Stable, minimal web framework with mature middleware support.      |
-| TypeScript |              5.8.2 | Strict typing for large modular codebases and safer refactoring.   |
-| MongoDB    |                 7+ | Flexible document model for rapidly evolving LMS domains.          |
-| Mongoose   |             8.13.0 | Schema modeling, indexes, middleware, and robust query ergonomics. |
-| pnpm       |            10.30.2 | Fast, deterministic and workspace-friendly package management.     |
+## Architecture
 
-### Security, Auth, Validation
+### Modular Monolithic Pattern
 
-| Technology              | Version | Why it was chosen                                          |
-| ----------------------- | ------: | ---------------------------------------------------------- |
-| jsonwebtoken            |   9.0.2 | JWT-based access control for user and staff token domains. |
-| passport                |   0.7.0 | Pluggable authentication strategy framework.               |
-| passport-google-oauth20 |   2.0.0 | Google social login support.                               |
-| passport-facebook       |   3.0.0 | Facebook social login support.                             |
-| speakeasy               |   2.0.0 | TOTP-based staff two-factor authentication.                |
-| zod                     |  3.24.2 | Runtime validation and schema-first request validation.    |
-| zod-validation-error    |   3.5.3 | Clean, user-friendly validation error messages.            |
-| helmet                  |   8.1.0 | Secure default HTTP headers.                               |
-| cors                    |   2.8.5 | Controlled cross-origin API access.                        |
-| express-rate-limit      |   7.5.0 | Abuse protection and route-group throttling.               |
-| express-mongo-sanitize  |   2.2.0 | Mitigates MongoDB operator injection payloads.             |
+A single deployable unit structured as independent domain modules:
 
-### Payments and Integrations
-
-| Technology                  | Version | Why it was chosen                                                 |
-| --------------------------- | ------: | ----------------------------------------------------------------- |
-| sslcommerz-lts              |   1.2.0 | Bangladesh-friendly gateway aggregation (bKash/Nagad card rails). |
-| stripe                      |  20.4.1 | Global card and billing support.                                  |
-| @paypal/checkout-server-sdk |   1.0.3 | PayPal checkout for international transactions.                   |
-| cloudinary                  |   2.7.0 | Media/file asset storage abstraction support.                     |
-| nodemailer                  |   7.0.7 | SMTP-based outbound email infrastructure.                         |
-| firebase-admin              |  13.5.0 | Push notification delivery integration.                           |
-
-### Operations and Quality
-
-| Technology                |                   Version | Why it was chosen                                      |
-| ------------------------- | ------------------------: | ------------------------------------------------------ |
-| winston                   |                    3.17.0 | Structured application logging.                        |
-| winston-daily-rotate-file |                     5.0.0 | Log rotation and retention management.                 |
-| morgan                    |                    1.10.0 | HTTP access logs with request timing integration.      |
-| node-cron                 |                     4.2.1 | Lightweight recurring job scheduling.                  |
-| vitest                    |                     4.1.0 | Fast TypeScript-friendly unit and integration testing. |
-| supertest                 |                     7.2.2 | HTTP integration testing for Express routes.           |
-| tsx                       |                    4.19.0 | Zero-config TypeScript execution in dev scripts.       |
-| Docker                    |               Compose 3.9 | Reproducible containerized local/prod runtime.         |
-| PM2                       | ecosystem config included | Multi-process production process management.           |
-
-## 4. 🏗️ Architecture
-
-### Modular Monolithic Architecture
-
-Stackread is a **single deployable backend** organized into domain modules. Each module encapsulates routing, validation, service logic, and persistence, while shared infrastructure (auth middleware, error handling, logger, utils) is centralized in common/config.
-
-Benefits:
-
-- Strong domain boundaries without microservice complexity
-- Easier local development and transactional consistency
-- Centralized observability, auth, and config governance
-- Clear path to service extraction later if needed
-
-### Folder Structure (Tree)
-
-```text
-.
-├─ src/
-│  ├─ app/
-│  │  ├─ app.ts
-│  │  ├─ routes.ts
-│  │  ├─ server.ts
-│  │  └─ worker.ts
-│  ├─ common/
-│  │  ├─ errors/
-│  │  ├─ interfaces/
-│  │  ├─ middlewares/
-│  │  ├─ services/
-│  │  ├─ utils/
-│  │  └─ validators/
-│  ├─ config/
-│  ├─ jobs/
-│  ├─ modules/
-│  │  ├─ auth/
-│  │  ├─ staff-auth/
-│  │  ├─ onboarding/
-│  │  ├─ authors/
-│  │  ├─ categories/
-│  │  ├─ plans/
-│  │  ├─ subscriptions/
-│  │  ├─ books/
-│  │  ├─ reading/
-│  │  ├─ borrows/
-│  │  ├─ reservations/
-│  │  ├─ wishlist/
-│  │  ├─ reviews/
-│  │  ├─ payments/
-│  │  ├─ promotions/
-│  │  ├─ search/
-│  │  ├─ dashboard/
-│  │  ├─ notifications/
-│  │  ├─ rbac/
-│  │  ├─ staff/
-│  │  ├─ members/
-│  │  ├─ audit/
-│  │  ├─ reports/
-│  │  ├─ settings/
-│  │  └─ health/
-│  ├─ scripts/
-│  ├─ seeds/
-│  ├─ types/
-│  └─ workers/
-├─ documentation/
-├─ tests/
-├─ Dockerfile
-├─ docker-compose.yml
-└─ ecosystem.config.cjs
+```
+API Router
+    ↓
+Auth Middleware
+    ↓
+24 Domain Modules (auth, books, users, payments, etc.)
+    ↓
+Shared Services (Database, Cache, Email, Storage)
+    ↓
+MongoDB + Redis + External APIs
 ```
 
-### Module Structure Pattern
-
-Each module follows a predictable shape (with slight naming variants for legacy modules):
-
-```text
-module-name/
-├─ router.ts (or auth.router.ts / health.router.ts)
-├─ controller.ts
-├─ service.ts
-├─ model.ts
-├─ validation.ts
-├─ interface.ts
-└─ index.ts
-```
-
-### API and Worker Process Separation
-
-- **API process**: Handles HTTP requests, auth, validation, responses, and route dispatch.
-- **Worker process**: Runs background jobs, cron schedules, retries, and async processing.
-
-This separation prevents long-running tasks from affecting request latency and improves production resilience.
-
-## 5. ✅ Prerequisites
-
-- **Node.js**: `>=22` (recommended `22.x`)
-- **MongoDB**: `>=7`
-- **pnpm**: `10.30.2` (or compatible `10.x`)
-
-## 6. 🏁 Getting Started
-
-### 1) Clone repository
-
-```bash
-git clone https://github.com/mdnuruzzamannirob/stackread-backend.git
-cd stackread-backend
-```
-
-### 2) Install dependencies
-
-```bash
-pnpm install
-```
-
-### 3) Environment setup (`.env.example` -> `.env`)
-
-**Linux/macOS**
-
-```bash
-cp .env.example .env
-```
-
-**Windows PowerShell**
-
-```powershell
-Copy-Item .env.example .env
-```
-
-### 4) Generate strong JWT and session secrets
-
-```bash
-node -e "const c=require('crypto'); console.log('JWT_USER_SECRET='+c.randomBytes(48).toString('hex')); console.log('JWT_STAFF_SECRET='+c.randomBytes(48).toString('hex')); console.log('SESSION_SECRET='+c.randomBytes(48).toString('hex'));"
-```
-
-Copy generated values into your `.env`.
-
-### 5) Run seeds
-
-```bash
-pnpm seed:all
-```
-
-Or run all from script entrypoint:
-
-```bash
-pnpm seed
-```
-
-### 6) Start development API server
-
-```bash
-pnpm dev
-```
-
-### 7) Start worker process (separate terminal)
-
-```bash
-pnpm dev:worker
-```
-
-## 7. 🔐 Environment Variables
-
-> All variables below come from `.env.example` and are validated in runtime config.
-
-### Runtime
-
-| Variable      | Required | Example       | Description                                         |
-| ------------- | -------- | ------------- | --------------------------------------------------- |
-| `NODE_ENV`    | Optional | `development` | Runtime mode (`development`, `test`, `production`). |
-| `PORT`        | Optional | `5000`        | API server port.                                    |
-| `API_VERSION` | Optional | `v1`          | API version prefix (used in `/api/{version}`).      |
-
-### Database
-
-| Variable      | Required | Example                                               | Description                |
-| ------------- | -------- | ----------------------------------------------------- | -------------------------- |
-| `MONGODB_URI` | Yes      | `mongodb://127.0.0.1:27017/library-management-system` | MongoDB connection string. |
-
-### HTTP / CORS
-
-| Variable       | Required | Example                                       | Description                                |
-| -------------- | -------- | --------------------------------------------- | ------------------------------------------ |
-| `CORS_ORIGINS` | Optional | `http://localhost:3000,http://localhost:3001` | Allowed browser origins (comma separated). |
-
-### Logging
-
-| Variable                     | Required | Example | Description                          |
-| ---------------------------- | -------- | ------- | ------------------------------------ |
-| `LOG_LEVEL`                  | Optional | `info`  | Logger verbosity level.              |
-| `LOG_DIR`                    | Optional | `logs`  | Directory where logs are stored.     |
-| `LOG_ROTATE_MAX_SIZE`        | Optional | `20m`   | Max size per rotated log file.       |
-| `LOG_ROTATE_APP_MAX_FILES`   | Optional | `14d`   | Retention for application log files. |
-| `LOG_ROTATE_ERROR_MAX_FILES` | Optional | `30d`   | Retention for error log files.       |
-| `LOG_ZIPPED_ARCHIVE`         | Optional | `true`  | Compress rotated logs.               |
-
-### Rate Limiting
-
-| Variable                 | Required | Example  | Description                               |
-| ------------------------ | -------- | -------- | ----------------------------------------- |
-| `RATE_LIMIT_WINDOW_MS`   | Optional | `900000` | Global rate-limit window in milliseconds. |
-| `RATE_LIMIT_MAX`         | Optional | `200`    | Global max requests per window.           |
-| `AUTH_RATE_LIMIT_MAX`    | Optional | `60`     | Max requests for auth routes.             |
-| `ADMIN_RATE_LIMIT_MAX`   | Optional | `120`    | Max requests for admin routes.            |
-| `SEARCH_RATE_LIMIT_MAX`  | Optional | `180`    | Max requests for search routes.           |
-| `WEBHOOK_RATE_LIMIT_MAX` | Optional | `1000`   | Max requests for payment webhooks.        |
-| `REPORT_RATE_LIMIT_MAX`  | Optional | `80`     | Max requests for report endpoints.        |
-
-### JWT / Session / Crypto
-
-| Variable                 | Required | Example                      | Description                    |
-| ------------------------ | -------- | ---------------------------- | ------------------------------ |
-| `JWT_USER_SECRET`        | Yes      | `change-this-user-secret`    | Signing secret for user JWTs.  |
-| `JWT_STAFF_SECRET`       | Yes      | `change-this-staff-secret`   | Signing secret for staff JWTs. |
-| `JWT_ACCESS_EXPIRES_IN`  | Optional | `1d`                         | Access token TTL.              |
-| `JWT_REFRESH_EXPIRES_IN` | Optional | `30d`                        | Refresh token TTL.             |
-| `JWT_ISSUER`             | Optional | `lms-backend`                | JWT issuer claim value.        |
-| `BCRYPT_SALT_ROUNDS`     | Optional | `12`                         | Password hash cost factor.     |
-| `SESSION_SECRET`         | Optional | `change-this-session-secret` | Session signing secret.        |
-
-### OAuth and 2FA
-
-| Variable                | Required | Example                                               | Description                 |
-| ----------------------- | -------- | ----------------------------------------------------- | --------------------------- |
-| `GOOGLE_CLIENT_ID`      | Optional | ``                                                    | Google OAuth client ID.     |
-| `GOOGLE_CLIENT_SECRET`  | Optional | ``                                                    | Google OAuth client secret. |
-| `GOOGLE_CALLBACK_URL`   | Optional | `http://localhost:5000/api/v1/auth/google/callback`   | Google OAuth callback URL.  |
-| `FACEBOOK_APP_ID`       | Optional | ``                                                    | Facebook app ID.            |
-| `FACEBOOK_APP_SECRET`   | Optional | ``                                                    | Facebook app secret.        |
-| `FACEBOOK_CALLBACK_URL` | Optional | `http://localhost:5000/api/v1/auth/facebook/callback` | Facebook callback URL.      |
-| `TWO_FACTOR_ISSUER`     | Optional | `LMS-Staff`                                           | TOTP issuer for staff 2FA.  |
-
-### Email Provider
-
-| Variable             | Required                 | Example               | Description                        |
-| -------------------- | ------------------------ | --------------------- | ---------------------------------- |
-| `GMAIL_USER`         | Optional (Prod required) | ``                    | SMTP username for outbound emails. |
-| `GMAIL_APP_PASSWORD` | Optional (Prod required) | ``                    | SMTP app password/token.           |
-| `EMAIL_FROM`         | Optional                 | `noreply@example.com` | Default sender address.            |
-
-### Push Provider (Firebase)
-
-| Variable                | Required                 | Example | Description                            |
-| ----------------------- | ------------------------ | ------- | -------------------------------------- |
-| `FIREBASE_PROJECT_ID`   | Optional (Prod required) | ``      | Firebase project ID.                   |
-| `FIREBASE_CLIENT_EMAIL` | Optional (Prod required) | ``      | Firebase service account client email. |
-| `FIREBASE_PRIVATE_KEY`  | Optional (Prod required) | ``      | Firebase service account private key.  |
-
-### Storage Provider (Cloudinary)
-
-| Variable                | Required                 | Example | Description            |
-| ----------------------- | ------------------------ | ------- | ---------------------- |
-| `CLOUDINARY_CLOUD_NAME` | Optional (Prod required) | ``      | Cloudinary cloud name. |
-| `CLOUDINARY_API_KEY`    | Optional (Prod required) | ``      | Cloudinary API key.    |
-| `CLOUDINARY_API_SECRET` | Optional (Prod required) | ``      | Cloudinary API secret. |
-
-### Payments
-
-| Variable                    | Required                 | Example   | Description                               |
-| --------------------------- | ------------------------ | --------- | ----------------------------------------- |
-| `SSLCOMMERZ_STORE_ID`       | Optional (Prod required) | ``        | SSLCommerz store ID.                      |
-| `SSLCOMMERZ_STORE_PASSWORD` | Optional (Prod required) | ``        | SSLCommerz store password.                |
-| `SSLCOMMERZ_IS_LIVE`        | Optional                 | `false`   | Toggle SSLCommerz sandbox/live mode.      |
-| `STRIPE_SECRET_KEY`         | Optional (Prod required) | ``        | Stripe secret key.                        |
-| `STRIPE_WEBHOOK_SECRET`     | Optional (Prod required) | ``        | Stripe webhook signature secret.          |
-| `PAYPAL_CLIENT_ID`          | Optional (Prod required) | ``        | PayPal client ID.                         |
-| `PAYPAL_CLIENT_SECRET`      | Optional (Prod required) | ``        | PayPal client secret.                     |
-| `PAYPAL_MODE`               | Optional                 | `sandbox` | PayPal environment (`sandbox` or `live`). |
-| `PAYPAL_WEBHOOK_ID`         | Optional                 | ``        | PayPal webhook ID for verification.       |
-
-### URLs
-
-| Variable           | Required | Example                 | Description         |
-| ------------------ | -------- | ----------------------- | ------------------- |
-| `FRONTEND_URL`     | Optional | `http://localhost:3000` | Frontend base URL.  |
-| `BACKEND_URL`      | Optional | `http://localhost:5000` | Backend public URL. |
-| `STAFF_PORTAL_URL` | Optional | `http://localhost:3001` | Staff portal URL.   |
-
-### Super Admin Bootstrap
-
-| Variable               | Required | Example                | Description                       |
-| ---------------------- | -------- | ---------------------- | --------------------------------- |
-| `SUPER_ADMIN_NAME`     | Optional | `Super Admin`          | Initial super-admin display name. |
-| `SUPER_ADMIN_EMAIL`    | Optional | `admin@example.com`    | Initial super-admin login email.  |
-| `SUPER_ADMIN_PASSWORD` | Optional | `change-this-password` | Initial super-admin password.     |
-
-### Worker / Jobs
-
-| Variable                  | Required | Example | Description                              |
-| ------------------------- | -------- | ------- | ---------------------------------------- |
-| `WORKER_ENABLED`          | Optional | `true`  | Enables/disables worker process startup. |
-| `WORKER_POLL_INTERVAL_MS` | Optional | `30000` | Worker scheduler tick interval.          |
-| `JOB_RETRY_LIMIT`         | Optional | `3`     | Retry attempts for background tasks.     |
-| `JOB_RETRY_BACKOFF_MS`    | Optional | `500`   | Retry backoff base milliseconds.         |
-| `SHUTDOWN_TIMEOUT_MS`     | Optional | `20000` | Graceful shutdown timeout window.        |
-
-### Domain Defaults
-
-| Variable                   | Required | Example      | Description                        |
-| -------------------------- | -------- | ------------ | ---------------------------------- |
-| `REPORT_DOWNLOAD_TTL_DAYS` | Optional | `7`          | Report artifact retention in days. |
-| `DEFAULT_TIMEZONE`         | Optional | `Asia/Dhaka` | System default timezone.           |
-| `DEFAULT_CURRENCY`         | Optional | `BDT`        | System default currency code.      |
-| `DEFAULT_LANGUAGE`         | Optional | `en`         | System default language.           |
-
-## 8. 📚 API Documentation
-
-### Interactive API Reference (Scalar) — Development Mode
-
-A modern, interactive API reference is available during development.
-
-**Access the documentation:**
-
-```text
-http://localhost:5000/api/docs
-```
-
-**Available in development mode only** (`NODE_ENV=development`)
-
-Features:
-
-- 📚 Full OpenAPI 3.0.3 specification with 170+ endpoints
-- 🎨 Modern purple theme and intuitive layout
-- 🧪 Try-it-out requests with live sandbox (JavaScript/fetch default client)
-- 💾 Copy request/response snippets for multiple languages
-- 🔍 Search across all endpoints and parameters
-- ⚡ Real-time validation and schema inspection
-- 🔐 Bearer token authentication helpers
-
-**Raw OpenAPI JSON endpoint:**
-
-```text
-GET http://localhost:5000/api/docs/openapi.json
-```
-
-### OpenAPI Specification
-
-- File: `documentation/OpenAPI_v1.json`
-- Auto-generated from module routers and validation schemas
-- Rebuild command: `pnpm generate:docs`
-- Current inventory baseline: 154 paths across 25 module groups
-- Compatible with SwaggerUI, Stoplight Studio, and other OpenAPI viewers
-
-### Postman Collection
-
-- File: `documentation/Postman_Collection_v1.json`
-- Import into Postman and set collection variables:
-  - `baseUrl` (default: `http://localhost:5000`)
-  - `userToken`
-  - `staffToken`
-- Contains 170+ requests with auth token helpers and pre-request scripts
-
-### Base URL
-
-```text
-http://localhost:5000/api/v1
-```
-
-### Authentication
-
-- Protected endpoints require **Bearer token** in `Authorization` header.
-- User and staff tokens are separated at auth boundaries.
-- Postman collection and Scalar UI both provide token capture and authentication helpers.
-
-### Standard Response Format
+### Module Structure
+
+Each module follows a consistent pattern:
+- **router.ts** - HTTP routes and middleware
+- **controller.ts** - Request handlers
+- **service.ts** - Business logic
+- **model.ts** - MongoDB schema
+- **validation.ts** - Input validation with Zod
+- **interface.ts** - TypeScript types
+- **index.ts** - Module exports
+
+---
+
+## Module Directory (24 Modules)
+
+- **audit** - Complete audit module with API endpoints and business logic
+- **auth** - Complete auth module with API endpoints and business logic
+- **authors** - Complete authors module with API endpoints and business logic
+- **books** - Complete books module with API endpoints and business logic
+- **categories** - Complete categories module with API endpoints and business logic
+- **dashboard** - Complete dashboard module with API endpoints and business logic
+- **health** - Complete health module with API endpoints and business logic
+- **members** - Complete members module with API endpoints and business logic
+- **notifications** - Complete notifications module with API endpoints and business logic
+- **onboarding** - Complete onboarding module with API endpoints and business logic
+- **payments** - Complete payments module with API endpoints and business logic
+- **plans** - Complete plans module with API endpoints and business logic
+- **promotions** - Complete promotions module with API endpoints and business logic
+- **publishers** - Complete publishers module with API endpoints and business logic
+- **rbac** - Complete rbac module with API endpoints and business logic
+- **reading** - Complete reading module with API endpoints and business logic
+- **reports** - Complete reports module with API endpoints and business logic
+- **reviews** - Complete reviews module with API endpoints and business logic
+- **search** - Complete search module with API endpoints and business logic
+- **settings** - Complete settings module with API endpoints and business logic
+- **staff** - Complete staff module with API endpoints and business logic
+- **staff-auth** - Complete staff-auth module with API endpoints and business logic
+- **subscriptions** - Complete subscriptions module with API endpoints and business logic
+- **wishlist** - Complete wishlist module with API endpoints and business logic
+
+---
+
+## Technology Stack
+
+| Technology | Version | Purpose |
+| --- | --- | --- |
+| Node.js | 22.x | Modern async runtime with native ES modules support |
+| TypeScript | 5.8.2 | Strict typing for large modular backends |
+| Express | 5.1.0 | Lightweight HTTP framework with middleware ecosystem |
+| Mongoose | 8.13.0 | MongoDB ODM with schema validation and hooks |
+| Zod | 3.24.2 | Runtime schema validation with TypeScript inference |
+| Winston | 3.17.0 | Structured logging with rotation and archival |
+| Vitest | 4.1.0 | Fast unit and integration test framework |
+| pnpm | 10.30.2 | Fast deterministic package management |
+
+---
+
+## API Communication
+
+### Request/Response Flow
+
+All API responses follow a standard format:
 
 ```json
 {
   "success": true,
   "message": "Operation successful",
-  "data": {},
-  "meta": {}
+  "data": {...},
+  "meta": {
+    "timestamp": "2026-03-22T10:30:00Z",
+    "requestId": "req_123"
+  }
 }
 ```
 
-## 9. 🧪 Available Scripts
+### Status Codes
 
-| Script                 | Command                                   | Description                               |
-| ---------------------- | ----------------------------------------- | ----------------------------------------- |
-| `dev`                  | `tsx watch src/app/server.ts`             | Start API server in watch mode.           |
-| `dev:worker`           | `tsx watch src/app/worker.ts`             | Start worker process in watch mode.       |
-| `build`                | `tsc -p tsconfig.json`                    | Compile TypeScript to `dist`.             |
-| `start`                | `node dist/app/server.js`                 | Start compiled API server.                |
-| `start:worker`         | `node dist/app/worker.js`                 | Start compiled worker process.            |
-| `typecheck`            | `tsc --noEmit`                            | Run strict type checking only.            |
-| `test`                 | `vitest run`                              | Run all tests once.                       |
-| `test:watch`           | `vitest`                                  | Run tests in watch mode.                  |
-| `test:integration`     | `vitest run tests/integration`            | Run integration test suite.               |
-| `test:unit`            | `vitest run tests/unit`                   | Run unit test suite.                      |
-| `seed:permissions`     | `tsx src/seeds/permissions.seed.ts`       | Seed RBAC permissions.                    |
-| `seed:plans`           | `tsx src/seeds/plans.seed.ts`             | Seed subscription plans.                  |
-| `seed:settings`        | `tsx src/seeds/settings.seed.ts`          | Seed global settings defaults.            |
-| `seed:super-admin`     | `tsx src/seeds/superAdmin.seed.ts`        | Seed super-admin account.                 |
-| `seed:all`             | `tsx src/scripts/seed.ts`                 | Run deterministic seed runner entrypoint. |
-| `migrate`              | `tsx src/scripts/migrate.ts`              | Execute migration script.                 |
-| `generate:docs`        | `tsx src/scripts/rebuild-api-docs.ts`     | Regenerate OpenAPI and Postman docs.      |
-| `generate:permissions` | `tsx src/scripts/generate-permissions.ts` | Regenerate permission definitions.        |
-| `export:openapi`       | `echo .../OpenAPI_v1.json`                | Print OpenAPI export path.                |
-| `export:postman`       | `echo .../Postman_Collection_v1.json`     | Print Postman export path.                |
+- **200** - OK (GET, PATCH success)
+- **201** - Created (POST success)
+- **400** - Bad Request (validation error)
+- **401** - Unauthorized (missing/invalid token)
+- **403** - Forbidden (insufficient permissions)
+- **404** - Not Found
+- **429** - Rate Limited
+- **500** - Server Error
 
-## 10. 🧱 Request Pipeline and Middleware
+---
 
-Global middleware pipeline (in order):
+## Quick Start
 
-1. `requestContext` (request id)
-2. `responseTime`
-3. `morgan` request logging
-4. `cors`
-5. `helmet`
-6. `apiRateLimiter`
-7. route-segment limiters: `authRateLimiter`, `adminRateLimiter`, `searchRateLimiter`, `reportsRateLimiter`, `webhookRateLimiter`
-8. `express.json` / `express.urlencoded` (with rawBody capture for webhook verification)
-9. `mongoSanitizeSafe`
-10. passport initialization
-11. app routes mount (`config.apiPrefix`)
-12. `notFound`
-13. `globalErrorHandler`
+**Prerequisites:**
+- Node.js 22.x
+- pnpm 10.x
+- MongoDB 7.x
+- Git
 
-## 11. 🧩 Module Overview
-
-| Module          | Description                                          | Key routes                                                                                                        |
-| --------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `auth`          | User auth and account lifecycle with optional 2FA    | `POST /auth/register`, `POST /auth/login`, `POST /auth/2fa/challenge`, `GET /auth/me`                             |
-| `staff-auth`    | Staff auth with mandatory 2FA setup and verification | `POST /staff/login`, `POST /staff/2fa/setup`, `POST /staff/2fa/enable`, `POST /staff/2fa/verify`, `GET /staff/me` |
-| `onboarding`    | New user onboarding and plan selection               | `GET /onboarding/plans`, `POST /onboarding/select`, `POST /onboarding/complete`                                   |
-| `authors`       | Author catalog records                               | `GET /authors`, `POST /authors`, `PUT /authors/{id}`                                                              |
-| `categories`    | Category taxonomy and CRUD                           | `GET /categories`, `POST /categories`, `DELETE /categories/{id}`                                                  |
-| `plans`         | Public/admin subscription plans                      | `GET /plans`, `POST /plans`, `PATCH /plans/{id}/toggle`                                                           |
-| `subscriptions` | Subscription lifecycle and admin controls            | `GET /subscriptions/my`, `PATCH /subscriptions/my/renew`, `PATCH /subscriptions/{id}`                             |
-| `books`         | Book catalog + admin content/file management         | `GET /books`, `POST /admin/books`, `POST /admin/books/{id}/files`                                                 |
-| `reading`       | Reading progress, sessions, bookmarks, highlights    | `POST /reading/{bookId}/start`, `PATCH /reading/{bookId}/progress`, `POST /books/{bookId}/bookmarks`              |
-| `borrows`       | Borrow request/return and state updates              | `POST /borrows`, `POST /borrows/{id}/return`, `GET /borrows/my`                                                   |
-| `reservations`  | Reservation queue and claim windows                  | `POST /reservations`, `PATCH /reservations/{id}`, `GET /reservations/my`                                          |
-| `wishlist`      | User saved book list                                 | `GET /wishlist`, `POST /wishlist/{bookId}`, `DELETE /wishlist/{bookId}`                                           |
-| `reviews`       | Reviews and admin moderation                         | `POST /books/{bookId}/reviews`, `PATCH /books/{bookId}/reviews/{id}`, `PATCH /admin/reviews/{id}/toggle`          |
-| `payments`      | Payment execution, verification, refund and webhooks | `POST /payments/initiate`, `POST /payments/verify`, `POST /webhooks/{gateway}`                                    |
-| `promotions`    | Coupons and flash sales                              | `POST /coupons/validate`, `POST /coupons`, `PATCH /flash-sales/{id}/toggle`                                       |
-| `search`        | Search UX and analytics logging                      | `GET /search`, `GET /search/suggestions`, `POST /search/log-click`                                                |
-| `dashboard`     | User dashboard metrics                               | `GET /dashboard`, `GET /dashboard/stats`, `GET /dashboard/recommendations`                                        |
-| `notifications` | In-app and bulk notifications                        | `GET /notifications`, `PATCH /notifications/{id}/read`, `POST /notifications/bulk-send`                           |
-| `rbac`          | Permission and role administration                   | `GET /admin/permissions`, `POST /admin/roles`, `PUT /admin/roles/{id}`                                            |
-| `staff`         | Staff account management                             | `POST /admin/staff/invite`, `PATCH /admin/staff/{id}/role`, `GET /admin/staff/{id}/activity`                      |
-| `members`       | Member administration and insight                    | `GET /admin/members`, `GET /admin/members/{userId}/payments`, `PATCH /admin/members/{userId}/suspend`             |
-| `audit`         | Audit/event logs and export                          | `GET /admin/audit/logs`, `GET /admin/audit/logs/export`, `POST /admin/audit/activity`                             |
-| `reports`       | Async report jobs and artifacts                      | `POST /admin/reports`, `GET /admin/reports/{reportId}`, `GET /admin/reports/{reportId}/download`                  |
-| `settings`      | Global/system settings                               | `GET /admin/settings`, `PUT /admin/settings`, `GET /admin/settings/maintenance`                                   |
-| `health`        | Service liveness and readiness                       | `GET /health`, `GET /health/live`, `GET /health/ready`                                                            |
-
-## 12. 💳 Payment Gateways
-
-Stackread uses a payment provider abstraction that supports country-appropriate gateways.
-
-### Gateways
-
-- **SSLCommerz (Bangladesh)** - optimized for BD market rails and local methods (including bKash/Nagad ecosystem compatibility).
-- **Stripe (International)** - global card processing and modern payment APIs.
-- **PayPal (International)** - alternative cross-border checkout option.
-
-### Country-based Gateway Selection
-
-Typical strategy:
-
-1. Use user profile `countryCode` and checkout currency.
-2. Route Bangladesh (`BD`) users to SSLCommerz-first flow.
-3. Route non-BD users to Stripe/PayPal options.
-4. Keep fallback logic for provider outage or compliance exceptions.
-
-This keeps checkout localized while preserving a single API contract.
-
-## 13. 🗄️ Database
-
-### MongoDB + Mongoose
-
-- MongoDB is the primary datastore.
-- Mongoose schemas define domain constraints, indexes, references, and model-level behavior.
-
-### Collections (Model-backed)
-
-- `User`
-- `UserEmailVerificationToken`
-- `UserPasswordResetToken`
-- `UserLoginHistory`
-- `Staff`
-- `StaffInviteToken`
-- `StaffActivityLog`
-- `StaffTwoFactorChallenge`
-- `Permission`
-- `Role`
-- `Plan`
-- `Subscription`
-- `Payment`
-- `WebhookLog`
-- `Coupon`
-- `FlashSale`
-- `CouponUsage`
-- `Author`
-- `Category`
-- `Book`
-- `ReadingProgress`
-- `ReadingSession`
-- `Bookmark`
-- `Highlight`
-- `Borrow`
-- `Reservation`
-- `Wishlist`
-- `Review`
-- `Notification`
-- `SearchLog`
-- `AuditLog`
-- `ReportJob`
-- `ReportArtifact`
-- `Settings`
-- `Onboarding`
-
-### TTL Indexes (Automatic Expiry)
-
-TTL indexes are used to automatically purge temporary/expirable data:
-
-- Email verification tokens (`UserEmailVerificationToken.expiresAt`)
-- Password reset tokens (`UserPasswordResetToken.expiresAt`)
-- Staff invite tokens (`StaffInviteToken.expiresAt`)
-- Staff 2FA challenges (`StaffTwoFactorChallenge.expiresAt`)
-- Audit logs (`AuditLog.expiresAt`)
-- Report artifacts (`ReportArtifact.expiresAt`)
-
-Benefits:
-
-- Lower storage overhead for ephemeral security artifacts
-- Less manual cleanup logic
-- Better compliance hygiene for time-bound data
-
-## 14. ⚙️ Workers and Jobs
-
-### Background Workers
-
-| Worker                    | Description                                                               |
-| ------------------------- | ------------------------------------------------------------------------- |
-| `worker.report-generator` | Pulls queued report jobs and generates report artifacts with retry logic. |
-| `worker.notification`     | Marks pending notifications as delivered in background flow.              |
-| `worker.subscription`     | Expires subscriptions that passed end date.                               |
-| `worker.borrow-expiry`    | Marks overdue borrows after due date.                                     |
-| `worker.reservation`      | Expires unclaimed claimable reservations and clears claim metadata.       |
-| `worker-heartbeat`        | Periodic worker heartbeat audit event for observability.                  |
-
-### Scheduled Cron Jobs
-
-| Job name                       | Schedule       | Description                                            |
-| ------------------------------ | -------------- | ------------------------------------------------------ |
-| `job.renewal-reminders`        | `0 */6 * * *`  | Sends reminders for subscriptions renewing in ~3 days. |
-| `job.birthday-coupons`         | `0 2 * * *`    | Generates birthday-week coupons for matching users.    |
-| `job.borrow-expiry-reminders`  | `0 */4 * * *`  | Notifies users about borrows due within 24 hours.      |
-| `job.reservation-claim-expiry` | `*/30 * * * *` | Expires claimable reservations past claim window.      |
-| `job.report-scheduling`        | `*/10 * * * *` | Processes queued report jobs in periodic batches.      |
-
-## 15. 🧪 Testing
-
-### Run tests
+**Installation:**
 
 ```bash
-pnpm test
+git clone https://github.com/mdnuruzzamannirob/stackread-backend.git
+cd stackread-backend
+pnpm install
+
+# Setup environment
+cp .env.example .env
+nano .env
+
+# Database setup
+pnpm migrate
+pnpm seed:all
+
+# Start
+pnpm dev          # Terminal 1: API server
+pnpm dev:worker   # Terminal 2: Background worker
 ```
 
-### Run specific test types
+**API Documentation:**
+- Interactive: http://localhost:5000/api/docs
+- OpenAPI: documentation/OpenAPI_v1.json
+
+---
+
+## Development Guide
+
+### Adding a New Module
+
+1. Create folder in `src/modules/MODULE_NAME/`
+2. Create standard files: router.ts, controller.ts, service.ts, model.ts, validation.ts, interface.ts
+3. Define Zod validation schemas
+4. Implement service with business logic
+5. Add thin controller handlers
+6. Define routes with middleware
+7. Export router in index.ts
+8. Import router in src/app/routes.ts
+
+### Code Organization
+
+- Controllers stay thin - delegate to services
+- Services contain all business logic
+- Models define schema and methods
+- Validation at request boundaries with Zod
+- Custom error classes for consistency
+- Comprehensive TypeScript typing
+
+---
+
+## Available Commands
+
+### Development
+
+| Command | Description |
+| --- | --- |
+| pnpm dev | tsx watch src/app/server.ts |
+| pnpm dev:worker | tsx watch src/app/worker.ts |
+
+### Build & Compilation
+
+| Command | Description |
+| --- | --- |
+| pnpm build | tsc -p tsconfig.json |
+
+### Code Generation
+
+| Command | Description |
+| --- | --- |
+| pnpm generate:permissions | tsx src/scripts/generate-permissions.ts |
+| pnpm generate:readme | tsx src/scripts/generate-readme.ts |
+| pnpm generate:docs | tsx src/scripts/generate-api-docs.ts |
+
+### Testing
+
+| Command | Description |
+| --- | --- |
+| pnpm test | vitest run |
+| pnpm test:watch | vitest |
+| pnpm test:integration | vitest run tests/integration |
+| pnpm test:unit | vitest run tests/unit |
+
+### Code Quality
+
+| Command | Description |
+| --- | --- |
+| pnpm typecheck | tsc --noEmit |
+
+### Database & Migration
+
+| Command | Description |
+| --- | --- |
+| pnpm start | node dist/app/server.js |
+| pnpm start:worker | node dist/app/worker.js |
+| pnpm migrate | tsx src/scripts/migrate.ts |
+| pnpm seed:permissions | tsx src/seeds/permissions.seed.ts |
+| pnpm seed:plans | tsx src/seeds/plans.seed.ts |
+| pnpm seed:settings | tsx src/seeds/settings.seed.ts |
+| pnpm seed:super-admin | tsx src/seeds/superAdmin.seed.ts |
+| pnpm seed:all | tsx src/scripts/seed.ts |
+
+### Utilities
+
+| Command | Description |
+| --- | --- |
+| pnpm export:openapi | echo OpenAPI export available at documentation/OpenAPI_v1.json |
+| pnpm export:postman | echo Postman export available at documentation/Postman_Collection_v1.json |
+
+---
+
+## Database
+
+**Collections:**
+- Users (reader accounts)
+- Staff (admin/manager accounts)
+- Books (content catalog)
+- Subscriptions (active subscriptions)
+- Payments (transaction records)
+- ReadingProgress (user activity)
+- Notifications (user messages)
+- Reports (generated outputs)
+- AuditLog (administrative events)
+
+**Indexes:** All critical fields indexed. TTL indexes auto-expire tokens (1hr password reset, 24hr email verification).
+
+---
+
+## API Documentation
+
+**Interactive Docs:** http://localhost:5000/api/docs
+- 170+ endpoints
+- Try-it-out interface
+- Code snippets (cURL, JS, Python)
+- Full search
+
+**Postman Collection:** documentation/Postman_Collection_v1.json
+
+---
+
+## Testing
 
 ```bash
-pnpm test:unit
-pnpm test:integration
-pnpm test:watch
-```
-
-### Test types used
-
-- **Unit tests**: Isolated service/helper logic checks.
-- **Integration tests**: API/module interactions with realistic data flow.
-
-Test folders:
-
-- `tests/unit`
-- `tests/integration`
-- `tests/fixtures`
-- `tests/setup`
-
-## 16. 🚢 Deployment
-
-### Docker setup
-
-Build and run full stack:
-
-```bash
-docker compose up --build
-```
-
-Services:
-
-- `lms-api` - API process (`dist/app/server.js`)
-- `lms-worker` - Worker process (`dist/app/worker.js`)
-- `mongo` - MongoDB 7 with persistent volume
-
-### PM2 setup
-
-```bash
-pnpm build
-pm2 start ecosystem.config.cjs
-pm2 status
-pm2 logs
-```
-
-PM2 apps:
-
-- `lms-api` (cluster mode, max instances)
-- `lms-worker` (single fork)
-
-### Production environment checklist
-
-- [ ] `NODE_ENV=production`
-- [ ] Strong values for `JWT_USER_SECRET`, `JWT_STAFF_SECRET`, `SESSION_SECRET`
-- [ ] Replace default `SUPER_ADMIN_PASSWORD`
-- [ ] Configure SMTP (`GMAIL_USER`, `GMAIL_APP_PASSWORD`)
-- [ ] Configure Firebase push credentials
-- [ ] Configure Cloudinary credentials
-- [ ] Configure SSLCommerz, Stripe, and PayPal credentials
-- [ ] Restrict `CORS_ORIGINS` to real domains
-- [ ] Enable log retention/rotation strategy
-- [ ] Run `pnpm typecheck && pnpm test`
-- [ ] Run `pnpm generate:docs` before release if APIs changed
-
-## 17. 🤝 Contributing
-
-### Code style
-
-- Use strict TypeScript patterns and explicit types for public APIs.
-- Follow module boundaries (no cross-module leakage of internals).
-- Prefer schema-first validation for request contracts.
-- Keep controllers thin; move business logic to services.
-- Add tests for changed behavior (unit/integration as appropriate).
-
-### Commit message format
-
-Recommended conventional style:
-
-```text
-type(scope): short summary
-```
-
-Examples:
-
-```text
-feat(payments): add paypal webhook signature verification
-fix(reading): prevent progress regression on stale client updates
-docs(readme): expand env variable matrix and deployment checklist
+pnpm test               # Run all tests
+pnpm test:watch        # Watch mode
+pnpm test:unit         # Unit tests only
+pnpm test:integration  # Integration tests
+pnpm test -- --coverage
 ```
 
 ---
 
-Built for production-grade LMS operations with modular clarity, worker-backed reliability, and API-first integration readiness.
+## Performance
+
+### Database Optimization
+
+- Use indexes on frequently queried fields
+- Implement pagination for large datasets
+- Use `.lean()` for read-only queries
+- Use field projection to limit data transfer
+- Add full-text search indexes for text fields
+
+### Caching Strategy
+
+- Redis for session and frequently accessed data
+- HTTP caching headers for static resources
+- Query result caching for expensive operations
+- TTL-based auto-expiration
+
+### Rate Limiting
+
+- Auth endpoints: 60 req/min per IP
+- API endpoints: 200 req/15min per user
+- Payment webhooks: 1000 req/min
+
+---
+
+## Security
+
+### Authentication
+
+- JWT tokens for user sessions (24hr expiry)
+- Staff 2FA with TOTP apps
+- OAuth integration (Google, Facebook)
+- Token refresh mechanism
+
+### Data Protection
+
+- Passwords hashed with Bcrypt (12 rounds)
+- Sensitive fields encrypted at rest
+- No credentials in logs or responses
+- Environment variables for all secrets
+
+### API Security
+
+- CORS restricted to whitelisted origins
+- Input validation with Zod
+- No raw SQL/NoSQL queries
+- Rate limiting on all endpoints
+- Security headers (CSP, X-Frame-Options, etc.)
+
+### Compliance
+
+- PII encrypted
+- Audit logging for admin actions
+- GDPR compliance framework
+- Payment PCI DSS standards
+
+---
+
+## Deployment
+
+### Environment Setup
+
+Set required environment variables:
+- `MONGODB_URI` - Database connection
+- `JWT_USER_SECRET` - Token signing (48+ chars)
+- `JWT_STAFF_SECRET` - Staff token key
+- `GMAIL_USER` / `GMAIL_PASS` - Email SMTP
+- Payment keys: STRIPE_SECRET_KEY, PAYPAL_CLIENT_ID, etc.
+
+### Docker Deployment
+
+```bash
+docker compose up --build -d
+```
+
+### PM2 Production
+
+```bash
+pnpm build
+pm2 start ecosystem.config.cjs --env production
+```
+
+### Pre-deployment Checks
+
+- All tests pass: `pnpm test`
+- Type checking clean: `pnpm typecheck`
+- Build successful: `pnpm build`
+- Environment variables configured
+- Database backups enabled
+- Monitoring configured
+
+---
+
+## Troubleshooting
+
+**MongoDB Connection:** Verify MONGODB_URI, check MongoDB Atlas IP whitelist
+**Port in Use:** Kill existing process or use different port: PORT=8000 pnpm dev
+**Worker Not Running:** Ensure WORKER_ENABLED=true, check logs
+**Type Errors:** Run pnpm typecheck, fix errors
+**Validation Errors:** Check request format against Zod schemas
+
+---
+
+## FAQ
+
+**Q: How do I add a new API endpoint?**
+A: Create route in module router.ts, implement controller handler, add Zod validation, import router in routes.ts.
+
+**Q: How does authentication work?**
+A: Users get JWT token on login (24hr expiry). Token included in Authorization header. Server validates signature and expiry.
+
+**Q: How do I handle file uploads?**
+A: Use Cloudinary integration. Client uploads → controller → service → Cloudinary → URL stored in DB.
+
+**Q: Why are queries slow?**
+A: Check .explain() output, ensure indexes exist, use projection, add pagination, consider caching.
+
+**Q: How do permissions work?**
+A: RBAC system with 30+ permissions. Auto-generated from route definitions. Use @requirePermission decorator.
+
+**Q: How do I run background jobs?**
+A: Add .job.ts file in src/jobs/, register in jobs/index.ts, backend worker process executes on schedule.
+
+**Q: How do I add a payment gateway?**
+A: Create payment processor in src/modules/payments/, implement webhook handlers, add to payment service.
+
+---
+
+## Contributing
+
+**Code Standards:**
+- TypeScript strict mode
+- Zod schemas for all inputs
+- Services for business logic
+- Comprehensive error handling
+- Unit + integration tests
+
+**Workflow:**
+1. Create feature branch
+2. Make changes and test locally
+3. Run `pnpm typecheck` and `pnpm test`
+4. Commit with conventional format: `feat(module): description`
+5. Push and open PR
+
+---
+
+## Resources
+
+- **API Reference:** http://localhost:5000/api/docs
+- **Repository:** https://github.com/mdnuruzzamannirob/stackread-backend
+- **Issues:** Report bugs or request features on GitHub
+
+---
+
+**Last Generated:** 3/22/2026, 1:34:00 PM
+
+Built with ❤️ using Node.js • Express • TypeScript • MongoDB
