@@ -184,6 +184,7 @@ bookSchema.index({
   tags: 'text',
 })
 bookSchema.index({ isAvailable: 1, featured: 1, createdAt: -1 })
-bookSchema.index({ authorIds: 1, categoryIds: 1 })
+bookSchema.index({ authorIds: 1 })
+bookSchema.index({ categoryIds: 1 })
 
 export const BookModel: Model<IBook> = model<IBook>('Book', bookSchema)
