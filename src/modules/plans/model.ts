@@ -39,11 +39,23 @@ const planSchema = new Schema<IPlan>(
       required: true,
       min: 1,
     },
-    maxBorrows: {
+    maxDevices: {
       type: Number,
       required: true,
       min: 1,
       default: 1,
+    },
+    downloadEnabled: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    accessLevel: {
+      type: String,
+      enum: ['free', 'basic', 'premium'],
+      required: true,
+      default: 'free',
+      index: true,
     },
     features: {
       type: [String],

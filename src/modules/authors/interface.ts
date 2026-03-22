@@ -5,7 +5,12 @@ export interface IAuthor {
   name: string
   bio: string | undefined
   countryCode: string | undefined
-  avatarUrl: string | undefined
+  avatar:
+    | {
+        publicId: string
+        url: string
+      }
+    | undefined
   website: string | undefined
   isActive: boolean
   createdAt: Date

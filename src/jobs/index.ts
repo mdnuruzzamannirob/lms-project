@@ -2,10 +2,9 @@ import cron, { type ScheduledTask } from 'node-cron'
 
 import { logger } from '../config/logger'
 import { runBirthdayCouponJob } from './birthday-coupons.job'
-import { runBorrowExpiryReminderJob } from './borrow-expiry-reminders.job'
+import { runReadingSessionCleanupJob } from './reading-session-cleanup.job'
 import { runRenewalReminderJob } from './renewal-reminders.job'
 import { runReportSchedulingJob } from './report-scheduling.job'
-import { runReservationClaimExpiryJob } from './reservation-claim-expiry.job'
 
 type JobDefinition = {
   name: string
@@ -25,14 +24,9 @@ const jobDefinitions: JobDefinition[] = [
     handler: runBirthdayCouponJob,
   },
   {
-    name: 'job.borrow-expiry-reminders',
-    schedule: '0 */4 * * *',
-    handler: runBorrowExpiryReminderJob,
-  },
-  {
-    name: 'job.reservation-claim-expiry',
-    schedule: '*/30 * * * *',
-    handler: runReservationClaimExpiryJob,
+    name: 'job.reading-session-cleanup',
+    schedule: '0 3 * * *',
+    handler: runReadingSessionCleanupJob,
   },
   {
     name: 'job.report-scheduling',

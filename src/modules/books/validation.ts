@@ -24,7 +24,22 @@ const baseBookBodySchema = z.object({
   language: z.string().trim().min(2).max(20).default('en'),
   pageCount: z.coerce.number().int().min(1).max(100000).optional(),
   publicationDate: z.coerce.date().optional(),
-  coverImageUrl: z.string().trim().url().max(500).optional(),
+  coverImage: z
+    .object({
+      publicId: z.string().trim().min(1).max(300),
+      url: z.string().trim().url().max(800),
+      width: z.coerce.number().int().min(1),
+      height: z.coerce.number().int().min(1),
+    })
+    .optional(),
+  publisherId: z
+    .string()
+    .trim()
+    .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId')
+    .optional(),
+  accessLevel: z.enum(['free', 'basic', 'premium']).default('free'),
+  isPublished: z.boolean().default(false),
+  edition: z.string().trim().min(1).max(50).optional(),
   featured: z.boolean().default(false),
   isAvailable: z.boolean().default(true),
   authorIds: z.array(objectIdString).min(1).max(20),
@@ -38,23 +53,26 @@ const addFileBodySchema = z
     contentType: z.string().trim().min(3).max(120),
     fileBase64: z.string().trim().min(8).optional(),
     folder: z.string().trim().min(1).max(200).optional(),
-    provider: z.string().trim().min(2).max(30).optional(),
-    key: z.string().trim().min(1).max(300).optional(),
+    publicId: z.string().trim().min(1).max(300).optional(),
     url: z.string().trim().url().max(800).optional(),
+    format: z.enum(['pdf', 'epub', 'mobi']).optional(),
+    resourceType: z.enum(['raw']).default('raw'),
     size: z.coerce.number().int().min(1).optional(),
   })
   .refine(
     (value) => {
       const hasUploadPayload = typeof value.fileBase64 === 'string'
       const hasMetadataPayload =
-        typeof value.key === 'string' &&
+        typeof value.publicId === 'string' &&
         typeof value.url === 'string' &&
+        typeof value.format === 'string' &&
         typeof value.size === 'number'
 
       return hasUploadPayload || hasMetadataPayload
     },
     {
-      message: 'Either fileBase64 or key/url/size metadata must be provided',
+      message:
+        'Either fileBase64 or publicId/url/format/size metadata must be provided',
     },
   )
 

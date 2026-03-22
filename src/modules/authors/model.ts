@@ -27,10 +27,15 @@ const authorSchema = new Schema<IAuthor>(
       default: undefined,
       index: true,
     },
-    avatarUrl: {
-      type: String,
+    avatar: {
+      type: new Schema(
+        {
+          publicId: { type: String, required: true, trim: true },
+          url: { type: String, required: true, trim: true },
+        },
+        { _id: false },
+      ),
       required: false,
-      trim: true,
       default: undefined,
     },
     website: {

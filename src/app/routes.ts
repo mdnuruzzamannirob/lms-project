@@ -4,7 +4,6 @@ import { auditRouter } from '../modules/audit'
 import { authRouter } from '../modules/auth'
 import { authorsRouter } from '../modules/authors'
 import { booksRouter } from '../modules/books'
-import { borrowsRouter } from '../modules/borrows'
 import { categoriesRouter } from '../modules/categories'
 import { dashboardRouter } from '../modules/dashboard'
 import { healthRouter } from '../modules/health'
@@ -14,10 +13,10 @@ import { onboardingRouter } from '../modules/onboarding'
 import { paymentsRouter } from '../modules/payments'
 import { plansRouter } from '../modules/plans'
 import { promotionsRouter } from '../modules/promotions'
+import { publishersRouter } from '../modules/publishers'
 import { rbacRouter } from '../modules/rbac'
 import { readingRouter } from '../modules/reading'
 import { reportsRouter } from '../modules/reports'
-import { reservationsRouter } from '../modules/reservations'
 import { reviewsRouter } from '../modules/reviews'
 import { searchRouter } from '../modules/search'
 import { settingsRouter } from '../modules/settings'
@@ -34,12 +33,11 @@ router.use('/staff', staffAuthRouter)
 router.use('/onboarding', onboardingRouter)
 router.use('/authors', authorsRouter)
 router.use('/categories', categoriesRouter)
+router.use('/publishers', publishersRouter)
 router.use('/plans', plansRouter)
 router.use('/subscriptions', subscriptionsRouter)
 router.use('/', booksRouter)
 router.use('/', readingRouter)
-router.use('/', borrowsRouter)
-router.use('/', reservationsRouter)
 router.use('/', wishlistRouter)
 router.use('/', reviewsRouter)
 router.use('/', paymentsRouter)

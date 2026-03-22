@@ -16,7 +16,7 @@ const formatAuthor = (author: IAuthor | null) => {
     name: author.name,
     bio: author.bio,
     countryCode: author.countryCode,
-    avatarUrl: author.avatarUrl,
+    avatar: author.avatar ?? null,
     website: author.website,
     isActive: author.isActive,
     createdAt: author.createdAt.toISOString(),
@@ -68,7 +68,7 @@ export const authorsService = {
     name: string
     bio?: string
     countryCode?: string
-    avatarUrl?: string
+    avatar?: { publicId: string; url: string }
     website?: string
     isActive: boolean
   }) => {
@@ -82,7 +82,7 @@ export const authorsService = {
       name: payload.name,
       bio: payload.bio,
       countryCode: payload.countryCode,
-      avatarUrl: payload.avatarUrl,
+      avatar: payload.avatar,
       website: payload.website,
       isActive: payload.isActive,
     })
@@ -96,7 +96,7 @@ export const authorsService = {
       name: string
       bio: string
       countryCode: string
-      avatarUrl: string
+      avatar: { publicId: string; url: string }
       website: string
       isActive: boolean
     }>,
@@ -119,8 +119,8 @@ export const authorsService = {
       author.countryCode = payload.countryCode
     }
 
-    if (typeof payload.avatarUrl === 'string') {
-      author.avatarUrl = payload.avatarUrl
+    if (payload.avatar) {
+      author.avatar = payload.avatar
     }
 
     if (typeof payload.website === 'string') {

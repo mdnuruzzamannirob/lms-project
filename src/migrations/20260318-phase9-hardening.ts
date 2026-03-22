@@ -26,7 +26,7 @@ export const migration20260318Phase9Hardening = async (): Promise<void> => {
         trial: {
           enabled: true,
           durationDays: 7,
-          maxBorrows: 2,
+          maxDevices: 2,
           autoActivate: true,
         },
       },

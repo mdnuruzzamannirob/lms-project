@@ -28,7 +28,7 @@ const defaultSettingsSeed = {
       reportReady: 'Your report is ready for download.',
     },
     push: {
-      reservationReady: 'Your reserved book is now claimable.',
+      newBookAlert: 'A new book has been added to your preferred category.',
       subscriptionExpiring: 'Your subscription is expiring soon.',
     },
   },
@@ -42,7 +42,7 @@ const defaultSettingsSeed = {
   trial: {
     enabled: true,
     durationDays: 7,
-    maxBorrows: 2,
+    accessLevel: 'free',
     autoActivate: true,
   },
 }

@@ -34,7 +34,7 @@ export interface IGlobalSettings {
   trial: {
     enabled: boolean
     durationDays: number
-    maxBorrows: number
+    accessLevel: 'free' | 'basic'
     autoActivate: boolean
   }
   createdAt: Date

@@ -24,7 +24,7 @@ const formatBook = (book: any): object => {
     ratingCount: book.ratingCount || 0,
     pageCount: book.pageCount || 0,
     language: book.language || null,
-    coverImageUrl: book.coverImageUrl || null,
+    coverImage: book.coverImage ?? null,
   }
 }
 
@@ -50,7 +50,7 @@ export const searchService = {
     const [books, total] = await Promise.all([
       BookModel.find(searchQuery)
         .select(
-          'title description authorIds categoryIds isbn publishedYear ratingAverage ratingCount pageCount language coverImageUrl',
+          'title description authorIds categoryIds isbn publishedYear ratingAverage ratingCount pageCount language coverImage',
         )
         .skip(skip)
         .limit(limit)

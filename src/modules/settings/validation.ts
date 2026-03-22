@@ -48,7 +48,7 @@ export const settingsValidation = {
       .object({
         enabled: z.boolean().optional(),
         durationDays: z.coerce.number().int().positive().optional(),
-        maxBorrows: z.coerce.number().int().positive().optional(),
+        accessLevel: z.enum(['free', 'basic']).optional(),
         autoActivate: z.boolean().optional(),
       })
       .optional(),

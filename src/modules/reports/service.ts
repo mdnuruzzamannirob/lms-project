@@ -296,7 +296,8 @@ export const reportsService = {
       | 'admin_overview'
       | 'revenue_summary'
       | 'popular_books'
-      | 'borrow_stats'
+      | 'reading_stats'
+      | 'subscription_stats'
   }) => {
     const filter: Record<string, unknown> = {}
 

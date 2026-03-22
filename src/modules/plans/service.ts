@@ -15,7 +15,9 @@ const formatPlan = (plan: IPlan | null) => {
     price: plan.price,
     currency: plan.currency,
     durationDays: plan.durationDays,
-    maxBorrows: plan.maxBorrows,
+    maxDevices: plan.maxDevices,
+    downloadEnabled: plan.downloadEnabled,
+    accessLevel: plan.accessLevel,
     features: plan.features,
     isFree: plan.isFree,
     isActive: plan.isActive,
@@ -61,7 +63,9 @@ export const plansService = {
     price: number
     currency: string
     durationDays: number
-    maxBorrows: number
+    maxDevices: number
+    downloadEnabled: boolean
+    accessLevel: 'free' | 'basic' | 'premium'
     features: string[]
     isFree: boolean
     isActive: boolean
@@ -92,7 +96,9 @@ export const plansService = {
       price: number
       currency: string
       durationDays: number
-      maxBorrows: number
+      maxDevices: number
+      downloadEnabled: boolean
+      accessLevel: 'free' | 'basic' | 'premium'
       features: string[]
       isFree: boolean
       isActive: boolean
@@ -129,8 +135,16 @@ export const plansService = {
       plan.durationDays = payload.durationDays
     }
 
-    if (typeof payload.maxBorrows === 'number') {
-      plan.maxBorrows = payload.maxBorrows
+    if (typeof payload.maxDevices === 'number') {
+      plan.maxDevices = payload.maxDevices
+    }
+
+    if (typeof payload.downloadEnabled === 'boolean') {
+      plan.downloadEnabled = payload.downloadEnabled
+    }
+
+    if (typeof payload.accessLevel === 'string') {
+      plan.accessLevel = payload.accessLevel
     }
 
     if (Array.isArray(payload.features)) {

@@ -8,7 +8,9 @@ export interface IPlan {
   price: number
   currency: string
   durationDays: number
-  maxBorrows: number
+  maxDevices: number
+  downloadEnabled: boolean
+  accessLevel: 'free' | 'basic' | 'premium'
   features: string[]
   isFree: boolean
   isActive: boolean

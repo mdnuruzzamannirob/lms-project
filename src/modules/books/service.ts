@@ -56,11 +56,15 @@ const formatBook = (book: IBook | null) => {
     language: book.language,
     pageCount: book.pageCount,
     publicationDate: book.publicationDate?.toISOString(),
-    coverImageUrl: book.coverImageUrl,
+    coverImage: book.coverImage ?? null,
+    edition: book.edition,
     featured: book.featured,
     isAvailable: book.isAvailable,
+    accessLevel: book.accessLevel,
+    isPublished: book.isPublished,
     authorIds: book.authorIds.map((authorId) => authorId.toString()),
     categoryIds: book.categoryIds.map((categoryId) => categoryId.toString()),
+    publisherId: book.publisherId?.toString(),
     tags: book.tags,
     files: book.files.map((file) => {
       if (!file._id) {
@@ -70,9 +74,10 @@ const formatBook = (book: IBook | null) => {
       return {
         id: file._id.toString(),
         provider: file.provider,
-        key: file.key,
+        publicId: file.publicId,
         url: file.url,
-        contentType: file.contentType,
+        format: file.format,
+        resourceType: file.resourceType,
         size: file.size,
         originalFileName: file.originalFileName,
         uploadedAt: file.uploadedAt.toISOString(),
@@ -126,7 +131,11 @@ const applyBookUpdates = async (
     language: string
     pageCount: number
     publicationDate: Date
-    coverImageUrl: string
+    coverImage: { publicId: string; url: string; width: number; height: number }
+    publisherId: string
+    accessLevel: 'free' | 'basic' | 'premium'
+    isPublished: boolean
+    edition: string
     featured: boolean
     isAvailable: boolean
     authorIds: string[]
@@ -184,8 +193,24 @@ const applyBookUpdates = async (
     book.publicationDate = payload.publicationDate
   }
 
-  if (typeof payload.coverImageUrl === 'string') {
-    book.coverImageUrl = payload.coverImageUrl
+  if (payload.coverImage) {
+    book.coverImage = payload.coverImage
+  }
+
+  if (typeof payload.publisherId === 'string') {
+    book.publisherId = new Types.ObjectId(payload.publisherId)
+  }
+
+  if (typeof payload.accessLevel === 'string') {
+    book.accessLevel = payload.accessLevel
+  }
+
+  if (typeof payload.isPublished === 'boolean') {
+    book.isPublished = payload.isPublished
+  }
+
+  if (typeof payload.edition === 'string') {
+    book.edition = payload.edition
   }
 
   if (typeof payload.featured === 'boolean') {
@@ -278,7 +303,7 @@ export const booksService = {
       title: book.title,
       slug: book.slug,
       summary: book.summary,
-      coverImageUrl: book.coverImageUrl,
+      coverImage: book.coverImage ?? null,
       featured: book.featured,
       isAvailable: book.isAvailable,
       authorIds: book.authorIds.map((authorId) => authorId.toString()),
@@ -315,7 +340,16 @@ export const booksService = {
       language: string
       pageCount?: number
       publicationDate?: Date
-      coverImageUrl?: string
+      coverImage?: {
+        publicId: string
+        url: string
+        width: number
+        height: number
+      }
+      publisherId?: string
+      accessLevel: 'free' | 'basic' | 'premium'
+      isPublished: boolean
+      edition?: string
       featured: boolean
       isAvailable: boolean
       authorIds: string[]
@@ -347,7 +381,13 @@ export const booksService = {
       language: payload.language,
       pageCount: payload.pageCount,
       publicationDate: payload.publicationDate,
-      coverImageUrl: payload.coverImageUrl,
+      coverImage: payload.coverImage,
+      publisherId: payload.publisherId
+        ? new Types.ObjectId(payload.publisherId)
+        : undefined,
+      accessLevel: payload.accessLevel,
+      isPublished: payload.isPublished,
+      edition: payload.edition,
       featured: payload.featured,
       isAvailable: payload.isAvailable,
       authorIds: toObjectIdArray(payload.authorIds),
@@ -370,7 +410,16 @@ export const booksService = {
       language: string
       pageCount: number
       publicationDate: Date
-      coverImageUrl: string
+      coverImage: {
+        publicId: string
+        url: string
+        width: number
+        height: number
+      }
+      publisherId: string
+      accessLevel: 'free' | 'basic' | 'premium'
+      isPublished: boolean
+      edition: string
       featured: boolean
       isAvailable: boolean
       authorIds: string[]
@@ -435,9 +484,10 @@ export const booksService = {
       contentType: string
       fileBase64?: string
       folder?: string
-      provider?: string
-      key?: string
+      publicId?: string
       url?: string
+      format?: 'pdf' | 'epub' | 'mobi'
+      resourceType?: 'raw'
       size?: number
     },
   ) => {
@@ -459,29 +509,32 @@ export const booksService = {
 
       book.files.push({
         provider: 'cloudinary',
-        key: upload.key,
+        publicId: upload.publicId,
         url: upload.url,
-        contentType: upload.contentType,
+        format: upload.format as 'pdf' | 'epub' | 'mobi',
         size: upload.size,
-        originalFileName: payload.fileName,
+        originalFileName: upload.originalFileName,
+        resourceType: 'raw',
         uploadedAt: new Date(),
       })
     } else {
       if (
-        typeof payload.key !== 'string' ||
+        typeof payload.publicId !== 'string' ||
         typeof payload.url !== 'string' ||
+        typeof payload.format !== 'string' ||
         typeof payload.size !== 'number'
       ) {
         throw new AppError('Invalid file metadata payload.', 400)
       }
 
       book.files.push({
-        provider: payload.provider ?? 'cloudinary',
-        key: payload.key,
+        provider: 'cloudinary',
+        publicId: payload.publicId,
         url: payload.url,
-        contentType: payload.contentType,
+        format: payload.format,
         size: payload.size,
         originalFileName: payload.fileName,
+        resourceType: payload.resourceType ?? 'raw',
         uploadedAt: new Date(),
       })
     }
@@ -497,9 +550,10 @@ export const booksService = {
     return {
       id: file._id.toString(),
       provider: file.provider,
-      key: file.key,
+      publicId: file.publicId,
       url: file.url,
-      contentType: file.contentType,
+      format: file.format,
+      resourceType: file.resourceType,
       size: file.size,
       originalFileName: file.originalFileName,
       uploadedAt: file.uploadedAt.toISOString(),
@@ -527,7 +581,7 @@ export const booksService = {
 
     return {
       id: targetFile._id.toString(),
-      key: targetFile.key,
+      publicId: targetFile.publicId,
       provider: targetFile.provider,
     }
   },
@@ -544,7 +598,16 @@ export const booksService = {
         language: string
         pageCount?: number
         publicationDate?: Date
-        coverImageUrl?: string
+        coverImage?: {
+          publicId: string
+          url: string
+          width: number
+          height: number
+        }
+        publisherId?: string
+        accessLevel: 'free' | 'basic' | 'premium'
+        isPublished: boolean
+        edition?: string
         featured: boolean
         isAvailable: boolean
         authorIds: string[]

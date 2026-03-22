@@ -1,9 +1,8 @@
 import { schedulerService } from '../common/services/scheduler.service'
 import { config } from '../config'
-import { runBorrowExpiryWorker } from './borrow-expiry.worker'
 import { runNotificationWorker } from './notification.worker'
 import { runReportGeneratorWorker } from './report-generator.worker'
-import { runReservationWorker } from './reservation.worker'
+import { runSubscriptionDowngradeWorker } from './subscription-downgrade.worker'
 import { runSubscriptionWorker } from './subscription.worker'
 
 export const registerBackgroundWorkers = () => {
@@ -28,14 +27,8 @@ export const registerBackgroundWorkers = () => {
   })
 
   schedulerService.registerJob({
-    name: 'worker.borrow-expiry',
+    name: 'worker.subscription-downgrade',
     intervalMs,
-    handler: runBorrowExpiryWorker,
-  })
-
-  schedulerService.registerJob({
-    name: 'worker.reservation',
-    intervalMs,
-    handler: runReservationWorker,
+    handler: runSubscriptionDowngradeWorker,
   })
 }

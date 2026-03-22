@@ -5,15 +5,9 @@ export interface IDashboardStats {
     totalReadingTime: number
     averageRatingGiven: number
   }
-  borrowStats: {
-    activeBorrows: number
-    overdueBorrows: number
-    totalBorrowsAllTime: number
-    returnedBorrows: number
-  }
-  reservationStats: {
-    activeReservations: number
-    claimableReservations: number
+  accessStats: {
+    totalBooksAccessed: number
+    currentlyReading: number
   }
   subscriptionStats: {
     currentPlan: string | null
@@ -34,7 +28,10 @@ export interface IDashboardRecommendation {
   authorIds: string[]
   categoryIds: string[]
   reason: string
-  coverImageUrl?: string
+  coverImage?: {
+    publicId: string
+    url: string
+  }
   ratingAverage: number
   ratingCount: number
 }

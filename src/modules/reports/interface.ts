@@ -4,7 +4,8 @@ export type ReportType =
   | 'admin_overview'
   | 'revenue_summary'
   | 'popular_books'
-  | 'borrow_stats'
+  | 'reading_stats'
+  | 'subscription_stats'
 
 export type ReportFormat = 'json' | 'csv' | 'pdf' | 'excel'
 
@@ -60,13 +61,10 @@ export type AdminOverviewAggregation = {
   popularBooks: Array<{
     bookId: string
     title: string
-    borrowCount: number
+    readCount: number
   }>
-  borrowStats: {
-    total: number
-    borrowed: number
-    returned: number
-    overdue: number
-    cancelled: number
+  readingStats: {
+    totalReadingSessions: number
+    totalReadingTimeSeconds: number
   }
 }

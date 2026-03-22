@@ -1,7 +1,7 @@
 {
   "name": "stackread-backend",
   "version": "1.0.0",
-  "description": "Library Management System Backend — Node.js + Express + TypeScript + MongoDB",
+  "description": "",
   "main": "dist/app/server.js",
   "scripts": {
     "dev": "tsx watch src/app/server.ts",
@@ -14,14 +14,14 @@
     "test:watch": "vitest",
     "test:integration": "vitest run tests/integration",
     "test:unit": "vitest run tests/unit",
+    "generate:permissions": "tsx src/scripts/generate-permissions.ts",
+    "generate:docs": "tsx src/scripts/rebuild-api-docs.ts",
+    "migrate": "tsx src/scripts/migrate.ts",
     "seed:permissions": "tsx src/seeds/permissions.seed.ts",
     "seed:plans": "tsx src/seeds/plans.seed.ts",
     "seed:settings": "tsx src/seeds/settings.seed.ts",
     "seed:super-admin": "tsx src/seeds/superAdmin.seed.ts",
     "seed:all": "tsx src/scripts/seed.ts",
-    "generate:permissions": "tsx src/scripts/generate-permissions.ts",
-    "generate:docs": "tsx src/scripts/rebuild-api-docs.ts",
-    "migrate": "tsx src/scripts/migrate.ts",
     "export:openapi": "echo OpenAPI export available at documentation/OpenAPI_v1.json",
     "export:postman": "echo Postman export available at documentation/Postman_Collection_v1.json"
   },

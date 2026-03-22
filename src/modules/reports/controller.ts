@@ -22,7 +22,8 @@ export const reportsController: Record<string, RequestHandler> = {
         | 'admin_overview'
         | 'revenue_summary'
         | 'popular_books'
-        | 'borrow_stats'
+        | 'reading_stats'
+        | 'subscription_stats'
       format: 'json' | 'csv' | 'pdf' | 'excel'
       filters?: Record<string, unknown>
     }
@@ -51,7 +52,8 @@ export const reportsController: Record<string, RequestHandler> = {
         | 'admin_overview'
         | 'revenue_summary'
         | 'popular_books'
-        | 'borrow_stats'
+        | 'reading_stats'
+        | 'subscription_stats'
     }
 
     const result = await reportsService.listReportJobs(query)

@@ -4,41 +4,19 @@ import type { IBook, IBookFile } from './interface'
 
 const bookFileSchema = new Schema<IBookFile>(
   {
-    provider: {
+    provider: { type: String, enum: ['cloudinary'], required: true },
+    publicId: { type: String, required: true, trim: true },
+    url: { type: String, required: true, trim: true },
+    format: { type: String, enum: ['pdf', 'epub', 'mobi'], required: true },
+    size: { type: Number, required: true, min: 1 },
+    originalFileName: { type: String, required: true, trim: true },
+    resourceType: {
       type: String,
+      enum: ['raw'],
       required: true,
-      trim: true,
+      default: 'raw',
     },
-    key: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    url: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    contentType: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    size: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-    originalFileName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    uploadedAt: {
-      type: Date,
-      required: true,
-      default: Date.now,
-    },
+    uploadedAt: { type: Date, required: true, default: Date.now },
   },
   {
     _id: true,
@@ -100,7 +78,20 @@ const bookSchema = new Schema<IBook>(
       required: false,
       default: undefined,
     },
-    coverImageUrl: {
+    coverImage: {
+      type: new Schema(
+        {
+          publicId: { type: String, required: true, trim: true },
+          url: { type: String, required: true, trim: true },
+          width: { type: Number, required: true },
+          height: { type: Number, required: true },
+        },
+        { _id: false },
+      ),
+      required: false,
+      default: undefined,
+    },
+    edition: {
       type: String,
       required: false,
       trim: true,
@@ -132,6 +123,13 @@ const bookSchema = new Schema<IBook>(
         index: true,
       },
     ],
+    publisherId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Publisher',
+      required: false,
+      default: undefined,
+      index: true,
+    },
     tags: {
       type: [String],
       default: [],
@@ -139,6 +137,18 @@ const bookSchema = new Schema<IBook>(
     files: {
       type: [bookFileSchema],
       default: [],
+    },
+    accessLevel: {
+      type: String,
+      enum: ['free', 'basic', 'premium'],
+      required: true,
+      default: 'free',
+      index: true,
+    },
+    isPublished: {
+      type: Boolean,
+      default: false,
+      index: true,
     },
     ratingAverage: {
       type: Number,

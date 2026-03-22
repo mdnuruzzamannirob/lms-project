@@ -8,7 +8,12 @@ const baseAuthorBodySchema = z.object({
   name: z.string().trim().min(2).max(150),
   bio: z.string().trim().min(3).max(3000).optional(),
   countryCode: countryCodeSchema.optional(),
-  avatarUrl: z.string().trim().url().max(500).optional(),
+  avatar: z
+    .object({
+      publicId: z.string().trim().min(1).max(300),
+      url: z.string().trim().url().max(800),
+    })
+    .optional(),
   website: z.string().trim().url().max(500).optional(),
   isActive: z.boolean().default(true),
 })

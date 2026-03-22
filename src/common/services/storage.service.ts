@@ -13,10 +13,12 @@ export type UploadPayload = {
 }
 
 export type UploadResult = {
+  publicId: string
   url: string
-  key: string
-  contentType: string
+  format: string
   size: number
+  originalFileName: string
+  resourceType: string
 }
 
 interface StorageProvider {
@@ -76,10 +78,12 @@ class CloudinaryStorageProvider implements StorageProvider {
     })
 
     return {
+      publicId: result.public_id,
       url: result.secure_url,
-      key: result.public_id,
-      contentType: payload.contentType,
+      format: result.format,
       size: result.bytes,
+      originalFileName: result.original_filename,
+      resourceType: result.resource_type,
     }
   }
 }

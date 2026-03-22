@@ -1559,7 +1559,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Ayesha Rahman\",\n  \"bio\": \"Bio sample\",\n  \"countryCode\": \"BD\",\n  \"avatarUrl\": \"https://example.com/resource\",\n  \"website\": \"https://example.com/resource\",\n  \"isActive\": true\n}",
+              "raw": "{\n  \"name\": \"Ayesha Rahman\",\n  \"bio\": \"Bio sample\",\n  \"countryCode\": \"BD\",\n  \"avatar\": {\n    \"publicId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n    \"url\": \"https://example.com/resource\"\n  },\n  \"website\": \"https://example.com/resource\",\n  \"isActive\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1763,7 +1763,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Atomic Habits\",\n  \"slug\": \"Slug sample\",\n  \"isbn\": \"Isbn sample\",\n  \"summary\": \"Summary sample\",\n  \"description\": \"Well-structured data for documentation examples.\",\n  \"language\": \"Language sample\",\n  \"pageCount\": 1,\n  \"publicationDate\": \"2026-03-18T09:30:00.000Z\",\n  \"coverImageUrl\": \"https://example.com/resource\",\n  \"featured\": true,\n  \"isAvailable\": true,\n  \"authorIds\": [\n    \"Author Ids sample\"\n  ],\n  \"categoryIds\": [\n    \"Category Ids sample\"\n  ],\n  \"tags\": [\n    \"Tags sample\"\n  ]\n}",
+              "raw": "{\n  \"title\": \"Atomic Habits\",\n  \"slug\": \"Slug sample\",\n  \"isbn\": \"Isbn sample\",\n  \"summary\": \"Summary sample\",\n  \"description\": \"Well-structured data for documentation examples.\",\n  \"language\": \"Language sample\",\n  \"pageCount\": 1,\n  \"publicationDate\": \"2026-03-18T09:30:00.000Z\",\n  \"coverImage\": {\n    \"publicId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n    \"url\": \"https://example.com/resource\",\n    \"width\": 1,\n    \"height\": 1\n  },\n  \"publisherId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"accessLevel\": \"free\",\n  \"isPublished\": true,\n  \"edition\": \"Edition sample\",\n  \"featured\": true,\n  \"isAvailable\": true,\n  \"authorIds\": [\n    \"Author Ids sample\"\n  ],\n  \"categoryIds\": [\n    \"Category Ids sample\"\n  ],\n  \"tags\": [\n    \"Tags sample\"\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2125,7 +2125,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"books\": [\n    {\n      \"title\": \"Atomic Habits\",\n      \"slug\": \"Slug sample\",\n      \"isbn\": \"Isbn sample\",\n      \"summary\": \"Summary sample\",\n      \"description\": \"Well-structured data for documentation examples.\",\n      \"language\": \"Language sample\",\n      \"pageCount\": 1,\n      \"publicationDate\": \"2026-03-18T09:30:00.000Z\",\n      \"coverImageUrl\": \"https://example.com/resource\",\n      \"featured\": true,\n      \"isAvailable\": true,\n      \"authorIds\": [\n        \"Author Ids sample\"\n      ],\n      \"categoryIds\": [\n        \"Category Ids sample\"\n      ],\n      \"tags\": [\n        \"Tags sample\"\n      ]\n    }\n  ]\n}",
+              "raw": "{\n  \"books\": [\n    {\n      \"title\": \"Atomic Habits\",\n      \"slug\": \"Slug sample\",\n      \"isbn\": \"Isbn sample\",\n      \"summary\": \"Summary sample\",\n      \"description\": \"Well-structured data for documentation examples.\",\n      \"language\": \"Language sample\",\n      \"pageCount\": 1,\n      \"publicationDate\": \"2026-03-18T09:30:00.000Z\",\n      \"coverImage\": {\n        \"publicId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n        \"url\": \"https://example.com/resource\",\n        \"width\": 1,\n        \"height\": 1\n      },\n      \"publisherId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n      \"accessLevel\": \"free\",\n      \"isPublished\": true,\n      \"edition\": \"Edition sample\",\n      \"featured\": true,\n      \"isAvailable\": true,\n      \"authorIds\": [\n        \"Author Ids sample\"\n      ],\n      \"categoryIds\": [\n        \"Category Ids sample\"\n      ],\n      \"tags\": [\n        \"Tags sample\"\n      ]\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2372,352 +2372,6 @@
               ]
             }
           }
-        }
-      ]
-    },
-    {
-      "name": "borrows",
-      "item": [
-        {
-          "name": "GET /api/v1/borrows",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{staffToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/borrows?page=1&limit=20&status=borrowed&userId=65f19a9a6f8f4a2b3c4d5e6f&bookId=65f19a9a6f8f4a2b3c4d5e6f&search=clean%20code&sortBy=createdAt&sortOrder=desc",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "borrows"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1",
-                  "disabled": true,
-                  "description": "Page number for paginated results."
-                },
-                {
-                  "key": "limit",
-                  "value": "20",
-                  "disabled": true,
-                  "description": "Maximum records per page."
-                },
-                {
-                  "key": "status",
-                  "value": "borrowed",
-                  "disabled": true,
-                  "description": "Query parameter 'status'."
-                },
-                {
-                  "key": "userId",
-                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
-                  "disabled": true,
-                  "description": "Query parameter 'userId'."
-                },
-                {
-                  "key": "bookId",
-                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
-                  "disabled": true,
-                  "description": "Query parameter 'bookId'."
-                },
-                {
-                  "key": "search",
-                  "value": "clean code",
-                  "disabled": true,
-                  "description": "Search keyword or query string."
-                },
-                {
-                  "key": "sortBy",
-                  "value": "createdAt",
-                  "disabled": true,
-                  "description": "Field name used for sorting."
-                },
-                {
-                  "key": "sortOrder",
-                  "value": "desc",
-                  "disabled": true,
-                  "description": "Sorting order: asc or desc."
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (!pm.collectionVariables.get(\"staffToken\")) { throw new Error(\"Missing staffToken collection variable.\"); }"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /api/v1/borrows",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{userToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/borrows",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "borrows"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"bookId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"bookFileId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"dueAt\": \"2026-03-18T09:30:00.000Z\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "PATCH /api/v1/borrows/:id",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{staffToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/borrows/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "borrows",
-                ":id"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (!pm.collectionVariables.get(\"staffToken\")) { throw new Error(\"Missing staffToken collection variable.\"); }"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /api/v1/borrows/:id/return",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{userToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/borrows/:id/return",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "borrows",
-                ":id",
-                "return"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"note\": \"Note sample\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "GET /api/v1/borrows/my",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{userToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/borrows/my?page=1&limit=20&status=borrowed&userId=65f19a9a6f8f4a2b3c4d5e6f&bookId=65f19a9a6f8f4a2b3c4d5e6f&search=clean%20code&sortBy=createdAt&sortOrder=desc",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "borrows",
-                "my"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1",
-                  "disabled": true,
-                  "description": "Page number for paginated results."
-                },
-                {
-                  "key": "limit",
-                  "value": "20",
-                  "disabled": true,
-                  "description": "Maximum records per page."
-                },
-                {
-                  "key": "status",
-                  "value": "borrowed",
-                  "disabled": true,
-                  "description": "Query parameter 'status'."
-                },
-                {
-                  "key": "userId",
-                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
-                  "disabled": true,
-                  "description": "Query parameter 'userId'."
-                },
-                {
-                  "key": "bookId",
-                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
-                  "disabled": true,
-                  "description": "Query parameter 'bookId'."
-                },
-                {
-                  "key": "search",
-                  "value": "clean code",
-                  "disabled": true,
-                  "description": "Search keyword or query string."
-                },
-                {
-                  "key": "sortBy",
-                  "value": "createdAt",
-                  "disabled": true,
-                  "description": "Field name used for sorting."
-                },
-                {
-                  "key": "sortOrder",
-                  "value": "desc",
-                  "disabled": true,
-                  "description": "Sorting order: asc or desc."
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
-                ]
-              }
-            }
-          ]
         }
       ]
     },
@@ -5075,7 +4729,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"Code sample\",\n  \"name\": \"Ayesha Rahman\",\n  \"description\": \"Well-structured data for documentation examples.\",\n  \"price\": 0,\n  \"currency\": \"BDT\",\n  \"durationDays\": 1,\n  \"maxBorrows\": 1,\n  \"features\": [\n    \"Features sample\"\n  ],\n  \"isFree\": true,\n  \"isActive\": true,\n  \"sortOrder\": 1\n}",
+              "raw": "{\n  \"code\": \"Code sample\",\n  \"name\": \"Ayesha Rahman\",\n  \"description\": \"Well-structured data for documentation examples.\",\n  \"price\": 0,\n  \"currency\": \"BDT\",\n  \"durationDays\": 1,\n  \"maxDevices\": 1,\n  \"downloadEnabled\": true,\n  \"accessLevel\": \"free\",\n  \"features\": [\n    \"Features sample\"\n  ],\n  \"isFree\": true,\n  \"isActive\": true,\n  \"sortOrder\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5919,6 +5573,265 @@
               ]
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "publishers",
+      "item": [
+        {
+          "name": "GET /api/v1/publishers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publishers?page=1&limit=20&search=clean%20code&isActive=true&sortBy=createdAt&sortOrder=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publishers"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "isActive",
+                  "value": "true",
+                  "disabled": true,
+                  "description": "Query parameter 'isActive'."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /api/v1/publishers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publishers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publishers"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ayesha Rahman\",\n  \"slug\": \"Slug sample\",\n  \"description\": \"Well-structured data for documentation examples.\",\n  \"website\": \"https://example.com/resource\",\n  \"logo\": {\n    \"publicId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n    \"url\": \"https://example.com/resource\"\n  },\n  \"country\": \"BD\",\n  \"foundedYear\": 1000,\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"staffToken\")) { throw new Error(\"Missing staffToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/v1/publishers/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publishers/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publishers",
+                ":id"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"staffToken\")) { throw new Error(\"Missing staffToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/publishers/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publishers/:id?page=1&limit=20&search=clean%20code&sortBy=createdAt&sortOrder=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publishers",
+                ":id"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": true,
+                  "description": "Page number for paginated results."
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "disabled": true,
+                  "description": "Maximum records per page."
+                },
+                {
+                  "key": "search",
+                  "value": "clean code",
+                  "disabled": true,
+                  "description": "Search keyword or query string."
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt",
+                  "disabled": true,
+                  "description": "Field name used for sorting."
+                },
+                {
+                  "key": "sortOrder",
+                  "value": "desc",
+                  "disabled": true,
+                  "description": "Sorting order: asc or desc."
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /api/v1/publishers/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/publishers/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "publishers",
+                ":id"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"staffToken\")) { throw new Error(\"Missing staffToken collection variable.\"); }"
+                ]
+              }
+            }
+          ]
         }
       ]
     },
@@ -7411,337 +7324,6 @@
       ]
     },
     {
-      "name": "reservations",
-      "item": [
-        {
-          "name": "GET /api/v1/reservations",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{staffToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/reservations?page=1&limit=20&status=queued&userId=65f19a9a6f8f4a2b3c4d5e6f&bookId=65f19a9a6f8f4a2b3c4d5e6f&search=clean%20code&sortBy=createdAt&sortOrder=desc",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "reservations"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1",
-                  "disabled": true,
-                  "description": "Page number for paginated results."
-                },
-                {
-                  "key": "limit",
-                  "value": "20",
-                  "disabled": true,
-                  "description": "Maximum records per page."
-                },
-                {
-                  "key": "status",
-                  "value": "queued",
-                  "disabled": true,
-                  "description": "Query parameter 'status'."
-                },
-                {
-                  "key": "userId",
-                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
-                  "disabled": true,
-                  "description": "Query parameter 'userId'."
-                },
-                {
-                  "key": "bookId",
-                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
-                  "disabled": true,
-                  "description": "Query parameter 'bookId'."
-                },
-                {
-                  "key": "search",
-                  "value": "clean code",
-                  "disabled": true,
-                  "description": "Search keyword or query string."
-                },
-                {
-                  "key": "sortBy",
-                  "value": "createdAt",
-                  "disabled": true,
-                  "description": "Field name used for sorting."
-                },
-                {
-                  "key": "sortOrder",
-                  "value": "desc",
-                  "disabled": true,
-                  "description": "Sorting order: asc or desc."
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (!pm.collectionVariables.get(\"staffToken\")) { throw new Error(\"Missing staffToken collection variable.\"); }"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "POST /api/v1/reservations",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{userToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/reservations",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "reservations"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"bookId\": \"65f19a9a6f8f4a2b3c4d5e6f\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "DELETE /api/v1/reservations/:id",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{userToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/reservations/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "reservations",
-                ":id"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "PATCH /api/v1/reservations/:id",
-          "request": {
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{staffToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/reservations/:id",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "reservations",
-                ":id"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (!pm.collectionVariables.get(\"staffToken\")) { throw new Error(\"Missing staffToken collection variable.\"); }"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "GET /api/v1/reservations/my",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{userToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/reservations/my?page=1&limit=20&status=queued&userId=65f19a9a6f8f4a2b3c4d5e6f&bookId=65f19a9a6f8f4a2b3c4d5e6f&search=clean%20code&sortBy=createdAt&sortOrder=desc",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "reservations",
-                "my"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1",
-                  "disabled": true,
-                  "description": "Page number for paginated results."
-                },
-                {
-                  "key": "limit",
-                  "value": "20",
-                  "disabled": true,
-                  "description": "Maximum records per page."
-                },
-                {
-                  "key": "status",
-                  "value": "queued",
-                  "disabled": true,
-                  "description": "Query parameter 'status'."
-                },
-                {
-                  "key": "userId",
-                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
-                  "disabled": true,
-                  "description": "Query parameter 'userId'."
-                },
-                {
-                  "key": "bookId",
-                  "value": "65f19a9a6f8f4a2b3c4d5e6f",
-                  "disabled": true,
-                  "description": "Query parameter 'bookId'."
-                },
-                {
-                  "key": "search",
-                  "value": "clean code",
-                  "disabled": true,
-                  "description": "Search keyword or query string."
-                },
-                {
-                  "key": "sortBy",
-                  "value": "createdAt",
-                  "disabled": true,
-                  "description": "Field name used for sorting."
-                },
-                {
-                  "key": "sortOrder",
-                  "value": "desc",
-                  "disabled": true,
-                  "description": "Sorting order: asc or desc."
-                }
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "if (!pm.collectionVariables.get(\"userToken\")) { throw new Error(\"Missing userToken collection variable.\"); }"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
       "name": "reviews",
       "item": [
         {
@@ -8525,7 +8107,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"providers\": {\n    \"email\": \"reader@example.com\",\n    \"push\": {\n      \"enabled\": true\n    },\n    \"storage\": {\n      \"enabled\": true,\n      \"basePath\": \"Base Path sample\"\n    },\n    \"payment\": {\n      \"enabled\": true,\n      \"currency\": \"BDT\"\n    }\n  },\n  \"templates\": {\n    \"email\": \"reader@example.com\",\n    \"push\": {}\n  },\n  \"maintenance\": {\n    \"enabled\": true,\n    \"message\": \"Message sample\",\n    \"startsAt\": \"2026-03-18T09:30:00.000Z\",\n    \"endsAt\": \"2026-03-18T09:30:00.000Z\",\n    \"allowedIps\": [\n      \"Allowed Ips sample\"\n    ]\n  },\n  \"trial\": {\n    \"enabled\": true,\n    \"durationDays\": 0,\n    \"maxBorrows\": 0,\n    \"autoActivate\": true\n  }\n}",
+              "raw": "{\n  \"providers\": {\n    \"email\": \"reader@example.com\",\n    \"push\": {\n      \"enabled\": true\n    },\n    \"storage\": {\n      \"enabled\": true,\n      \"basePath\": \"Base Path sample\"\n    },\n    \"payment\": {\n      \"enabled\": true,\n      \"currency\": \"BDT\"\n    }\n  },\n  \"templates\": {\n    \"email\": \"reader@example.com\",\n    \"push\": {}\n  },\n  \"maintenance\": {\n    \"enabled\": true,\n    \"message\": \"Message sample\",\n    \"startsAt\": \"2026-03-18T09:30:00.000Z\",\n    \"endsAt\": \"2026-03-18T09:30:00.000Z\",\n    \"allowedIps\": [\n      \"Allowed Ips sample\"\n    ]\n  },\n  \"trial\": {\n    \"enabled\": true,\n    \"durationDays\": 0,\n    \"accessLevel\": \"free\",\n    \"autoActivate\": true\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -9064,12 +8646,7 @@
           "name": "POST /api/v1/staff/2fa/setup",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/staff/2fa/setup",
               "host": [
@@ -9082,15 +8659,6 @@
                 "2fa",
                 "setup"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
           }
         },

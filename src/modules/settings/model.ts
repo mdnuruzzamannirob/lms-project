@@ -97,10 +97,10 @@ const settingsSchema = new Schema<IGlobalSettings>(
         default: 7,
         min: 1,
       },
-      maxBorrows: {
-        type: Number,
-        default: 2,
-        min: 1,
+      accessLevel: {
+        type: String,
+        enum: ['free', 'basic'],
+        default: 'free',
       },
       autoActivate: {
         type: Boolean,
