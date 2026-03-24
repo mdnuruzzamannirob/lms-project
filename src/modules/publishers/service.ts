@@ -3,7 +3,12 @@ import {
   createPaginationMeta,
   getPaginationState,
 } from '../../common/utils/pagination'
-import type { IPublisher } from './interface'
+import {
+  type CreatePublisherPayload,
+  type IPublisher,
+  type PublishersListQuery,
+  type UpdatePublisherPayload,
+} from './interface'
 import { PublisherModel } from './model'
 
 const stripHtml = (value: string) =>
@@ -53,12 +58,7 @@ const formatPublisher = (publisher: IPublisher | null) => {
 }
 
 export const publishersService = {
-  listPublishers: async (query: {
-    page?: number
-    limit?: number
-    search?: string
-    isActive?: boolean
-  }) => {
+  listPublishers: async (query: PublishersListQuery) => {
     const pagination = getPaginationState(query)
     const filter: Record<string, unknown> = {}
     if (typeof query.isActive === 'boolean') filter.isActive = query.isActive
@@ -89,16 +89,7 @@ export const publishersService = {
     return formatPublisher(publisher)
   },
 
-  createPublisher: async (payload: {
-    name: string
-    slug: string
-    description?: string | null
-    website?: string | null
-    logo?: { provider: 'cloudinary'; publicId: string; url: string } | null
-    countryCode?: string | null
-    foundedYear?: number | null
-    isActive: boolean
-  }) => {
+  createPublisher: async (payload: CreatePublisherPayload) => {
     const [existingName, existingSlug] = await Promise.all([
       PublisherModel.findOne({ name: payload.name }),
       PublisherModel.findOne({ slug: payload.slug }),
@@ -120,19 +111,7 @@ export const publishersService = {
     return formatPublisher(publisher)
   },
 
-  updatePublisher: async (
-    id: string,
-    payload: Partial<{
-      name: string
-      slug: string
-      description: string | null
-      website: string | null
-      logo: { provider: 'cloudinary'; publicId: string; url: string } | null
-      countryCode: string | null
-      foundedYear: number | null
-      isActive: boolean
-    }>,
-  ) => {
+  updatePublisher: async (id: string, payload: UpdatePublisherPayload) => {
     const publisher = await PublisherModel.findById(id)
     if (!publisher) throw new AppError('Publisher not found.', 404)
 

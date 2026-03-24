@@ -11,26 +11,18 @@ import {
 import { AuthorModel } from '../authors/model'
 import { CategoryModel } from '../categories/model'
 import { PublisherModel } from '../publishers/model'
-import type { IBook } from './interface'
+import type {
+  AddBookFilePayload,
+  BookAvailabilityStatus,
+  BookFileFormat,
+  BookStatus,
+  BooksListQuery,
+  BulkImportBooksPayload,
+  CreateBookPayload,
+  IBook,
+  UpdateBookPayload,
+} from './interface'
 import { BookModel } from './model'
-
-type BookQuery = {
-  page?: number
-  limit?: number
-  search?: string
-  featured?: boolean
-  status?: 'draft' | 'published' | 'archived'
-  availabilityStatus?: 'available' | 'unavailable' | 'coming_soon'
-  authorId?: string
-  categoryId?: string
-  publisherId?: string
-  accessLevel?: 'free' | 'basic' | 'premium'
-  language?: 'bn' | 'en' | 'hi'
-}
-
-type BookStatus = 'draft' | 'published' | 'archived'
-type BookAvailabilityStatus = 'available' | 'unavailable' | 'coming_soon'
-type BookFileFormat = 'pdf' | 'epub' | 'mobi' | 'txt' | 'azw3'
 
 const allowedBookFormats = new Set<BookFileFormat>([
   'pdf',
@@ -187,35 +179,7 @@ const validatePublisherLink = async (
   }
 }
 
-const applyBookUpdates = async (
-  book: IBook,
-  payload: Partial<{
-    title: string
-    slug: string
-    isbn: string | null
-    summary: string
-    description: string | null
-    language: 'bn' | 'en' | 'hi'
-    pageCount: number | null
-    publicationDate: Date | null
-    coverImage: {
-      provider: 'cloudinary'
-      publicId: string
-      url: string
-      width: number
-      height: number
-    }
-    publisherId: string | null
-    accessLevel: 'free' | 'basic' | 'premium'
-    status: BookStatus
-    edition: string | null
-    featured: boolean
-    availabilityStatus: BookAvailabilityStatus
-    authorIds: string[]
-    categoryIds: string[]
-    tags: string[]
-  }>,
-) => {
+const applyBookUpdates = async (book: IBook, payload: UpdateBookPayload) => {
   if (typeof payload.slug === 'string') {
     const existingSlug = await BookModel.findOne({
       slug: payload.slug,
@@ -321,7 +285,7 @@ const applyBookUpdates = async (
 }
 
 export const booksService = {
-  listPublicBooks: async (query: BookQuery) => {
+  listPublicBooks: async (query: BooksListQuery) => {
     const pagination = getPaginationState(query)
     const filter: Record<string, unknown> = {
       status: query.status ?? 'published',
@@ -443,35 +407,7 @@ export const booksService = {
     }
   },
 
-  createBook: async (
-    staffId: string,
-    payload: {
-      title: string
-      slug: string
-      isbn?: string | null
-      summary: string
-      description?: string | null
-      language: 'bn' | 'en' | 'hi'
-      pageCount?: number | null
-      publicationDate?: Date | null
-      coverImage: {
-        provider: 'cloudinary'
-        publicId: string
-        url: string
-        width: number
-        height: number
-      }
-      publisherId?: string | null
-      accessLevel: 'free' | 'basic' | 'premium'
-      status: BookStatus
-      edition?: string | null
-      featured: boolean
-      availabilityStatus: BookAvailabilityStatus
-      authorIds: string[]
-      categoryIds: string[]
-      tags: string[]
-    },
-  ) => {
+  createBook: async (staffId: string, payload: CreateBookPayload) => {
     const [existingSlug, existingIsbn] = await Promise.all([
       BookModel.findOne({ slug: payload.slug }),
       payload.isbn ? BookModel.findOne({ isbn: payload.isbn }) : null,
@@ -520,35 +456,7 @@ export const booksService = {
     return formatBook(book)
   },
 
-  updateBook: async (
-    id: string,
-    payload: Partial<{
-      title: string
-      slug: string
-      isbn: string | null
-      summary: string
-      description: string | null
-      language: 'bn' | 'en' | 'hi'
-      pageCount: number | null
-      publicationDate: Date | null
-      coverImage: {
-        provider: 'cloudinary'
-        publicId: string
-        url: string
-        width: number
-        height: number
-      }
-      publisherId: string | null
-      accessLevel: 'free' | 'basic' | 'premium'
-      status: BookStatus
-      edition: string | null
-      featured: boolean
-      availabilityStatus: BookAvailabilityStatus
-      authorIds: string[]
-      categoryIds: string[]
-      tags: string[]
-    }>,
-  ) => {
+  updateBook: async (id: string, payload: UpdateBookPayload) => {
     const book = await BookModel.findById(id)
 
     if (!book) {
@@ -621,20 +529,7 @@ export const booksService = {
     return formatBook(book)
   },
 
-  addBookFile: async (
-    id: string,
-    payload: {
-      fileName: string
-      contentType: string
-      fileBase64?: string
-      folder?: string
-      publicId?: string
-      url?: string
-      format?: BookFileFormat
-      resourceType?: 'raw'
-      size?: number
-    },
-  ) => {
+  addBookFile: async (id: string, payload: AddBookFilePayload) => {
     const book = await BookModel.findById(id)
 
     if (!book) {
@@ -738,37 +633,7 @@ export const booksService = {
     }
   },
 
-  bulkImportBooks: async (
-    staffId: string,
-    payload: {
-      books: Array<{
-        title: string
-        slug: string
-        isbn?: string | null
-        summary: string
-        description?: string | null
-        language: 'bn' | 'en' | 'hi'
-        pageCount?: number | null
-        publicationDate?: Date | null
-        coverImage: {
-          provider: 'cloudinary'
-          publicId: string
-          url: string
-          width: number
-          height: number
-        }
-        publisherId?: string | null
-        accessLevel: 'free' | 'basic' | 'premium'
-        status: BookStatus
-        edition?: string | null
-        featured: boolean
-        availabilityStatus: BookAvailabilityStatus
-        authorIds: string[]
-        categoryIds: string[]
-        tags: string[]
-      }>
-    },
-  ) => {
+  bulkImportBooks: async (staffId: string, payload: BulkImportBooksPayload) => {
     const results: Array<
       | { slug: string; success: true; data: ReturnType<typeof formatBook> }
       | { slug: string; success: false; error: string }

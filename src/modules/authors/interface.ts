@@ -18,3 +18,22 @@ export interface IAuthor {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface AuthorsListQuery {
+  page?: number
+  limit?: number
+  search?: string
+  isActive?: boolean
+}
+
+export interface CreateAuthorPayload {
+  name: string
+  slug: string
+  bio?: string | null
+  countryCode?: string | null
+  avatar?: IAuthorAvatar | null
+  website?: string | null
+  isActive: boolean
+}
+
+export type UpdateAuthorPayload = Partial<CreateAuthorPayload>

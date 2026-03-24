@@ -3,6 +3,16 @@ import type { RequestHandler } from 'express'
 import { AppError } from '../../common/errors/AppError'
 import { catchAsync } from '../../common/utils/catchAsync'
 import { sendResponse } from '../../common/utils/sendResponse'
+import type {
+  AddBookFilePayload,
+  BooksListQuery,
+  BulkImportBooksPayload,
+  CreateBookPayload,
+  SetBookAvailabilityPayload,
+  SetBookStatusPayload,
+  ToggleBookFeaturedPayload,
+  UpdateBookPayload,
+} from './interface'
 import { booksService } from './service'
 
 const getIdParam = (request: Parameters<RequestHandler>[0]): string => {
@@ -35,19 +45,7 @@ const getStaffId = (request: Parameters<RequestHandler>[0]): string => {
 
 export const listPublicBooks: RequestHandler = catchAsync(
   async (request, response) => {
-    const query = request.query as {
-      page?: number
-      limit?: number
-      search?: string
-      featured?: boolean
-      status?: 'draft' | 'published' | 'archived'
-      availabilityStatus?: 'available' | 'unavailable' | 'coming_soon'
-      authorId?: string
-      categoryId?: string
-      publisherId?: string
-      accessLevel?: 'free' | 'basic' | 'premium'
-      language?: 'bn' | 'en' | 'hi'
-    }
+    const query = request.query as BooksListQuery
 
     const result = await booksService.listPublicBooks(query)
 
@@ -117,7 +115,7 @@ export const createBook: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await booksService.createBook(
       getStaffId(request),
-      request.body,
+      request.body as CreateBookPayload,
     )
 
     sendResponse(response, {
@@ -133,7 +131,7 @@ export const updateBook: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await booksService.updateBook(
       getIdParam(request),
-      request.body,
+      request.body as UpdateBookPayload,
     )
 
     sendResponse(response, {
@@ -162,7 +160,7 @@ export const setBookFeatured: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await booksService.setBookFeatured(
       getIdParam(request),
-      request.body.featured,
+      (request.body as ToggleBookFeaturedPayload).featured,
     )
 
     sendResponse(response, {
@@ -178,7 +176,7 @@ export const setBookStatus: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await booksService.setBookStatus(
       getIdParam(request),
-      request.body.status,
+      (request.body as SetBookStatusPayload).status,
     )
 
     sendResponse(response, {
@@ -194,7 +192,7 @@ export const setBookAvailability: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await booksService.setBookAvailability(
       getIdParam(request),
-      request.body.availabilityStatus,
+      (request.body as SetBookAvailabilityPayload).availabilityStatus,
     )
 
     sendResponse(response, {
@@ -210,7 +208,7 @@ export const addBookFile: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await booksService.addBookFile(
       getIdParam(request),
-      request.body,
+      request.body as AddBookFilePayload,
     )
 
     sendResponse(response, {
@@ -242,7 +240,7 @@ export const bulkImportBooks: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await booksService.bulkImportBooks(
       getStaffId(request),
-      request.body,
+      request.body as BulkImportBooksPayload,
     )
 
     sendResponse(response, {

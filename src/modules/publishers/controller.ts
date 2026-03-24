@@ -2,6 +2,11 @@ import type { RequestHandler } from 'express'
 import { AppError } from '../../common/errors/AppError'
 import { catchAsync } from '../../common/utils/catchAsync'
 import { sendResponse } from '../../common/utils/sendResponse'
+import type {
+  CreatePublisherPayload,
+  PublishersListQuery,
+  UpdatePublisherPayload,
+} from './interface'
 import { publishersService } from './service'
 
 const getIdParam = (request: Parameters<RequestHandler>[0]): string => {
@@ -17,12 +22,7 @@ const getIdParam = (request: Parameters<RequestHandler>[0]): string => {
 export const publishersController = {
   listPublishers: catchAsync(async (req, res) => {
     const result = await publishersService.listPublishers(
-      req.query as {
-        page?: number
-        limit?: number
-        search?: string
-        isActive?: boolean
-      },
+      req.query as PublishersListQuery,
     )
     sendResponse(res, {
       statusCode: 200,
@@ -44,7 +44,9 @@ export const publishersController = {
   }) as RequestHandler,
 
   createPublisher: catchAsync(async (req, res) => {
-    const result = await publishersService.createPublisher(req.body)
+    const result = await publishersService.createPublisher(
+      req.body as CreatePublisherPayload,
+    )
     sendResponse(res, {
       statusCode: 201,
       success: true,
@@ -56,7 +58,7 @@ export const publishersController = {
   updatePublisher: catchAsync(async (req, res) => {
     const result = await publishersService.updatePublisher(
       getIdParam(req),
-      req.body,
+      req.body as UpdatePublisherPayload,
     )
     sendResponse(res, {
       statusCode: 200,

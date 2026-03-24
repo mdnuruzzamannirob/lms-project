@@ -11,3 +11,48 @@ export interface ICategory {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface CategoriesListQuery {
+  page?: number
+  limit?: number
+  search?: string
+  includeInactive?: boolean
+  tree?: boolean
+  parentId?: string
+}
+
+export interface CreateCategoryPayload {
+  name: string
+  slug?: string
+  description?: string
+  parentId?: string
+  sortOrder: number
+  isActive: boolean
+}
+
+export type UpdateCategoryPayload = Partial<{
+  name: string
+  slug: string
+  description: string
+  parentId: string
+  sortOrder: number
+  isActive: boolean
+}>
+
+export interface FormattedCategory {
+  id: string
+  name: string
+  slug: string
+  description?: string
+  parentId?: string
+  parent_id?: string
+  sortOrder: number
+  isActive: boolean
+  booksCount: number
+  createdAt: string
+  updatedAt: string
+}
+
+export type CategoryTreeNode = FormattedCategory & {
+  children: CategoryTreeNode[]
+}

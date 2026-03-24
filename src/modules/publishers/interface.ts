@@ -19,3 +19,23 @@ export interface IPublisher {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface PublishersListQuery {
+  page?: number
+  limit?: number
+  search?: string
+  isActive?: boolean
+}
+
+export interface CreatePublisherPayload {
+  name: string
+  slug: string
+  description?: string | null
+  website?: string | null
+  logo?: IPublisherLogo | null
+  countryCode?: string | null
+  foundedYear?: number | null
+  isActive: boolean
+}
+
+export type UpdatePublisherPayload = Partial<CreatePublisherPayload>

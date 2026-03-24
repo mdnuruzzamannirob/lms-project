@@ -3,6 +3,11 @@ import type { RequestHandler } from 'express'
 import { AppError } from '../../common/errors/AppError'
 import { catchAsync } from '../../common/utils/catchAsync'
 import { sendResponse } from '../../common/utils/sendResponse'
+import type {
+  AuthorsListQuery,
+  CreateAuthorPayload,
+  UpdateAuthorPayload,
+} from './interface'
 import { authorsService } from './service'
 
 const getIdParam = (request: Parameters<RequestHandler>[0]): string => {
@@ -17,12 +22,7 @@ const getIdParam = (request: Parameters<RequestHandler>[0]): string => {
 
 export const listAuthors: RequestHandler = catchAsync(
   async (request, response) => {
-    const query = request.query as {
-      page?: number
-      limit?: number
-      search?: string
-      isActive?: boolean
-    }
+    const query = request.query as AuthorsListQuery
 
     const data = await authorsService.listAuthors(query)
 
@@ -51,7 +51,9 @@ export const getAuthorById: RequestHandler = catchAsync(
 
 export const createAuthor: RequestHandler = catchAsync(
   async (request, response) => {
-    const data = await authorsService.createAuthor(request.body)
+    const data = await authorsService.createAuthor(
+      request.body as CreateAuthorPayload,
+    )
 
     sendResponse(response, {
       statusCode: 201,
@@ -66,7 +68,7 @@ export const updateAuthor: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await authorsService.updateAuthor(
       getIdParam(request),
-      request.body,
+      request.body as UpdateAuthorPayload,
     )
 
     sendResponse(response, {

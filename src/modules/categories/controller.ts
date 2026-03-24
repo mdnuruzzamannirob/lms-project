@@ -3,6 +3,11 @@ import type { RequestHandler } from 'express'
 import { AppError } from '../../common/errors/AppError'
 import { catchAsync } from '../../common/utils/catchAsync'
 import { sendResponse } from '../../common/utils/sendResponse'
+import type {
+  CategoriesListQuery,
+  CreateCategoryPayload,
+  UpdateCategoryPayload,
+} from './interface'
 import { categoriesService } from './service'
 
 const getIdParam = (request: Parameters<RequestHandler>[0]): string => {
@@ -17,14 +22,7 @@ const getIdParam = (request: Parameters<RequestHandler>[0]): string => {
 
 export const listCategories: RequestHandler = catchAsync(
   async (request, response) => {
-    const query = request.query as {
-      page?: number
-      limit?: number
-      search?: string
-      includeInactive?: boolean
-      tree?: boolean
-      parentId?: string
-    }
+    const query = request.query as CategoriesListQuery
 
     const result = await categoriesService.listCategories(query)
 
@@ -53,7 +51,9 @@ export const getCategoryById: RequestHandler = catchAsync(
 
 export const createCategory: RequestHandler = catchAsync(
   async (request, response) => {
-    const data = await categoriesService.createCategory(request.body)
+    const data = await categoriesService.createCategory(
+      request.body as CreateCategoryPayload,
+    )
 
     sendResponse(response, {
       statusCode: 201,
@@ -68,7 +68,7 @@ export const updateCategory: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await categoriesService.updateCategory(
       getIdParam(request),
-      request.body,
+      request.body as UpdateCategoryPayload,
     )
 
     sendResponse(response, {

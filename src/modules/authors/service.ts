@@ -3,7 +3,12 @@ import {
   createPaginationMeta,
   getPaginationState,
 } from '../../common/utils/pagination'
-import type { IAuthor } from './interface'
+import type {
+  AuthorsListQuery,
+  CreateAuthorPayload,
+  IAuthor,
+  UpdateAuthorPayload,
+} from './interface'
 import { AuthorModel } from './model'
 
 const stripHtml = (value: string) =>
@@ -55,12 +60,7 @@ const formatAuthor = (author: IAuthor | null) => {
 }
 
 export const authorsService = {
-  listAuthors: async (query: {
-    page?: number
-    limit?: number
-    search?: string
-    isActive?: boolean
-  }) => {
+  listAuthors: async (query: AuthorsListQuery) => {
     const pagination = getPaginationState(query)
     const filter: Record<string, unknown> = {}
 
@@ -97,15 +97,7 @@ export const authorsService = {
     return formatAuthor(author)
   },
 
-  createAuthor: async (payload: {
-    name: string
-    slug: string
-    bio?: string | null
-    countryCode?: string | null
-    avatar?: { provider: 'cloudinary'; publicId: string; url: string } | null
-    website?: string | null
-    isActive: boolean
-  }) => {
+  createAuthor: async (payload: CreateAuthorPayload) => {
     const [existingName, existingSlug] = await Promise.all([
       AuthorModel.findOne({ name: payload.name }),
       AuthorModel.findOne({ slug: payload.slug }),
@@ -132,18 +124,7 @@ export const authorsService = {
     return formatAuthor(author)
   },
 
-  updateAuthor: async (
-    id: string,
-    payload: Partial<{
-      name: string
-      slug: string
-      bio: string | null
-      countryCode: string | null
-      avatar: { provider: 'cloudinary'; publicId: string; url: string } | null
-      website: string | null
-      isActive: boolean
-    }>,
-  ) => {
+  updateAuthor: async (id: string, payload: UpdateAuthorPayload) => {
     const author = await AuthorModel.findById(id)
 
     if (!author) {

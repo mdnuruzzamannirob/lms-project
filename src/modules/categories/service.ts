@@ -6,22 +6,15 @@ import {
   getPaginationState,
 } from '../../common/utils/pagination'
 import { BookModel } from '../books/model'
-import type { ICategory } from './interface'
+import type {
+  CategoriesListQuery,
+  CategoryTreeNode,
+  CreateCategoryPayload,
+  FormattedCategory,
+  ICategory,
+  UpdateCategoryPayload,
+} from './interface'
 import { CategoryModel } from './model'
-
-type FormattedCategory = {
-  id: string
-  name: string
-  slug: string
-  description?: string
-  parentId?: string
-  parent_id?: string
-  sortOrder: number
-  isActive: boolean
-  booksCount: number
-  createdAt: string
-  updatedAt: string
-}
 
 const stripHtml = (value: string) =>
   value
@@ -58,8 +51,6 @@ const generateSlug = (name: string) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
-
-type CategoryTreeNode = FormattedCategory & { children: CategoryTreeNode[] }
 
 const formatCategory = (
   category: ICategory | null,
@@ -201,14 +192,7 @@ const countBooksPerCategory = async (categories: ICategory[]) => {
 }
 
 export const categoriesService = {
-  listCategories: async (query: {
-    page?: number
-    limit?: number
-    search?: string
-    includeInactive?: boolean
-    tree?: boolean
-    parentId?: string
-  }) => {
+  listCategories: async (query: CategoriesListQuery) => {
     const pagination = getPaginationState(query)
     const filter: Record<string, unknown> = {}
 
@@ -281,14 +265,7 @@ export const categoriesService = {
     return formatCategory(category, booksCount)
   },
 
-  createCategory: async (payload: {
-    name: string
-    slug?: string
-    description?: string
-    parentId?: string
-    sortOrder: number
-    isActive: boolean
-  }) => {
+  createCategory: async (payload: CreateCategoryPayload) => {
     await ensureParentIsValid(undefined, payload.parentId)
 
     const slug = payload.slug ?? generateSlug(payload.name)
@@ -310,17 +287,7 @@ export const categoriesService = {
     return formatCategory(category, 0)
   },
 
-  updateCategory: async (
-    id: string,
-    payload: Partial<{
-      name: string
-      slug: string
-      description: string
-      parentId: string
-      sortOrder: number
-      isActive: boolean
-    }>,
-  ) => {
+  updateCategory: async (id: string, payload: UpdateCategoryPayload) => {
     const category = await CategoryModel.findById(id)
 
     if (!category) {
