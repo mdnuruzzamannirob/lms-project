@@ -88,3 +88,35 @@ export type SocialProfile = {
   email: string
   name: string
 }
+
+export type EmailOtpActorType = 'user' | 'staff'
+
+export type EmailOtpPurpose =
+  | 'login'
+  | '2fa-verify'
+  | '2fa-setup'
+  | 'password-reset'
+
+export interface EmailOtpDocument {
+  actorId: Types.ObjectId
+  actorType: EmailOtpActorType
+  otpHash: string
+  purpose: EmailOtpPurpose
+  expiresAt: Date
+  usedAt?: Date
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface UserEmailVerificationToken {
+  userId: Types.ObjectId
+  tokenHash: string
+  expiresAt: Date
+}
+
+export interface UserLoginHistory {
+  userId: Types.ObjectId
+  ipAddress?: string
+  userAgent?: string
+  createdAt: Date
+}

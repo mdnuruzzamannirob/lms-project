@@ -4,21 +4,7 @@ import { PERMISSIONS } from '../../common/constants/permissions'
 import { authenticateStaff } from '../../common/middlewares/auth'
 import { requirePermission } from '../../common/middlewares/requirePermission'
 import { validateRequest } from '../../common/middlewares/validateRequest'
-import {
-  addBookFile,
-  bulkImportBooks,
-  createBook,
-  deleteBook,
-  deleteBookFile,
-  getBookPreview,
-  getPublicBookById,
-  listFeaturedBooks,
-  listPublicBooks,
-  setBookAvailability,
-  setBookFeatured,
-  setBookStatus,
-  updateBook,
-} from './controller'
+import { booksController } from './controller'
 import { booksValidation } from './validation'
 
 const router = Router()
@@ -26,18 +12,18 @@ const router = Router()
 router.get(
   '/books',
   validateRequest({ query: booksValidation.query }),
-  listPublicBooks,
+  booksController.listPublicBooks,
 )
-router.get('/books/featured', listFeaturedBooks)
+router.get('/books/featured', booksController.listFeaturedBooks)
 router.get(
   '/books/:id',
   validateRequest({ params: booksValidation.idParam }),
-  getPublicBookById,
+  booksController.getPublicBookById,
 )
 router.get(
   '/books/:id/preview',
   validateRequest({ params: booksValidation.idParam }),
-  getBookPreview,
+  booksController.getBookPreview,
 )
 
 router.post(
@@ -45,14 +31,14 @@ router.post(
   authenticateStaff,
   requirePermission(PERMISSIONS.BOOKS_MANAGE),
   validateRequest({ body: booksValidation.createBody }),
-  createBook,
+  booksController.createBook,
 )
 router.post(
   '/admin/books/bulk-import',
   authenticateStaff,
   requirePermission(PERMISSIONS.BOOKS_MANAGE),
   validateRequest({ body: booksValidation.bulkImportBody }),
-  bulkImportBooks,
+  booksController.bulkImportBooks,
 )
 router.post(
   '/admin/books/:id/files',
@@ -62,7 +48,7 @@ router.post(
     params: booksValidation.idParam,
     body: booksValidation.addFileBody,
   }),
-  addBookFile,
+  booksController.addBookFile,
 )
 router.put(
   '/admin/books/:id',
@@ -72,7 +58,7 @@ router.put(
     params: booksValidation.idParam,
     body: booksValidation.updateBody,
   }),
-  updateBook,
+  booksController.updateBook,
 )
 router.patch(
   '/admin/books/:id/featured',
@@ -82,7 +68,7 @@ router.patch(
     params: booksValidation.idParam,
     body: booksValidation.toggleFeaturedBody,
   }),
-  setBookFeatured,
+  booksController.setBookFeatured,
 )
 router.patch(
   '/admin/books/:id/status',
@@ -92,7 +78,7 @@ router.patch(
     params: booksValidation.idParam,
     body: booksValidation.setStatusBody,
   }),
-  setBookStatus,
+  booksController.setBookStatus,
 )
 router.patch(
   '/admin/books/:id/availability',
@@ -102,21 +88,21 @@ router.patch(
     params: booksValidation.idParam,
     body: booksValidation.setAvailabilityBody,
   }),
-  setBookAvailability,
+  booksController.setBookAvailability,
 )
 router.delete(
   '/admin/books/:id',
   authenticateStaff,
   requirePermission(PERMISSIONS.BOOKS_MANAGE),
   validateRequest({ params: booksValidation.idParam }),
-  deleteBook,
+  booksController.deleteBook,
 )
 router.delete(
   '/admin/books/:id/files/:fid',
   authenticateStaff,
   requirePermission(PERMISSIONS.BOOKS_MANAGE),
   validateRequest({ params: booksValidation.idWithFileParam }),
-  deleteBookFile,
+  booksController.deleteBookFile,
 )
 
 export const booksRouter = router

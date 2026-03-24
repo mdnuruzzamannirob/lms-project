@@ -1,42 +1,11 @@
 import type { RequestHandler } from 'express'
 
-import { AppError } from '../../common/errors/AppError'
 import { catchAsync } from '../../common/utils/catchAsync'
+import { getUserId } from '../../common/utils/getId'
+import { getIdParam } from '../../common/utils/getParam'
 import { sendResponse } from '../../common/utils/sendResponse'
 import { paymentsService } from './service'
-
-const getUserId = (request: Parameters<RequestHandler>[0]): string => {
-  if (!request.auth || request.auth.type !== 'user') {
-    throw new AppError('User authentication is required.', 401)
-  }
-
-  return request.auth.sub
-}
-
-const getIdParam = (request: Parameters<RequestHandler>[0]): string => {
-  const id = request.params.id
-
-  if (typeof id !== 'string') {
-    throw new AppError('Invalid id parameter.', 400)
-  }
-
-  return id
-}
-
-const getGatewayParam = (request: Parameters<RequestHandler>[0]) => {
-  const gateway = request.params.gateway
-
-  if (
-    gateway !== 'bkash' &&
-    gateway !== 'nagad' &&
-    gateway !== 'paypal' &&
-    gateway !== 'stripe'
-  ) {
-    throw new AppError('Invalid webhook gateway.', 400)
-  }
-
-  return gateway
-}
+import { getGatewayParam } from './utils'
 
 export const listMyPayments: RequestHandler = catchAsync(
   async (request, response) => {
@@ -195,3 +164,15 @@ export const handleWebhook: RequestHandler = catchAsync(
     })
   },
 )
+
+export const paymentsController = {
+  listMyPayments,
+  listAvailablePaymentGateways,
+  getMyPaymentById,
+  listPayments,
+  getPaymentById,
+  initiatePayment,
+  verifyPayment,
+  refundPayment,
+  handleWebhook,
+}

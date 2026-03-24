@@ -7,14 +7,7 @@ import {
 } from '../../common/middlewares/auth'
 import { requirePermission } from '../../common/middlewares/requirePermission'
 import { validateRequest } from '../../common/middlewares/validateRequest'
-import {
-  createReview,
-  deleteReview,
-  listPublicBookReviews,
-  listReviewsForAdmin,
-  toggleReviewVisibility,
-  updateReview,
-} from './controller'
+import { reviewsController } from './controller'
 import { reviewsValidation } from './validation'
 
 const router = Router()
@@ -25,7 +18,7 @@ router.get(
     params: reviewsValidation.bookParam,
     query: reviewsValidation.query,
   }),
-  listPublicBookReviews,
+  reviewsController.listPublicBookReviews,
 )
 router.post(
   '/books/:bookId/reviews',
@@ -34,7 +27,7 @@ router.post(
     params: reviewsValidation.bookParam,
     body: reviewsValidation.createBody,
   }),
-  createReview,
+  reviewsController.createReview,
 )
 router.patch(
   '/books/:bookId/reviews/:id',
@@ -43,13 +36,13 @@ router.patch(
     params: reviewsValidation.reviewNestedParam,
     body: reviewsValidation.updateBody,
   }),
-  updateReview,
+  reviewsController.updateReview,
 )
 router.delete(
   '/books/:bookId/reviews/:id',
   authenticateUser,
   validateRequest({ params: reviewsValidation.reviewNestedParam }),
-  deleteReview,
+  reviewsController.deleteReview,
 )
 
 router.get(
@@ -57,7 +50,7 @@ router.get(
   authenticateStaff,
   requirePermission(PERMISSIONS.REVIEWS_VIEW),
   validateRequest({ query: reviewsValidation.query }),
-  listReviewsForAdmin,
+  reviewsController.listReviewsForAdmin,
 )
 router.patch(
   '/admin/reviews/:id/toggle',
@@ -67,7 +60,7 @@ router.patch(
     params: reviewsValidation.idParam,
     body: reviewsValidation.toggleVisibilityBody,
   }),
-  toggleReviewVisibility,
+  reviewsController.toggleReviewVisibility,
 )
 
 export const reviewsRouter = router

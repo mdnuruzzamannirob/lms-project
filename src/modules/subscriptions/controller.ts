@@ -1,29 +1,12 @@
 import type { RequestHandler } from 'express'
 
-import { AppError } from '../../common/errors/AppError'
 import { catchAsync } from '../../common/utils/catchAsync'
+import { getUserId } from '../../common/utils/getId'
+import { getIdParam } from '../../common/utils/getParam'
 import { sendResponse } from '../../common/utils/sendResponse'
 import { subscriptionsService } from './service'
 
-const getUserId = (request: Parameters<RequestHandler>[0]): string => {
-  if (!request.auth || request.auth.type !== 'user') {
-    throw new AppError('User authentication is required.', 401)
-  }
-
-  return request.auth.sub
-}
-
-const getIdParam = (request: Parameters<RequestHandler>[0]): string => {
-  const id = request.params.id
-
-  if (typeof id !== 'string') {
-    throw new AppError('Invalid id parameter.', 400)
-  }
-
-  return id
-}
-
-export const getMyCurrentSubscription: RequestHandler = catchAsync(
+const getMyCurrentSubscription: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await subscriptionsService.getMyCurrentSubscription(
       getUserId(request),
@@ -38,7 +21,7 @@ export const getMyCurrentSubscription: RequestHandler = catchAsync(
   },
 )
 
-export const getMySubscriptionHistory: RequestHandler = catchAsync(
+const getMySubscriptionHistory: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await subscriptionsService.getMySubscriptionHistory(
       getUserId(request),
@@ -53,7 +36,7 @@ export const getMySubscriptionHistory: RequestHandler = catchAsync(
   },
 )
 
-export const listSubscriptions: RequestHandler = catchAsync(
+const listSubscriptions: RequestHandler = catchAsync(
   async (_request, response) => {
     const data = await subscriptionsService.listSubscriptions()
 
@@ -66,7 +49,7 @@ export const listSubscriptions: RequestHandler = catchAsync(
   },
 )
 
-export const getSubscriptionById: RequestHandler = catchAsync(
+const getSubscriptionById: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await subscriptionsService.getSubscriptionById(
       getIdParam(request),
@@ -81,7 +64,7 @@ export const getSubscriptionById: RequestHandler = catchAsync(
   },
 )
 
-export const createSubscription: RequestHandler = catchAsync(
+const createSubscription: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await subscriptionsService.createSubscription(request.body)
 
@@ -94,7 +77,7 @@ export const createSubscription: RequestHandler = catchAsync(
   },
 )
 
-export const cancelMySubscription: RequestHandler = catchAsync(
+const cancelMySubscription: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await subscriptionsService.cancelMySubscription(
       getUserId(request),
@@ -110,7 +93,7 @@ export const cancelMySubscription: RequestHandler = catchAsync(
   },
 )
 
-export const renewMySubscription: RequestHandler = catchAsync(
+const renewMySubscription: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await subscriptionsService.renewMySubscription(
       getUserId(request),
@@ -125,7 +108,7 @@ export const renewMySubscription: RequestHandler = catchAsync(
   },
 )
 
-export const upgradeMySubscription: RequestHandler = catchAsync(
+const upgradeMySubscription: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await subscriptionsService.changePlanWithTransaction({
       userId: getUserId(request),
@@ -142,7 +125,7 @@ export const upgradeMySubscription: RequestHandler = catchAsync(
   },
 )
 
-export const downgradeMySubscription: RequestHandler = catchAsync(
+const downgradeMySubscription: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await subscriptionsService.changePlanWithTransaction({
       userId: getUserId(request),
@@ -159,7 +142,7 @@ export const downgradeMySubscription: RequestHandler = catchAsync(
   },
 )
 
-export const adminUpdateSubscription: RequestHandler = catchAsync(
+const adminUpdateSubscription: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await subscriptionsService.adminUpdateSubscription(
       getIdParam(request),
@@ -174,3 +157,16 @@ export const adminUpdateSubscription: RequestHandler = catchAsync(
     })
   },
 )
+
+export const subscriptionsController = {
+  getMyCurrentSubscription,
+  getMySubscriptionHistory,
+  listSubscriptions,
+  getSubscriptionById,
+  createSubscription,
+  cancelMySubscription,
+  renewMySubscription,
+  upgradeMySubscription,
+  downgradeMySubscription,
+  adminUpdateSubscription,
+}

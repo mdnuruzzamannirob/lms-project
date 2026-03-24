@@ -4,13 +4,7 @@ import { PERMISSIONS } from '../../common/constants/permissions'
 import { authenticateStaff } from '../../common/middlewares/auth'
 import { requirePermission } from '../../common/middlewares/requirePermission'
 import { validateRequest } from '../../common/middlewares/validateRequest'
-import {
-  createAuthor,
-  deleteAuthor,
-  getAuthorById,
-  listAuthors,
-  updateAuthor,
-} from './controller'
+import { authorsController } from './controller'
 import { authorsValidation } from './validation'
 
 const router = Router()
@@ -18,12 +12,12 @@ const router = Router()
 router.get(
   '/',
   validateRequest({ query: authorsValidation.query }),
-  listAuthors,
+  authorsController.listAuthors,
 )
 router.get(
   '/:id',
   validateRequest({ params: authorsValidation.idParam }),
-  getAuthorById,
+  authorsController.getAuthorById,
 )
 
 router.post(
@@ -31,7 +25,7 @@ router.post(
   authenticateStaff,
   requirePermission(PERMISSIONS.AUTHORS_MANAGE),
   validateRequest({ body: authorsValidation.createBody }),
-  createAuthor,
+  authorsController.createAuthor,
 )
 router.put(
   '/:id',
@@ -41,14 +35,14 @@ router.put(
     params: authorsValidation.idParam,
     body: authorsValidation.updateBody,
   }),
-  updateAuthor,
+  authorsController.updateAuthor,
 )
 router.delete(
   '/:id',
   authenticateStaff,
   requirePermission(PERMISSIONS.AUTHORS_MANAGE),
   validateRequest({ params: authorsValidation.idParam }),
-  deleteAuthor,
+  authorsController.deleteAuthor,
 )
 
 export const authorsRouter = router

@@ -4,13 +4,7 @@ import { PERMISSIONS } from '../../common/constants/permissions'
 import { authenticateStaff } from '../../common/middlewares/auth'
 import { requirePermission } from '../../common/middlewares/requirePermission'
 import { validateRequest } from '../../common/middlewares/validateRequest'
-import {
-  createCategory,
-  deleteCategory,
-  getCategoryById,
-  listCategories,
-  updateCategory,
-} from './controller'
+import { categoriesController } from './controller'
 import { categoriesValidation } from './validation'
 
 const router = Router()
@@ -18,12 +12,12 @@ const router = Router()
 router.get(
   '/',
   validateRequest({ query: categoriesValidation.query }),
-  listCategories,
+  categoriesController.listCategories,
 )
 router.get(
   '/:id',
   validateRequest({ params: categoriesValidation.idParam }),
-  getCategoryById,
+  categoriesController.getCategoryById,
 )
 
 router.post(
@@ -31,7 +25,7 @@ router.post(
   authenticateStaff,
   requirePermission(PERMISSIONS.CATEGORIES_MANAGE),
   validateRequest({ body: categoriesValidation.createBody }),
-  createCategory,
+  categoriesController.createCategory,
 )
 router.put(
   '/:id',
@@ -41,14 +35,14 @@ router.put(
     params: categoriesValidation.idParam,
     body: categoriesValidation.updateBody,
   }),
-  updateCategory,
+  categoriesController.updateCategory,
 )
 router.delete(
   '/:id',
   authenticateStaff,
   requirePermission(PERMISSIONS.CATEGORIES_MANAGE),
   validateRequest({ params: categoriesValidation.idParam }),
-  deleteCategory,
+  categoriesController.deleteCategory,
 )
 
 export const categoriesRouter = router

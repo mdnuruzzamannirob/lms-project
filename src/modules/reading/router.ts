@@ -3,22 +3,7 @@ import { Router } from 'express'
 import { authenticateUser } from '../../common/middlewares/auth'
 import { checkSubscriptionAccess } from '../../common/middlewares/subscriptionAccess'
 import { validateRequest } from '../../common/middlewares/validateRequest'
-import {
-  createBookmark,
-  createHighlight,
-  createReadingSession,
-  deleteBookmark,
-  deleteHighlight,
-  getCompletedReading,
-  getCurrentlyReading,
-  getReadingHistory,
-  listBookmarks,
-  listHighlights,
-  startReading,
-  updateBookmark,
-  updateHighlight,
-  updateReadingProgress,
-} from './controller'
+import { readingController } from './controller'
 import { readingValidation } from './validation'
 
 const router = Router()
@@ -31,7 +16,7 @@ router.post(
     params: readingValidation.bookParam,
     body: readingValidation.startReadingBody,
   }),
-  startReading,
+  readingController.startReading,
 )
 router.post(
   '/reading/:bookId/session',
@@ -41,7 +26,7 @@ router.post(
     params: readingValidation.bookParam,
     body: readingValidation.createSessionBody,
   }),
-  createReadingSession,
+  readingController.createReadingSession,
 )
 router.patch(
   '/reading/:bookId/progress',
@@ -51,26 +36,26 @@ router.patch(
     params: readingValidation.bookParam,
     body: readingValidation.updateProgressBody,
   }),
-  updateReadingProgress,
+  readingController.updateReadingProgress,
 )
 
 router.get(
   '/reading/history',
   authenticateUser,
   validateRequest({ query: readingValidation.paginationQuery }),
-  getReadingHistory,
+  readingController.getReadingHistory,
 )
 router.get(
   '/reading/currently-reading',
   authenticateUser,
   validateRequest({ query: readingValidation.paginationQuery }),
-  getCurrentlyReading,
+  readingController.getCurrentlyReading,
 )
 router.get(
   '/reading/completed',
   authenticateUser,
   validateRequest({ query: readingValidation.paginationQuery }),
-  getCompletedReading,
+  readingController.getCompletedReading,
 )
 
 router.get(
@@ -78,7 +63,7 @@ router.get(
   authenticateUser,
   checkSubscriptionAccess,
   validateRequest({ params: readingValidation.bookParam }),
-  listBookmarks,
+  readingController.listBookmarks,
 )
 router.post(
   '/books/:bookId/bookmarks',
@@ -88,7 +73,7 @@ router.post(
     params: readingValidation.bookParam,
     body: readingValidation.createBookmarkBody,
   }),
-  createBookmark,
+  readingController.createBookmark,
 )
 router.patch(
   '/books/:bookId/bookmarks/:id',
@@ -98,14 +83,14 @@ router.patch(
     params: readingValidation.nestedIdParam,
     body: readingValidation.updateBookmarkBody,
   }),
-  updateBookmark,
+  readingController.updateBookmark,
 )
 router.delete(
   '/books/:bookId/bookmarks/:id',
   authenticateUser,
   checkSubscriptionAccess,
   validateRequest({ params: readingValidation.nestedIdParam }),
-  deleteBookmark,
+  readingController.deleteBookmark,
 )
 
 router.get(
@@ -113,7 +98,7 @@ router.get(
   authenticateUser,
   checkSubscriptionAccess,
   validateRequest({ params: readingValidation.bookParam }),
-  listHighlights,
+  readingController.listHighlights,
 )
 router.post(
   '/books/:bookId/highlights',
@@ -123,7 +108,7 @@ router.post(
     params: readingValidation.bookParam,
     body: readingValidation.createHighlightBody,
   }),
-  createHighlight,
+  readingController.createHighlight,
 )
 router.patch(
   '/books/:bookId/highlights/:id',
@@ -133,14 +118,14 @@ router.patch(
     params: readingValidation.nestedIdParam,
     body: readingValidation.updateHighlightBody,
   }),
-  updateHighlight,
+  readingController.updateHighlight,
 )
 router.delete(
   '/books/:bookId/highlights/:id',
   authenticateUser,
   checkSubscriptionAccess,
   validateRequest({ params: readingValidation.nestedIdParam }),
-  deleteHighlight,
+  readingController.deleteHighlight,
 )
 
 export const readingRouter = router

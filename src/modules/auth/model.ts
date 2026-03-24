@@ -3,24 +3,13 @@ import { model, Schema, type Model } from 'mongoose'
 import type {
   IUser,
   UserAuthProvider,
+  UserEmailVerificationToken,
+  UserLoginHistory,
   UserNotificationPreferences,
   UserTwoFactor,
 } from './interface'
 
 type UserDocument = IUser
-
-type UserEmailVerificationToken = {
-  userId: Schema.Types.ObjectId
-  tokenHash: string
-  expiresAt: Date
-}
-
-type UserLoginHistory = {
-  userId: Schema.Types.ObjectId
-  ipAddress?: string
-  userAgent?: string
-  createdAt: Date
-}
 
 const notificationPreferencesSchema = new Schema<UserNotificationPreferences>(
   {

@@ -4,408 +4,376 @@ import { AppError } from '../../common/errors/AppError'
 import { PlanModel } from '../plans/model'
 import type { ISubscription } from './interface'
 import { SubscriptionModel } from './model'
+import {
+  computeEndAt,
+  getActiveSubscription,
+  getSubscriptionById,
+  toSubscriptionSummary,
+} from './utils'
 
-const toSubscriptionSummary = (subscription: ISubscription) => {
-  return {
-    id: subscription._id.toString(),
-    userId: subscription.userId.toString(),
-    planId: subscription.planId.toString(),
-    previousPlanId: subscription.previousPlanId?.toString(),
-    status: subscription.status,
-    startedAt: subscription.startedAt.toISOString(),
-    endsAt: subscription.endsAt.toISOString(),
-    autoRenew: subscription.autoRenew,
-    cancelledAt: subscription.cancelledAt?.toISOString(),
-    cancellationReason: subscription.cancellationReason,
-    latestPaymentId: subscription.latestPaymentId?.toString(),
-    createdAt: subscription.createdAt.toISOString(),
-    updatedAt: subscription.updatedAt.toISOString(),
+const getMyCurrentSubscription = async (userId: string) => {
+  const subscription = await SubscriptionModel.findOne({
+    userId,
+    status: { $in: ['active', 'pending'] },
+  }).sort({ createdAt: -1 })
+
+  if (!subscription) {
+    return null
   }
+
+  return toSubscriptionSummary(subscription)
 }
 
-const computeEndAt = (startAt: Date, durationDays: number): Date => {
-  return new Date(startAt.getTime() + durationDays * 24 * 60 * 60 * 1000)
-}
-
-const getActiveSubscription = async (
-  userId: string,
-  session?: ClientSession,
-) => {
-  return SubscriptionModel.findOne({ userId, status: 'active' }).session(
-    session ?? null,
+const getMySubscriptionHistory = async (userId: string) => {
+  const subscriptions = await SubscriptionModel.find({ userId }).sort({
+    createdAt: -1,
+  })
+  return subscriptions.map((subscription) =>
+    toSubscriptionSummary(subscription),
   )
 }
 
-const getSubscriptionById = async (id: string, session?: ClientSession) => {
-  return SubscriptionModel.findById(id).session(session ?? null)
+const listSubscriptions = async () => {
+  const subscriptions = await SubscriptionModel.find({}).sort({
+    createdAt: -1,
+  })
+  return subscriptions.map((subscription) =>
+    toSubscriptionSummary(subscription),
+  )
+}
+
+const createSubscription = async (payload: {
+  userId: string
+  planId: string
+  autoRenew: boolean
+}) => {
+  const plan = await PlanModel.findById(payload.planId)
+
+  if (!plan || !plan.isActive) {
+    throw new AppError('Plan not found or inactive.', 404)
+  }
+
+  const startAt = new Date()
+  const endAt = computeEndAt(startAt, plan.durationDays)
+
+  const subscription = await SubscriptionModel.create({
+    userId: new Types.ObjectId(payload.userId),
+    planId: plan._id,
+    status: plan.isFree ? 'active' : 'pending',
+    startedAt: startAt,
+    endsAt: endAt,
+    autoRenew: payload.autoRenew,
+  })
+
+  return toSubscriptionSummary(subscription)
+}
+
+const createPendingSubscriptionForPlan = async (
+  payload: {
+    userId: string
+    planId: string
+    autoRenew?: boolean
+  },
+  session?: ClientSession,
+): Promise<ISubscription> => {
+  const plan = await PlanModel.findById(payload.planId).session(session ?? null)
+
+  if (!plan || !plan.isActive) {
+    throw new AppError('Plan not found or inactive.', 404)
+  }
+
+  const startAt = new Date()
+  const endAt = computeEndAt(startAt, plan.durationDays)
+
+  const existingPending = await SubscriptionModel.findOne({
+    userId: payload.userId,
+    status: 'pending',
+    planId: plan._id,
+  }).session(session ?? null)
+
+  if (existingPending) {
+    return existingPending
+  }
+
+  const [created] = await SubscriptionModel.create(
+    [
+      {
+        userId: new Types.ObjectId(payload.userId),
+        planId: plan._id,
+        status: plan.isFree ? 'active' : 'pending',
+        startedAt: startAt,
+        endsAt: endAt,
+        autoRenew: payload.autoRenew ?? true,
+      },
+    ],
+    { session },
+  )
+
+  if (!created) {
+    throw new AppError('Failed to create pending subscription.', 500)
+  }
+
+  return created
+}
+
+const activateSubscriptionFromPayment = async (
+  payload: {
+    subscriptionId: string
+    paymentId: string
+    userId: string
+  },
+  session?: ClientSession,
+) => {
+  const applyActivation = async (transactionSession: ClientSession) => {
+    const target = await getSubscriptionById(
+      payload.subscriptionId,
+      transactionSession,
+    )
+
+    if (!target) {
+      throw new AppError(
+        'Subscription not found for payment verification.',
+        404,
+      )
+    }
+
+    const activeSubscription = await getActiveSubscription(
+      payload.userId,
+      transactionSession,
+    )
+
+    if (
+      activeSubscription &&
+      activeSubscription._id.toString() !== target._id.toString()
+    ) {
+      activeSubscription.status = 'expired'
+      await activeSubscription.save({ session: transactionSession })
+    }
+
+    target.status = 'active'
+    target.latestPaymentId = new Types.ObjectId(payload.paymentId)
+    target.cancellationReason = undefined
+    target.cancelledAt = undefined
+    await target.save({ session: transactionSession })
+
+    return target
+  }
+
+  if (session) {
+    const updated = await applyActivation(session)
+    return toSubscriptionSummary(updated)
+  }
+
+  const transactionSession = await mongoose.startSession()
+
+  try {
+    let result: ISubscription | null = null
+
+    await transactionSession.withTransaction(async () => {
+      result = await applyActivation(transactionSession)
+    })
+
+    if (!result) {
+      throw new AppError('Subscription activation failed.', 500)
+    }
+
+    return toSubscriptionSummary(result)
+  } finally {
+    await transactionSession.endSession()
+  }
+}
+
+const cancelMySubscription = async (userId: string, reason: string) => {
+  const session = await mongoose.startSession()
+
+  try {
+    let result: ISubscription | null = null
+
+    await session.withTransaction(async () => {
+      const subscription = await SubscriptionModel.findOne({
+        userId,
+        status: 'active',
+      }).session(session)
+
+      if (!subscription) {
+        throw new AppError('Active subscription not found.', 404)
+      }
+
+      subscription.status = 'cancelled'
+      subscription.cancelledAt = new Date()
+      subscription.cancellationReason = reason
+      subscription.autoRenew = false
+      await subscription.save({ session })
+
+      result = subscription
+    })
+
+    if (!result) {
+      throw new AppError('Subscription cancellation failed.', 500)
+    }
+
+    return toSubscriptionSummary(result)
+  } finally {
+    await session.endSession()
+  }
+}
+
+const renewMySubscription = async (userId: string) => {
+  const session = await mongoose.startSession()
+
+  try {
+    let result: ISubscription | null = null
+
+    await session.withTransaction(async () => {
+      const subscription = await SubscriptionModel.findOne({
+        userId,
+        status: 'active',
+      }).session(session)
+
+      if (!subscription) {
+        throw new AppError('Active subscription not found.', 404)
+      }
+
+      const plan = await PlanModel.findById(subscription.planId).session(
+        session,
+      )
+
+      if (!plan || !plan.isActive) {
+        throw new AppError('Plan not found or inactive.', 404)
+      }
+
+      subscription.endsAt = computeEndAt(subscription.endsAt, plan.durationDays)
+      subscription.status = 'active'
+      subscription.autoRenew = true
+      await subscription.save({ session })
+
+      result = subscription
+    })
+
+    if (!result) {
+      throw new AppError('Subscription renewal failed.', 500)
+    }
+
+    return toSubscriptionSummary(result)
+  } finally {
+    await session.endSession()
+  }
+}
+
+const changePlanWithTransaction = async (payload: {
+  userId: string
+  newPlanId: string
+  mode: 'upgrade' | 'downgrade'
+}) => {
+  const session = await mongoose.startSession()
+
+  try {
+    let result: ISubscription | null = null
+
+    await session.withTransaction(async () => {
+      const current = await SubscriptionModel.findOne({
+        userId: payload.userId,
+        status: 'active',
+      }).session(session)
+
+      if (!current) {
+        throw new AppError('Active subscription not found.', 404)
+      }
+
+      const newPlan = await PlanModel.findById(payload.newPlanId).session(
+        session,
+      )
+
+      if (!newPlan || !newPlan.isActive) {
+        throw new AppError('Requested plan not found or inactive.', 404)
+      }
+
+      current.status = payload.mode === 'upgrade' ? 'upgraded' : 'downgraded'
+      await current.save({ session })
+
+      const startAt = new Date()
+      const endsAt = computeEndAt(startAt, newPlan.durationDays)
+
+      const [newSubscription] = await SubscriptionModel.create(
+        [
+          {
+            userId: current.userId,
+            planId: newPlan._id,
+            previousPlanId: current.planId,
+            status: newPlan.isFree ? 'active' : 'pending',
+            startedAt: startAt,
+            endsAt,
+            autoRenew: current.autoRenew,
+          },
+        ],
+        { session },
+      )
+
+      if (!newSubscription) {
+        throw new AppError('Failed to create changed subscription.', 500)
+      }
+
+      result = newSubscription
+    })
+
+    if (!result) {
+      throw new AppError('Subscription plan change failed.', 500)
+    }
+
+    return toSubscriptionSummary(result)
+  } finally {
+    await session.endSession()
+  }
+}
+
+const adminUpdateSubscription = async (
+  id: string,
+  payload: {
+    status?:
+      | 'pending'
+      | 'active'
+      | 'cancelled'
+      | 'expired'
+      | 'upgraded'
+      | 'downgraded'
+    autoRenew?: boolean
+    cancellationReason?: string
+  },
+) => {
+  const subscription = await SubscriptionModel.findById(id)
+
+  if (!subscription) {
+    throw new AppError('Subscription not found.', 404)
+  }
+
+  if (typeof payload.status === 'string') {
+    subscription.status = payload.status
+  }
+
+  if (typeof payload.autoRenew === 'boolean') {
+    subscription.autoRenew = payload.autoRenew
+  }
+
+  if (typeof payload.cancellationReason === 'string') {
+    subscription.cancellationReason = payload.cancellationReason
+    subscription.cancelledAt = new Date()
+  }
+
+  await subscription.save()
+
+  return toSubscriptionSummary(subscription)
 }
 
 export const subscriptionsService = {
-  getMyCurrentSubscription: async (userId: string) => {
-    const subscription = await SubscriptionModel.findOne({
-      userId,
-      status: { $in: ['active', 'pending'] },
-    }).sort({ createdAt: -1 })
-
-    if (!subscription) {
-      return null
-    }
-
-    return toSubscriptionSummary(subscription)
-  },
-
-  getMySubscriptionHistory: async (userId: string) => {
-    const subscriptions = await SubscriptionModel.find({ userId }).sort({
-      createdAt: -1,
-    })
-    return subscriptions.map((subscription) =>
-      toSubscriptionSummary(subscription),
-    )
-  },
-
-  listSubscriptions: async () => {
-    const subscriptions = await SubscriptionModel.find({}).sort({
-      createdAt: -1,
-    })
-    return subscriptions.map((subscription) =>
-      toSubscriptionSummary(subscription),
-    )
-  },
-
-  getSubscriptionById: async (id: string) => {
-    const subscription = await SubscriptionModel.findById(id)
-
-    if (!subscription) {
-      throw new AppError('Subscription not found.', 404)
-    }
-
-    return toSubscriptionSummary(subscription)
-  },
-
-  createSubscription: async (payload: {
-    userId: string
-    planId: string
-    autoRenew: boolean
-  }) => {
-    const plan = await PlanModel.findById(payload.planId)
-
-    if (!plan || !plan.isActive) {
-      throw new AppError('Plan not found or inactive.', 404)
-    }
-
-    const startAt = new Date()
-    const endAt = computeEndAt(startAt, plan.durationDays)
-
-    const subscription = await SubscriptionModel.create({
-      userId: new Types.ObjectId(payload.userId),
-      planId: plan._id,
-      status: plan.isFree ? 'active' : 'pending',
-      startedAt: startAt,
-      endsAt: endAt,
-      autoRenew: payload.autoRenew,
-    })
-
-    return toSubscriptionSummary(subscription)
-  },
-
-  createPendingSubscriptionForPlan: async (
-    payload: {
-      userId: string
-      planId: string
-      autoRenew?: boolean
-    },
-    session?: ClientSession,
-  ): Promise<ISubscription> => {
-    const plan = await PlanModel.findById(payload.planId).session(
-      session ?? null,
-    )
-
-    if (!plan || !plan.isActive) {
-      throw new AppError('Plan not found or inactive.', 404)
-    }
-
-    const startAt = new Date()
-    const endAt = computeEndAt(startAt, plan.durationDays)
-
-    const existingPending = await SubscriptionModel.findOne({
-      userId: payload.userId,
-      status: 'pending',
-      planId: plan._id,
-    }).session(session ?? null)
-
-    if (existingPending) {
-      return existingPending
-    }
-
-    const [created] = await SubscriptionModel.create(
-      [
-        {
-          userId: new Types.ObjectId(payload.userId),
-          planId: plan._id,
-          status: plan.isFree ? 'active' : 'pending',
-          startedAt: startAt,
-          endsAt: endAt,
-          autoRenew: payload.autoRenew ?? true,
-        },
-      ],
-      { session },
-    )
-
-    if (!created) {
-      throw new AppError('Failed to create pending subscription.', 500)
-    }
-
-    return created
-  },
-
-  activateSubscriptionFromPayment: async (
-    payload: {
-      subscriptionId: string
-      paymentId: string
-      userId: string
-    },
-    session?: ClientSession,
-  ) => {
-    const applyActivation = async (transactionSession: ClientSession) => {
-      const target = await getSubscriptionById(
-        payload.subscriptionId,
-        transactionSession,
-      )
-
-      if (!target) {
-        throw new AppError(
-          'Subscription not found for payment verification.',
-          404,
-        )
-      }
-
-      const activeSubscription = await getActiveSubscription(
-        payload.userId,
-        transactionSession,
-      )
-
-      if (
-        activeSubscription &&
-        activeSubscription._id.toString() !== target._id.toString()
-      ) {
-        activeSubscription.status = 'expired'
-        await activeSubscription.save({ session: transactionSession })
-      }
-
-      target.status = 'active'
-      target.latestPaymentId = new Types.ObjectId(payload.paymentId)
-      target.cancellationReason = undefined
-      target.cancelledAt = undefined
-      await target.save({ session: transactionSession })
-
-      return target
-    }
-
-    if (session) {
-      const updated = await applyActivation(session)
-      return toSubscriptionSummary(updated)
-    }
-
-    const transactionSession = await mongoose.startSession()
-
-    try {
-      let result: ISubscription | null = null
-
-      await transactionSession.withTransaction(async () => {
-        result = await applyActivation(transactionSession)
-      })
-
-      if (!result) {
-        throw new AppError('Subscription activation failed.', 500)
-      }
-
-      return toSubscriptionSummary(result)
-    } finally {
-      await transactionSession.endSession()
-    }
-  },
-
-  cancelMySubscription: async (userId: string, reason: string) => {
-    const session = await mongoose.startSession()
-
-    try {
-      let result: ISubscription | null = null
-
-      await session.withTransaction(async () => {
-        const subscription = await SubscriptionModel.findOne({
-          userId,
-          status: 'active',
-        }).session(session)
-
-        if (!subscription) {
-          throw new AppError('Active subscription not found.', 404)
-        }
-
-        subscription.status = 'cancelled'
-        subscription.cancelledAt = new Date()
-        subscription.cancellationReason = reason
-        subscription.autoRenew = false
-        await subscription.save({ session })
-
-        result = subscription
-      })
-
-      if (!result) {
-        throw new AppError('Subscription cancellation failed.', 500)
-      }
-
-      return toSubscriptionSummary(result)
-    } finally {
-      await session.endSession()
-    }
-  },
-
-  renewMySubscription: async (userId: string) => {
-    const session = await mongoose.startSession()
-
-    try {
-      let result: ISubscription | null = null
-
-      await session.withTransaction(async () => {
-        const subscription = await SubscriptionModel.findOne({
-          userId,
-          status: 'active',
-        }).session(session)
-
-        if (!subscription) {
-          throw new AppError('Active subscription not found.', 404)
-        }
-
-        const plan = await PlanModel.findById(subscription.planId).session(
-          session,
-        )
-
-        if (!plan || !plan.isActive) {
-          throw new AppError('Plan not found or inactive.', 404)
-        }
-
-        subscription.endsAt = computeEndAt(
-          subscription.endsAt,
-          plan.durationDays,
-        )
-        subscription.status = 'active'
-        subscription.autoRenew = true
-        await subscription.save({ session })
-
-        result = subscription
-      })
-
-      if (!result) {
-        throw new AppError('Subscription renewal failed.', 500)
-      }
-
-      return toSubscriptionSummary(result)
-    } finally {
-      await session.endSession()
-    }
-  },
-
-  changePlanWithTransaction: async (payload: {
-    userId: string
-    newPlanId: string
-    mode: 'upgrade' | 'downgrade'
-  }) => {
-    const session = await mongoose.startSession()
-
-    try {
-      let result: ISubscription | null = null
-
-      await session.withTransaction(async () => {
-        const current = await SubscriptionModel.findOne({
-          userId: payload.userId,
-          status: 'active',
-        }).session(session)
-
-        if (!current) {
-          throw new AppError('Active subscription not found.', 404)
-        }
-
-        const newPlan = await PlanModel.findById(payload.newPlanId).session(
-          session,
-        )
-
-        if (!newPlan || !newPlan.isActive) {
-          throw new AppError('Requested plan not found or inactive.', 404)
-        }
-
-        current.status = payload.mode === 'upgrade' ? 'upgraded' : 'downgraded'
-        await current.save({ session })
-
-        const startAt = new Date()
-        const endsAt = computeEndAt(startAt, newPlan.durationDays)
-
-        const [newSubscription] = await SubscriptionModel.create(
-          [
-            {
-              userId: current.userId,
-              planId: newPlan._id,
-              previousPlanId: current.planId,
-              status: newPlan.isFree ? 'active' : 'pending',
-              startedAt: startAt,
-              endsAt,
-              autoRenew: current.autoRenew,
-            },
-          ],
-          { session },
-        )
-
-        if (!newSubscription) {
-          throw new AppError('Failed to create changed subscription.', 500)
-        }
-
-        result = newSubscription
-      })
-
-      if (!result) {
-        throw new AppError('Subscription plan change failed.', 500)
-      }
-
-      return toSubscriptionSummary(result)
-    } finally {
-      await session.endSession()
-    }
-  },
-
-  adminUpdateSubscription: async (
-    id: string,
-    payload: {
-      status?:
-        | 'pending'
-        | 'active'
-        | 'cancelled'
-        | 'expired'
-        | 'upgraded'
-        | 'downgraded'
-      autoRenew?: boolean
-      cancellationReason?: string
-    },
-  ) => {
-    const subscription = await SubscriptionModel.findById(id)
-
-    if (!subscription) {
-      throw new AppError('Subscription not found.', 404)
-    }
-
-    if (typeof payload.status === 'string') {
-      subscription.status = payload.status
-    }
-
-    if (typeof payload.autoRenew === 'boolean') {
-      subscription.autoRenew = payload.autoRenew
-    }
-
-    if (typeof payload.cancellationReason === 'string') {
-      subscription.cancellationReason = payload.cancellationReason
-      subscription.cancelledAt = new Date()
-    }
-
-    await subscription.save()
-
-    return toSubscriptionSummary(subscription)
-  },
+  getMyCurrentSubscription,
+  getMySubscriptionHistory,
+  listSubscriptions,
+  getSubscriptionById,
+  createSubscription,
+  createPendingSubscriptionForPlan,
+  cancelMySubscription,
+  renewMySubscription,
+  changePlanWithTransaction,
+  activateSubscriptionFromPayment,
+  adminUpdateSubscription,
 }

@@ -4,49 +4,42 @@ import { PERMISSIONS } from '../../common/constants/permissions'
 import { authenticateStaff } from '../../common/middlewares/auth'
 import { requirePermission } from '../../common/middlewares/requirePermission'
 import { validateRequest } from '../../common/middlewares/validateRequest'
-import {
-  getStaffActivity,
-  getStaffById,
-  inviteStaff,
-  listStaff,
-  reinviteStaff,
-  removeStaff,
-  resetTwoFactor,
-  suspendStaff,
-  unsuspendStaff,
-  updateStaffRole,
-} from './controller'
+import { staffController } from './controller'
 import { staffValidation } from './validation'
 
 const router = Router()
 
 router.use(authenticateStaff)
 
-router.get('/', requirePermission(PERMISSIONS.STAFF_VIEW), listStaff)
+router.get(
+  '/',
+  requirePermission(PERMISSIONS.STAFF_VIEW),
+  staffController.listStaff,
+)
 router.get(
   '/:id',
   requirePermission(PERMISSIONS.STAFF_VIEW),
   validateRequest({ params: staffValidation.idParam }),
-  getStaffById,
+  staffController.getStaffById,
 )
 router.get(
   '/:id/activity',
   requirePermission(PERMISSIONS.STAFF_VIEW),
   validateRequest({ params: staffValidation.idParam }),
-  getStaffActivity,
+  staffController.getStaffActivity,
 )
 
 router.post(
   '/invite',
   requirePermission(PERMISSIONS.STAFF_MANAGE),
   validateRequest({ body: staffValidation.inviteBody }),
-  inviteStaff,
+  staffController.inviteStaff,
 )
 router.post(
   '/:id/reinvite',
   requirePermission(PERMISSIONS.STAFF_MANAGE),
   validateRequest({ params: staffValidation.idParam }),
-  reinviteStaff,
+  staffController.reinviteStaff,
 )
 router.patch(
   '/:id/role',
@@ -55,31 +48,31 @@ router.patch(
     params: staffValidation.idParam,
     body: staffValidation.updateRoleBody,
   }),
-  updateStaffRole,
+  staffController.updateStaffRole,
 )
 router.patch(
   '/:id/suspend',
   requirePermission(PERMISSIONS.STAFF_MANAGE),
   validateRequest({ params: staffValidation.idParam }),
-  suspendStaff,
+  staffController.suspendStaff,
 )
 router.patch(
   '/:id/unsuspend',
   requirePermission(PERMISSIONS.STAFF_MANAGE),
   validateRequest({ params: staffValidation.idParam }),
-  unsuspendStaff,
+  staffController.unsuspendStaff,
 )
 router.post(
   '/:id/2fa/reset',
   requirePermission(PERMISSIONS.STAFF_MANAGE),
   validateRequest({ params: staffValidation.idParam }),
-  resetTwoFactor,
+  staffController.resetTwoFactor,
 )
 router.delete(
   '/:id',
   requirePermission(PERMISSIONS.STAFF_MANAGE),
   validateRequest({ params: staffValidation.idParam }),
-  removeStaff,
+  staffController.removeStaff,
 )
 
 export const staffRouter = router

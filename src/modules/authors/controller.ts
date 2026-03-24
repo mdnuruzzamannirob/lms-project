@@ -10,75 +10,73 @@ import type {
 } from './interface'
 import { authorsService } from './service'
 
-export const listAuthors: RequestHandler = catchAsync(
-  async (request, response) => {
-    const query = request.query as AuthorsListQuery
+const listAuthors: RequestHandler = catchAsync(async (request, response) => {
+  const query = request.query as AuthorsListQuery
 
-    const data = await authorsService.listAuthors(query)
+  const data = await authorsService.listAuthors(query)
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Authors retrieved successfully.',
-      data: data.data,
-      meta: data.meta,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Authors retrieved successfully.',
+    data: data.data,
+    meta: data.meta,
+  })
+})
 
-export const getAuthorById: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await authorsService.getAuthorById(getIdParam(request))
+const getAuthorById: RequestHandler = catchAsync(async (request, response) => {
+  const data = await authorsService.getAuthorById(getIdParam(request))
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Author retrieved successfully.',
-      data,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Author retrieved successfully.',
+    data,
+  })
+})
 
-export const createAuthor: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await authorsService.createAuthor(
-      request.body as CreateAuthorPayload,
-    )
+const createAuthor: RequestHandler = catchAsync(async (request, response) => {
+  const data = await authorsService.createAuthor(
+    request.body as CreateAuthorPayload,
+  )
 
-    sendResponse(response, {
-      statusCode: 201,
-      success: true,
-      message: 'Author created successfully.',
-      data,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 201,
+    success: true,
+    message: 'Author created successfully.',
+    data,
+  })
+})
 
-export const updateAuthor: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await authorsService.updateAuthor(
-      getIdParam(request),
-      request.body as UpdateAuthorPayload,
-    )
+const updateAuthor: RequestHandler = catchAsync(async (request, response) => {
+  const data = await authorsService.updateAuthor(
+    getIdParam(request),
+    request.body as UpdateAuthorPayload,
+  )
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Author updated successfully.',
-      data,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Author updated successfully.',
+    data,
+  })
+})
 
-export const deleteAuthor: RequestHandler = catchAsync(
-  async (request, response) => {
-    await authorsService.deleteAuthor(getIdParam(request))
+const deleteAuthor: RequestHandler = catchAsync(async (request, response) => {
+  await authorsService.deleteAuthor(getIdParam(request))
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Author deleted successfully.',
-      data: null,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Author deleted successfully.',
+    data: null,
+  })
+})
+
+export const authorsController = {
+  listAuthors,
+  getAuthorById,
+  createAuthor,
+  updateAuthor,
+  deleteAuthor,
+}

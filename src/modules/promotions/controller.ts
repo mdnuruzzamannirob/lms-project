@@ -1,115 +1,91 @@
 import type { RequestHandler } from 'express'
 
-import { AppError } from '../../common/errors/AppError'
 import { catchAsync } from '../../common/utils/catchAsync'
+import { getIdParam } from '../../common/utils/getParam'
 import { sendResponse } from '../../common/utils/sendResponse'
 import { promotionsService } from './service'
 
-const getIdParam = (request: Parameters<RequestHandler>[0]): string => {
-  const id = request.params.id
+const validateCoupon: RequestHandler = catchAsync(async (request, response) => {
+  const data = await promotionsService.validateCoupon(request.body)
 
-  if (typeof id !== 'string') {
-    throw new AppError('Invalid id parameter.', 400)
-  }
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Coupon validated successfully.',
+    data,
+  })
+})
 
-  return id
-}
+const listCoupons: RequestHandler = catchAsync(async (_request, response) => {
+  const data = await promotionsService.listCoupons()
 
-export const validateCoupon: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await promotionsService.validateCoupon(request.body)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Coupons retrieved successfully.',
+    data,
+  })
+})
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Coupon validated successfully.',
-      data,
-    })
-  },
-)
+const getCouponById: RequestHandler = catchAsync(async (request, response) => {
+  const data = await promotionsService.getCouponById(getIdParam(request))
 
-export const listCoupons: RequestHandler = catchAsync(
-  async (_request, response) => {
-    const data = await promotionsService.listCoupons()
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Coupon retrieved successfully.',
+    data,
+  })
+})
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Coupons retrieved successfully.',
-      data,
-    })
-  },
-)
+const createCoupon: RequestHandler = catchAsync(async (request, response) => {
+  const data = await promotionsService.createCoupon(request.body)
 
-export const getCouponById: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await promotionsService.getCouponById(getIdParam(request))
+  sendResponse(response, {
+    statusCode: 201,
+    success: true,
+    message: 'Coupon created successfully.',
+    data,
+  })
+})
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Coupon retrieved successfully.',
-      data,
-    })
-  },
-)
+const updateCoupon: RequestHandler = catchAsync(async (request, response) => {
+  const data = await promotionsService.updateCoupon(
+    getIdParam(request),
+    request.body,
+  )
 
-export const createCoupon: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await promotionsService.createCoupon(request.body)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Coupon updated successfully.',
+    data,
+  })
+})
 
-    sendResponse(response, {
-      statusCode: 201,
-      success: true,
-      message: 'Coupon created successfully.',
-      data,
-    })
-  },
-)
+const toggleCoupon: RequestHandler = catchAsync(async (request, response) => {
+  const data = await promotionsService.toggleCoupon(getIdParam(request))
 
-export const updateCoupon: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await promotionsService.updateCoupon(
-      getIdParam(request),
-      request.body,
-    )
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Coupon status updated successfully.',
+    data,
+  })
+})
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Coupon updated successfully.',
-      data,
-    })
-  },
-)
+const deleteCoupon: RequestHandler = catchAsync(async (request, response) => {
+  await promotionsService.deleteCoupon(getIdParam(request))
 
-export const toggleCoupon: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await promotionsService.toggleCoupon(getIdParam(request))
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Coupon deleted successfully.',
+    data: null,
+  })
+})
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Coupon status updated successfully.',
-      data,
-    })
-  },
-)
-
-export const deleteCoupon: RequestHandler = catchAsync(
-  async (request, response) => {
-    await promotionsService.deleteCoupon(getIdParam(request))
-
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Coupon deleted successfully.',
-      data: null,
-    })
-  },
-)
-
-export const getActiveFlashSales: RequestHandler = catchAsync(
+const getActiveFlashSales: RequestHandler = catchAsync(
   async (_request, response) => {
     const data = await promotionsService.getActiveFlashSales()
 
@@ -122,7 +98,7 @@ export const getActiveFlashSales: RequestHandler = catchAsync(
   },
 )
 
-export const listFlashSales: RequestHandler = catchAsync(
+const listFlashSales: RequestHandler = catchAsync(
   async (_request, response) => {
     const data = await promotionsService.listFlashSales()
 
@@ -135,7 +111,7 @@ export const listFlashSales: RequestHandler = catchAsync(
   },
 )
 
-export const createFlashSale: RequestHandler = catchAsync(
+const createFlashSale: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await promotionsService.createFlashSale(request.body)
 
@@ -148,7 +124,7 @@ export const createFlashSale: RequestHandler = catchAsync(
   },
 )
 
-export const updateFlashSale: RequestHandler = catchAsync(
+const updateFlashSale: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await promotionsService.updateFlashSale(
       getIdParam(request),
@@ -164,7 +140,7 @@ export const updateFlashSale: RequestHandler = catchAsync(
   },
 )
 
-export const toggleFlashSale: RequestHandler = catchAsync(
+const toggleFlashSale: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await promotionsService.toggleFlashSale(getIdParam(request))
 
@@ -177,7 +153,7 @@ export const toggleFlashSale: RequestHandler = catchAsync(
   },
 )
 
-export const deleteFlashSale: RequestHandler = catchAsync(
+const deleteFlashSale: RequestHandler = catchAsync(
   async (request, response) => {
     await promotionsService.deleteFlashSale(getIdParam(request))
 
@@ -189,3 +165,19 @@ export const deleteFlashSale: RequestHandler = catchAsync(
     })
   },
 )
+
+export const promotionsController = {
+  validateCoupon,
+  listCoupons,
+  getCouponById,
+  createCoupon,
+  updateCoupon,
+  toggleCoupon,
+  deleteCoupon,
+  getActiveFlashSales,
+  listFlashSales,
+  createFlashSale,
+  updateFlashSale,
+  toggleFlashSale,
+  deleteFlashSale,
+}

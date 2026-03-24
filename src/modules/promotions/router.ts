@@ -4,21 +4,7 @@ import { PERMISSIONS } from '../../common/constants/permissions'
 import { authenticateStaff } from '../../common/middlewares/auth'
 import { requirePermission } from '../../common/middlewares/requirePermission'
 import { validateRequest } from '../../common/middlewares/validateRequest'
-import {
-  createCoupon,
-  createFlashSale,
-  deleteCoupon,
-  deleteFlashSale,
-  getActiveFlashSales,
-  getCouponById,
-  listCoupons,
-  listFlashSales,
-  toggleCoupon,
-  toggleFlashSale,
-  updateCoupon,
-  updateFlashSale,
-  validateCoupon,
-} from './controller'
+import { promotionsController } from './controller'
 import { promotionsValidation } from './validation'
 
 const router = Router()
@@ -26,28 +12,28 @@ const router = Router()
 router.post(
   '/coupons/validate',
   validateRequest({ body: promotionsValidation.validateCouponBody }),
-  validateCoupon,
+  promotionsController.validateCoupon,
 )
 
 router.get(
   '/coupons',
   authenticateStaff,
   requirePermission(PERMISSIONS.PROMOTIONS_VIEW),
-  listCoupons,
+  promotionsController.listCoupons,
 )
 router.get(
   '/coupons/:id',
   authenticateStaff,
   requirePermission(PERMISSIONS.PROMOTIONS_VIEW),
   validateRequest({ params: promotionsValidation.idParam }),
-  getCouponById,
+  promotionsController.getCouponById,
 )
 router.post(
   '/coupons',
   authenticateStaff,
   requirePermission(PERMISSIONS.PROMOTIONS_MANAGE),
   validateRequest({ body: promotionsValidation.createCouponBody }),
-  createCoupon,
+  promotionsController.createCoupon,
 )
 router.put(
   '/coupons/:id',
@@ -57,36 +43,36 @@ router.put(
     params: promotionsValidation.idParam,
     body: promotionsValidation.updateCouponBody,
   }),
-  updateCoupon,
+  promotionsController.updateCoupon,
 )
 router.patch(
   '/coupons/:id/toggle',
   authenticateStaff,
   requirePermission(PERMISSIONS.PROMOTIONS_MANAGE),
   validateRequest({ params: promotionsValidation.idParam }),
-  toggleCoupon,
+  promotionsController.toggleCoupon,
 )
 router.delete(
   '/coupons/:id',
   authenticateStaff,
   requirePermission(PERMISSIONS.PROMOTIONS_MANAGE),
   validateRequest({ params: promotionsValidation.idParam }),
-  deleteCoupon,
+  promotionsController.deleteCoupon,
 )
 
-router.get('/flash-sales/active', getActiveFlashSales)
+router.get('/flash-sales/active', promotionsController.getActiveFlashSales)
 router.get(
   '/flash-sales',
   authenticateStaff,
   requirePermission(PERMISSIONS.PROMOTIONS_VIEW),
-  listFlashSales,
+  promotionsController.listFlashSales,
 )
 router.post(
   '/flash-sales',
   authenticateStaff,
   requirePermission(PERMISSIONS.PROMOTIONS_MANAGE),
   validateRequest({ body: promotionsValidation.createFlashSaleBody }),
-  createFlashSale,
+  promotionsController.createFlashSale,
 )
 router.put(
   '/flash-sales/:id',
@@ -96,21 +82,21 @@ router.put(
     params: promotionsValidation.idParam,
     body: promotionsValidation.updateFlashSaleBody,
   }),
-  updateFlashSale,
+  promotionsController.updateFlashSale,
 )
 router.patch(
   '/flash-sales/:id/toggle',
   authenticateStaff,
   requirePermission(PERMISSIONS.PROMOTIONS_MANAGE),
   validateRequest({ params: promotionsValidation.idParam }),
-  toggleFlashSale,
+  promotionsController.toggleFlashSale,
 )
 router.delete(
   '/flash-sales/:id',
   authenticateStaff,
   requirePermission(PERMISSIONS.PROMOTIONS_MANAGE),
   validateRequest({ params: promotionsValidation.idParam }),
-  deleteFlashSale,
+  promotionsController.deleteFlashSale,
 )
 
 export const promotionsRouter = router

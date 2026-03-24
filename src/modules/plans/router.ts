@@ -4,22 +4,16 @@ import { PERMISSIONS } from '../../common/constants/permissions'
 import { authenticateStaff } from '../../common/middlewares/auth'
 import { requirePermission } from '../../common/middlewares/requirePermission'
 import { validateRequest } from '../../common/middlewares/validateRequest'
-import {
-  createPlan,
-  getPlanById,
-  listPlans,
-  togglePlan,
-  updatePlan,
-} from './controller'
+import { plansController } from './controller'
 import { plansValidation } from './validation'
 
 const router = Router()
 
-router.get('/', validateRequest({ query: plansValidation.query }), listPlans)
+router.get('/', validateRequest({ query: plansValidation.query }), plansController.listPlans)
 router.get(
   '/:id',
   validateRequest({ params: plansValidation.idParam }),
-  getPlanById,
+  plansController.getPlanById,
 )
 
 router.post(
@@ -27,7 +21,7 @@ router.post(
   authenticateStaff,
   requirePermission(PERMISSIONS.PLANS_MANAGE),
   validateRequest({ body: plansValidation.createBody }),
-  createPlan,
+  plansController.createPlan,
 )
 router.put(
   '/:id',
@@ -37,14 +31,14 @@ router.put(
     params: plansValidation.idParam,
     body: plansValidation.updateBody,
   }),
-  updatePlan,
+  plansController.updatePlan,
 )
 router.patch(
   '/:id/toggle',
   authenticateStaff,
   requirePermission(PERMISSIONS.PLANS_MANAGE),
   validateRequest({ params: plansValidation.idParam }),
-  togglePlan,
+  plansController.togglePlan,
 )
 
 export const plansRouter = router

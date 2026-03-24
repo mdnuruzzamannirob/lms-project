@@ -7,3 +7,15 @@ export { authRouter } from './router'
 export * from './service'
 export * from './utils'
 export * from './validation'
+
+import * as authControllerExports from './controller'
+import * as authServiceExports from './service'
+import * as authRouterExports from './router'
+import * as authValidationExports from './validation'
+
+export const authModule = {
+  controller: authControllerExports,
+  service: authServiceExports,
+  router: authRouterExports,
+  validation: authValidationExports,
+}

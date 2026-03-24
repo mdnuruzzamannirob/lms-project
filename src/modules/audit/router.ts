@@ -1,4 +1,3 @@
-import type { RequestHandler } from 'express'
 import express from 'express'
 
 import { PERMISSIONS } from '../../common/constants/permissions'
@@ -17,7 +16,7 @@ router.post(
   validateRequest({
     body: auditValidation.createBody,
   }),
-  auditController.createActivityLog as RequestHandler,
+  auditController.createActivityLog,
 )
 
 router.get(
@@ -27,7 +26,7 @@ router.get(
   validateRequest({
     query: auditValidation.listQuery,
   }),
-  auditController.listLogs as RequestHandler,
+  auditController.listLogs,
 )
 
 router.get(
@@ -37,7 +36,7 @@ router.get(
   validateRequest({
     query: auditValidation.exportQuery,
   }),
-  auditController.exportLogs as RequestHandler,
+  auditController.exportLogs,
 )
 
 export const auditRouter = router

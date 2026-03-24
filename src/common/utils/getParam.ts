@@ -23,10 +23,3 @@ export const getFileIdParam = (
   return fileId
 }
 
-export const getStaffId = (request: Parameters<RequestHandler>[0]): string => {
-  if (!request.auth || request.auth.type !== 'staff') {
-    throw new AppError('Staff authentication is required.', 401)
-  }
-
-  return request.auth.sub
-}

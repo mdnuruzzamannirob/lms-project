@@ -2,91 +2,65 @@ import type { RequestHandler } from 'express'
 
 import { AppError } from '../../common/errors/AppError'
 import { catchAsync } from '../../common/utils/catchAsync'
+import { getIdParam } from '../../common/utils/getParam'
 import { sendResponse } from '../../common/utils/sendResponse'
 import { staffService } from './service'
+import { getActorId } from './utils'
 
-const getActorId = (
-  request: Parameters<RequestHandler>[0],
-): string | undefined => {
-  if (request.auth?.type !== 'staff') {
-    return undefined
-  }
+const inviteStaff: RequestHandler = catchAsync(async (request, response) => {
+  const data = await staffService.inviteStaff(
+    request.body,
+    getActorId(request),
+    request.id,
+  )
 
-  return request.auth.sub
-}
+  sendResponse(response, {
+    statusCode: 201,
+    success: true,
+    message: 'Staff invitation sent successfully.',
+    data,
+  })
+})
 
-const getIdParam = (request: Parameters<RequestHandler>[0]): string => {
-  const id = request.params.id
+const reinviteStaff: RequestHandler = catchAsync(async (request, response) => {
+  const staffId = getIdParam(request)
+  const data = await staffService.reinviteStaff(
+    staffId,
+    getActorId(request),
+    request.id,
+  )
 
-  if (typeof id !== 'string') {
-    throw new AppError('Invalid id parameter.', 400)
-  }
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Staff invitation resent successfully.',
+    data,
+  })
+})
 
-  return id
-}
+const listStaff: RequestHandler = catchAsync(async (_request, response) => {
+  const data = await staffService.listStaff()
 
-export const inviteStaff: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await staffService.inviteStaff(
-      request.body,
-      getActorId(request),
-      request.id,
-    )
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Staff list retrieved successfully.',
+    data,
+  })
+})
 
-    sendResponse(response, {
-      statusCode: 201,
-      success: true,
-      message: 'Staff invitation sent successfully.',
-      data,
-    })
-  },
-)
+const getStaffById: RequestHandler = catchAsync(async (request, response) => {
+  const data = await staffService.getStaffById(getIdParam(request))
 
-export const reinviteStaff: RequestHandler = catchAsync(
-  async (request, response) => {
-    const staffId = getIdParam(request)
-    const data = await staffService.reinviteStaff(
-      staffId,
-      getActorId(request),
-      request.id,
-    )
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Staff profile retrieved successfully.',
+    data,
+  })
+})
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Staff invitation resent successfully.',
-      data,
-    })
-  },
-)
-
-export const listStaff: RequestHandler = catchAsync(
-  async (_request, response) => {
-    const data = await staffService.listStaff()
-
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Staff list retrieved successfully.',
-      data,
-    })
-  },
-)
-
-export const getStaffById: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await staffService.getStaffById(getIdParam(request))
-
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Staff profile retrieved successfully.',
-      data,
-    })
-  },
-)
-
-export const getStaffActivity: RequestHandler = catchAsync(
+const getStaffActivity: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await staffService.getStaffActivity(getIdParam(request))
 
@@ -99,7 +73,7 @@ export const getStaffActivity: RequestHandler = catchAsync(
   },
 )
 
-export const updateStaffRole: RequestHandler = catchAsync(
+const updateStaffRole: RequestHandler = catchAsync(
   async (request, response) => {
     const staffId = getIdParam(request)
     const data = await staffService.updateStaffRole(
@@ -118,85 +92,90 @@ export const updateStaffRole: RequestHandler = catchAsync(
   },
 )
 
-export const suspendStaff: RequestHandler = catchAsync(
-  async (request, response) => {
-    const staffId = getIdParam(request)
-    const actorId = getActorId(request)
+const suspendStaff: RequestHandler = catchAsync(async (request, response) => {
+  const staffId = getIdParam(request)
+  const actorId = getActorId(request)
 
-    if (actorId === staffId) {
-      throw new AppError('You cannot suspend yourself.', 400)
-    }
+  if (actorId === staffId) {
+    throw new AppError('You cannot suspend yourself.', 400)
+  }
 
-    const data = await staffService.suspendStaff(staffId, actorId, request.id)
+  const data = await staffService.suspendStaff(staffId, actorId, request.id)
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Staff suspended successfully.',
-      data,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Staff suspended successfully.',
+    data,
+  })
+})
 
-export const unsuspendStaff: RequestHandler = catchAsync(
-  async (request, response) => {
-    const staffId = getIdParam(request)
-    const data = await staffService.unsuspendStaff(
-      staffId,
-      getActorId(request),
-      request.id,
-    )
+const unsuspendStaff: RequestHandler = catchAsync(async (request, response) => {
+  const staffId = getIdParam(request)
+  const data = await staffService.unsuspendStaff(
+    staffId,
+    getActorId(request),
+    request.id,
+  )
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Staff unsuspended successfully.',
-      data,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Staff unsuspended successfully.',
+    data,
+  })
+})
 
-export const removeStaff: RequestHandler = catchAsync(
-  async (request, response) => {
-    const staffId = getIdParam(request)
-    const actorId = getActorId(request)
+const removeStaff: RequestHandler = catchAsync(async (request, response) => {
+  const staffId = getIdParam(request)
+  const actorId = getActorId(request)
 
-    if (!actorId) {
-      throw new AppError('Staff authentication is required.', 401)
-    }
+  if (!actorId) {
+    throw new AppError('Staff authentication is required.', 401)
+  }
 
-    await staffService.removeStaff(staffId, actorId, actorId, request.id)
+  await staffService.removeStaff(staffId, actorId, actorId, request.id)
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Staff removed successfully.',
-      data: null,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Staff removed successfully.',
+    data: null,
+  })
+})
 
-export const resetTwoFactor: RequestHandler = catchAsync(
-  async (request, response) => {
-    const staffId = getIdParam(request)
-    const actorId = getActorId(request)
+const resetTwoFactor: RequestHandler = catchAsync(async (request, response) => {
+  const staffId = getIdParam(request)
+  const actorId = getActorId(request)
 
-    if (!actorId) {
-      throw new AppError('Staff authentication is required.', 401)
-    }
+  if (!actorId) {
+    throw new AppError('Staff authentication is required.', 401)
+  }
 
-    const data = await staffService.resetStaffTwoFactor(
-      staffId,
-      actorId,
-      actorId,
-      request.id,
-    )
+  const data = await staffService.resetStaffTwoFactor(
+    staffId,
+    actorId,
+    actorId,
+    request.id,
+  )
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Staff 2FA reset successfully.',
-      data,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Staff 2FA reset successfully.',
+    data,
+  })
+})
+
+export const staffController = {
+  inviteStaff,
+  reinviteStaff,
+  listStaff,
+  getStaffById,
+  getStaffActivity,
+  updateStaffRole,
+  suspendStaff,
+  unsuspendStaff,
+  removeStaff,
+  resetTwoFactor,
+}

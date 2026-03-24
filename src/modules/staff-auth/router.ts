@@ -3,23 +3,7 @@ import { Router } from 'express'
 import { authenticateStaff } from '../../common/middlewares/auth'
 import { authenticateTempToken } from '../../common/middlewares/authenticateTempToken'
 import { validateRequest } from '../../common/middlewares/validateRequest'
-import {
-  acceptInvite,
-  changeStaffPassword,
-  disableTwoFactor,
-  enableTwoFactor,
-  forgotStaffPassword,
-  getStaffMe,
-  refreshStaffSession,
-  resendStaffResetOtp,
-  resetStaffPassword,
-  sendStaffEmailOtp,
-  setupTwoFactor,
-  staffLogin,
-  staffLogout,
-  verifyStaffResetOtp,
-  verifyTwoFactor,
-} from './controller'
+import { staffAuthController } from './controller'
 import { staffAuthValidation } from './validation'
 
 const router = Router()
@@ -27,61 +11,69 @@ const router = Router()
 router.post(
   '/login',
   validateRequest({ body: staffAuthValidation.loginBody }),
-  staffLogin,
+  staffAuthController.staffLogin,
 )
 router.post(
   '/accept-invite',
   validateRequest({ body: staffAuthValidation.acceptInviteBody }),
-  acceptInvite,
+  staffAuthController.acceptInvite,
 )
 router.post(
   '/forgot-password',
   validateRequest({ body: staffAuthValidation.forgotPasswordBody }),
-  forgotStaffPassword,
+  staffAuthController.forgotStaffPassword,
 )
 router.post(
   '/resend-reset-otp',
   validateRequest({ body: staffAuthValidation.resendResetOtpBody }),
-  resendStaffResetOtp,
+  staffAuthController.resendStaffResetOtp,
 )
 router.post(
   '/verify-reset-otp',
   validateRequest({ body: staffAuthValidation.verifyResetOtpBody }),
-  verifyStaffResetOtp,
+  staffAuthController.verifyStaffResetOtp,
 )
 router.post(
   '/reset-password',
   validateRequest({ body: staffAuthValidation.resetPasswordBody }),
-  resetStaffPassword,
+  staffAuthController.resetStaffPassword,
 )
-router.post('/logout', authenticateStaff, staffLogout)
-router.post('/refresh', refreshStaffSession)
-router.get('/me', authenticateStaff, getStaffMe)
+router.post('/logout', authenticateStaff, staffAuthController.staffLogout)
+router.post('/refresh', staffAuthController.refreshStaffSession)
+router.get('/me', authenticateStaff, staffAuthController.getStaffMe)
 router.patch(
   '/me/password',
   authenticateStaff,
   validateRequest({ body: staffAuthValidation.changePasswordBody }),
-  changeStaffPassword,
+  staffAuthController.changeStaffPassword,
 )
-router.post('/2fa/setup', authenticateTempToken, setupTwoFactor)
+router.post(
+  '/2fa/setup',
+  authenticateTempToken,
+  staffAuthController.setupTwoFactor,
+)
 router.post(
   '/2fa/enable',
   authenticateTempToken,
   validateRequest({ body: staffAuthValidation.staffTwoFactorEnableBody }),
-  enableTwoFactor,
+  staffAuthController.enableTwoFactor,
 )
 router.post(
   '/2fa/verify',
   authenticateTempToken,
   validateRequest({ body: staffAuthValidation.staffTwoFactorVerifyBody }),
-  verifyTwoFactor,
+  staffAuthController.verifyTwoFactor,
 )
-router.post('/2fa/email/send', authenticateTempToken, sendStaffEmailOtp)
+router.post(
+  '/2fa/email/send',
+  authenticateTempToken,
+  staffAuthController.sendStaffEmailOtp,
+)
 router.post(
   '/2fa/disable',
   authenticateStaff,
   validateRequest({ body: staffAuthValidation.disableTwoFactorBody }),
-  disableTwoFactor,
+  staffAuthController.disableTwoFactor,
 )
 
 export const staffAuthRouter = router

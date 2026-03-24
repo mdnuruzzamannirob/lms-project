@@ -1,22 +1,10 @@
 import { model, Schema, type Model } from 'mongoose'
 
-export type EmailOtpActorType = 'user' | 'staff'
-export type EmailOtpPurpose =
-  | 'login'
-  | '2fa-verify'
-  | '2fa-setup'
-  | 'password-reset'
-
-type EmailOtpDocument = {
-  actorId: Schema.Types.ObjectId
-  actorType: EmailOtpActorType
-  otpHash: string
-  purpose: EmailOtpPurpose
-  expiresAt: Date
-  usedAt?: Date
-  createdAt: Date
-  updatedAt: Date
-}
+import type {
+  EmailOtpActorType,
+  EmailOtpDocument,
+  EmailOtpPurpose,
+} from './interface'
 
 const emailOtpSchema = new Schema<EmailOtpDocument>(
   {

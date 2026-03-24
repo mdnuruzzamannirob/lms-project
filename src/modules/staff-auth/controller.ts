@@ -10,74 +10,55 @@ import {
   setStaffSessionCookie,
 } from '../../common/utils/token'
 import { staffAuthService } from './service'
+import { STAFF_REFRESH_COOKIE_NAME, getStaffIdFromAuth } from './utils'
 
-const STAFF_REFRESH_COOKIE_NAME = 'stackread_staff_refresh'
+const staffLogin: RequestHandler = catchAsync(async (request, response) => {
+  const data = await staffAuthService.login(request.body, request)
 
-const getStaffIdFromAuth = (request: Parameters<RequestHandler>[0]): string => {
-  if (!request.auth || request.auth.type !== 'staff') {
-    throw new AppError('Staff authentication is required.', 401)
-  }
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: data.mustSetup2FA
+      ? '2FA setup is required before access.'
+      : '2FA verification is required.',
+    data,
+  })
+})
 
-  return request.auth.sub
-}
+const acceptInvite: RequestHandler = catchAsync(async (request, response) => {
+  const data = await staffAuthService.acceptInvite(request.body)
 
-export const staffLogin: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await staffAuthService.login(request.body, request)
+  sendResponse(response, {
+    statusCode: 201,
+    success: true,
+    message: data.message,
+    data,
+  })
+})
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: data.mustSetup2FA
-        ? '2FA setup is required before access.'
-        : '2FA verification is required.',
-      data,
-    })
-  },
-)
+const staffLogout: RequestHandler = catchAsync(async (_request, response) => {
+  await staffAuthService.logout(response)
 
-export const acceptInvite: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await staffAuthService.acceptInvite(request.body)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Staff logout successful.',
+    data: null,
+  })
+})
 
-    sendResponse(response, {
-      statusCode: 201,
-      success: true,
-      message: data.message,
-      data,
-    })
-  },
-)
+const getStaffMe: RequestHandler = catchAsync(async (request, response) => {
+  const data = await staffAuthService.getMyProfile(getStaffIdFromAuth(request))
 
-export const staffLogout: RequestHandler = catchAsync(
-  async (_request, response) => {
-    await staffAuthService.logout(response)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Staff profile retrieved successfully.',
+    data,
+  })
+})
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Staff logout successful.',
-      data: null,
-    })
-  },
-)
-
-export const getStaffMe: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await staffAuthService.getMyProfile(
-      getStaffIdFromAuth(request),
-    )
-
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Staff profile retrieved successfully.',
-      data,
-    })
-  },
-)
-
-export const changeStaffPassword: RequestHandler = catchAsync(
+const changeStaffPassword: RequestHandler = catchAsync(
   async (request, response) => {
     await staffAuthService.changeMyPassword(
       getStaffIdFromAuth(request),
@@ -93,7 +74,7 @@ export const changeStaffPassword: RequestHandler = catchAsync(
   },
 )
 
-export const enableTwoFactor: RequestHandler = catchAsync(
+const enableTwoFactor: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await staffAuthService.enableTwoFactor(
       request.auth.sub,
@@ -112,20 +93,18 @@ export const enableTwoFactor: RequestHandler = catchAsync(
   },
 )
 
-export const setupTwoFactor: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await staffAuthService.setupTwoFactor(request.auth.sub)
+const setupTwoFactor: RequestHandler = catchAsync(async (request, response) => {
+  const data = await staffAuthService.setupTwoFactor(request.auth.sub)
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: '2FA setup secret generated successfully.',
-      data,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: '2FA setup secret generated successfully.',
+    data,
+  })
+})
 
-export const verifyTwoFactor: RequestHandler = catchAsync(
+const verifyTwoFactor: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await staffAuthService.verifyTwoFactor(
       request.auth.sub,
@@ -144,7 +123,7 @@ export const verifyTwoFactor: RequestHandler = catchAsync(
   },
 )
 
-export const disableTwoFactor: RequestHandler = catchAsync(
+const disableTwoFactor: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await staffAuthService.disableTwoFactor()
 
@@ -157,7 +136,7 @@ export const disableTwoFactor: RequestHandler = catchAsync(
   },
 )
 
-export const sendStaffEmailOtp: RequestHandler = catchAsync(
+const sendStaffEmailOtp: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await staffAuthService.sendStaffEmailOtp(request.auth.sub)
 
@@ -170,7 +149,7 @@ export const sendStaffEmailOtp: RequestHandler = catchAsync(
   },
 )
 
-export const forgotStaffPassword: RequestHandler = catchAsync(
+const forgotStaffPassword: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await staffAuthService.forgotStaffPassword(request.body.email)
 
@@ -183,7 +162,7 @@ export const forgotStaffPassword: RequestHandler = catchAsync(
   },
 )
 
-export const resendStaffResetOtp: RequestHandler = catchAsync(
+const resendStaffResetOtp: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await staffAuthService.resendStaffResetOtp(request.body.email)
 
@@ -196,7 +175,7 @@ export const resendStaffResetOtp: RequestHandler = catchAsync(
   },
 )
 
-export const verifyStaffResetOtp: RequestHandler = catchAsync(
+const verifyStaffResetOtp: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await staffAuthService.verifyStaffResetOtp(
       request.body.email,
@@ -212,7 +191,7 @@ export const verifyStaffResetOtp: RequestHandler = catchAsync(
   },
 )
 
-export const resetStaffPassword: RequestHandler = catchAsync(
+const resetStaffPassword: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await staffAuthService.resetStaffPassword(
       request.body.resetToken,
@@ -228,7 +207,7 @@ export const resetStaffPassword: RequestHandler = catchAsync(
   },
 )
 
-export const refreshStaffSession: RequestHandler = catchAsync(
+const refreshStaffSession: RequestHandler = catchAsync(
   async (request, response) => {
     const refreshToken =
       getCookieValueFromHeader(
@@ -253,3 +232,21 @@ export const refreshStaffSession: RequestHandler = catchAsync(
     })
   },
 )
+
+export const staffAuthController = {
+  staffLogin,
+  acceptInvite,
+  staffLogout,
+  getStaffMe,
+  changeStaffPassword,
+  enableTwoFactor,
+  setupTwoFactor,
+  verifyTwoFactor,
+  disableTwoFactor,
+  sendStaffEmailOtp,
+  forgotStaffPassword,
+  resendStaffResetOtp,
+  verifyStaffResetOtp,
+  resetStaffPassword,
+  refreshStaffSession,
+}

@@ -1,56 +1,26 @@
 import type { RequestHandler } from 'express'
 
-import { AppError } from '../../common/errors/AppError'
 import { catchAsync } from '../../common/utils/catchAsync'
+import { getBookId, getEntityId, getUserId } from '../../common/utils/getId'
 import { sendResponse } from '../../common/utils/sendResponse'
 import { readingService } from './service'
 
-const getUserId = (request: Parameters<RequestHandler>[0]): string => {
-  if (!request.auth || request.auth.type !== 'user') {
-    throw new AppError('User authentication is required.', 401)
-  }
+const startReading: RequestHandler = catchAsync(async (request, response) => {
+  const data = await readingService.startReading(
+    getUserId(request),
+    getBookId(request),
+    request.body,
+  )
 
-  return request.auth.sub
-}
+  sendResponse(response, {
+    statusCode: 201,
+    success: true,
+    message: 'Reading started successfully.',
+    data,
+  })
+})
 
-const getBookId = (request: Parameters<RequestHandler>[0]): string => {
-  const bookId = request.params.bookId
-
-  if (typeof bookId !== 'string') {
-    throw new AppError('Invalid book id parameter.', 400)
-  }
-
-  return bookId
-}
-
-const getEntityId = (request: Parameters<RequestHandler>[0]): string => {
-  const id = request.params.id
-
-  if (typeof id !== 'string') {
-    throw new AppError('Invalid id parameter.', 400)
-  }
-
-  return id
-}
-
-export const startReading: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await readingService.startReading(
-      getUserId(request),
-      getBookId(request),
-      request.body,
-    )
-
-    sendResponse(response, {
-      statusCode: 201,
-      success: true,
-      message: 'Reading started successfully.',
-      data,
-    })
-  },
-)
-
-export const createReadingSession: RequestHandler = catchAsync(
+const createReadingSession: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await readingService.createReadingSession(
       getUserId(request),
@@ -67,7 +37,7 @@ export const createReadingSession: RequestHandler = catchAsync(
   },
 )
 
-export const updateReadingProgress: RequestHandler = catchAsync(
+const updateReadingProgress: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await readingService.updateReadingProgress(
       getUserId(request),
@@ -84,7 +54,7 @@ export const updateReadingProgress: RequestHandler = catchAsync(
   },
 )
 
-export const getReadingHistory: RequestHandler = catchAsync(
+const getReadingHistory: RequestHandler = catchAsync(
   async (request, response) => {
     const result = await readingService.getReadingHistory(
       getUserId(request),
@@ -101,7 +71,7 @@ export const getReadingHistory: RequestHandler = catchAsync(
   },
 )
 
-export const getCurrentlyReading: RequestHandler = catchAsync(
+const getCurrentlyReading: RequestHandler = catchAsync(
   async (request, response) => {
     const result = await readingService.getCurrentlyReading(
       getUserId(request),
@@ -118,7 +88,7 @@ export const getCurrentlyReading: RequestHandler = catchAsync(
   },
 )
 
-export const getCompletedReading: RequestHandler = catchAsync(
+const getCompletedReading: RequestHandler = catchAsync(
   async (request, response) => {
     const result = await readingService.getCompletedReading(
       getUserId(request),
@@ -135,91 +105,81 @@ export const getCompletedReading: RequestHandler = catchAsync(
   },
 )
 
-export const listBookmarks: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await readingService.listBookmarks(
-      getUserId(request),
-      getBookId(request),
-    )
+const listBookmarks: RequestHandler = catchAsync(async (request, response) => {
+  const data = await readingService.listBookmarks(
+    getUserId(request),
+    getBookId(request),
+  )
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Bookmarks retrieved successfully.',
-      data,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Bookmarks retrieved successfully.',
+    data,
+  })
+})
 
-export const createBookmark: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await readingService.createBookmark(
-      getUserId(request),
-      getBookId(request),
-      request.body,
-    )
+const createBookmark: RequestHandler = catchAsync(async (request, response) => {
+  const data = await readingService.createBookmark(
+    getUserId(request),
+    getBookId(request),
+    request.body,
+  )
 
-    sendResponse(response, {
-      statusCode: 201,
-      success: true,
-      message: 'Bookmark created successfully.',
-      data,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 201,
+    success: true,
+    message: 'Bookmark created successfully.',
+    data,
+  })
+})
 
-export const updateBookmark: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await readingService.updateBookmark(
-      getUserId(request),
-      getBookId(request),
-      getEntityId(request),
-      request.body,
-    )
+const updateBookmark: RequestHandler = catchAsync(async (request, response) => {
+  const data = await readingService.updateBookmark(
+    getUserId(request),
+    getBookId(request),
+    getEntityId(request),
+    request.body,
+  )
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Bookmark updated successfully.',
-      data,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Bookmark updated successfully.',
+    data,
+  })
+})
 
-export const deleteBookmark: RequestHandler = catchAsync(
-  async (request, response) => {
-    await readingService.deleteBookmark(
-      getUserId(request),
-      getBookId(request),
-      getEntityId(request),
-    )
+const deleteBookmark: RequestHandler = catchAsync(async (request, response) => {
+  await readingService.deleteBookmark(
+    getUserId(request),
+    getBookId(request),
+    getEntityId(request),
+  )
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Bookmark deleted successfully.',
-      data: null,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Bookmark deleted successfully.',
+    data: null,
+  })
+})
 
-export const listHighlights: RequestHandler = catchAsync(
-  async (request, response) => {
-    const data = await readingService.listHighlights(
-      getUserId(request),
-      getBookId(request),
-    )
+const listHighlights: RequestHandler = catchAsync(async (request, response) => {
+  const data = await readingService.listHighlights(
+    getUserId(request),
+    getBookId(request),
+  )
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Highlights retrieved successfully.',
-      data,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Highlights retrieved successfully.',
+    data,
+  })
+})
 
-export const createHighlight: RequestHandler = catchAsync(
+const createHighlight: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await readingService.createHighlight(
       getUserId(request),
@@ -236,7 +196,7 @@ export const createHighlight: RequestHandler = catchAsync(
   },
 )
 
-export const updateHighlight: RequestHandler = catchAsync(
+const updateHighlight: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await readingService.updateHighlight(
       getUserId(request),
@@ -254,7 +214,7 @@ export const updateHighlight: RequestHandler = catchAsync(
   },
 )
 
-export const deleteHighlight: RequestHandler = catchAsync(
+const deleteHighlight: RequestHandler = catchAsync(
   async (request, response) => {
     await readingService.deleteHighlight(
       getUserId(request),
@@ -270,3 +230,20 @@ export const deleteHighlight: RequestHandler = catchAsync(
     })
   },
 )
+
+export const readingController = {
+  startReading,
+  createReadingSession,
+  updateReadingProgress,
+  getReadingHistory,
+  getCurrentlyReading,
+  getCompletedReading,
+  listBookmarks,
+  createBookmark,
+  updateBookmark,
+  deleteBookmark,
+  listHighlights,
+  createHighlight,
+  updateHighlight,
+  deleteHighlight,
+}
