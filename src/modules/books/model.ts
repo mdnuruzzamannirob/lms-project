@@ -122,7 +122,6 @@ const bookSchema = new Schema<IBook>(
         type: Schema.Types.ObjectId,
         ref: 'Author',
         required: true,
-        index: true,
       },
     ],
     categoryIds: [
@@ -130,7 +129,6 @@ const bookSchema = new Schema<IBook>(
         type: Schema.Types.ObjectId,
         ref: 'Category',
         required: true,
-        index: true,
       },
     ],
     publisherId: {
