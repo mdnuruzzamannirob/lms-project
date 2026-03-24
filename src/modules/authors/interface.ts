@@ -1,25 +1,20 @@
 import type { Types } from 'mongoose'
 
+export interface IAuthorAvatar {
+  provider: 'cloudinary'
+  publicId: string
+  url: string
+}
+
 export interface IAuthor {
   _id: Types.ObjectId
   name: string
-  bio: string | undefined
-  countryCode: string | undefined
-  avatar:
-    | {
-        publicId: string
-        url: string
-      }
-    | undefined
-  website: string | undefined
+  slug: string
+  bio: string | null
+  countryCode: string | null
+  avatar: IAuthorAvatar | null
+  website: string | null
   isActive: boolean
   createdAt: Date
   updatedAt: Date
-}
-
-export type AuthorListQuery = {
-  search?: string
-  page?: number
-  limit?: number
-  isActive?: boolean
 }

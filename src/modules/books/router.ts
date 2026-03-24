@@ -89,7 +89,7 @@ router.patch(
   requirePermission(PERMISSIONS.BOOKS_MANAGE),
   validateRequest({
     params: booksValidation.idParam,
-    body: booksValidation.toggleAvailabilityBody,
+    body: booksValidation.setAvailabilityBody,
   }),
   setBookAvailability,
 )

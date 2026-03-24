@@ -5,7 +5,7 @@ export interface IBookFile {
   provider: 'cloudinary'
   publicId: string
   url: string
-  format: 'pdf' | 'epub' | 'mobi'
+  format: 'pdf' | 'epub' | 'mobi' | 'txt' | 'azw3'
   size: number
   originalFileName: string
   resourceType: 'raw'
@@ -13,6 +13,7 @@ export interface IBookFile {
 }
 
 export interface IBookCoverImage {
+  provider: 'cloudinary'
   publicId: string
   url: string
   width: number
@@ -23,23 +24,23 @@ export interface IBook {
   _id: Types.ObjectId
   title: string
   slug: string
-  isbn: string | undefined
-  language: string
-  pageCount: number | undefined
-  publicationDate: Date | undefined
-  edition: string | undefined
+  isbn: string | null
+  language: 'bn' | 'en' | 'hi'
+  pageCount: number | null
+  publicationDate: Date | null
+  edition: string | null
   summary: string
-  description: string | undefined
+  description: string | null
   tags: string[]
   authorIds: Types.ObjectId[]
   categoryIds: Types.ObjectId[]
-  publisherId: Types.ObjectId | undefined
-  coverImage: IBookCoverImage | undefined
+  publisherId: Types.ObjectId | null
+  coverImage: IBookCoverImage
   files: IBookFile[]
   accessLevel: 'free' | 'basic' | 'premium'
   featured: boolean
-  isAvailable: boolean
-  isPublished: boolean
+  status: 'draft' | 'published' | 'archived'
+  availabilityStatus: 'available' | 'unavailable' | 'coming_soon'
   ratingAverage: number
   ratingCount: number
   addedBy: Types.ObjectId

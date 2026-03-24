@@ -4,8 +4,8 @@ export interface ICategory {
   _id: Types.ObjectId
   name: string
   slug: string
-  description: string | undefined
-  parentId: Types.ObjectId | undefined
+  description: string | null
+  parentId: Types.ObjectId | null
   sortOrder: number
   isActive: boolean
   createdAt: Date
