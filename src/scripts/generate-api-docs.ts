@@ -532,10 +532,10 @@ const exampleForName = (
   if (Array.isArray(schema.enum) && schema.enum.length > 0) {
     return schema.enum[0]
   }
-  if (lower.includes('email')) return 'reader@example.com'
-  if (lower.includes('password')) return 'P@ssw0rd123!'
-  if (lower.includes('name')) return 'Ayesha Rahman'
-  if (lower.includes('phone')) return '+8801712345678'
+  if (lower.includes('email')) return 'dev.mdnuruzzaman@gmail.com'
+  if (lower.includes('password')) return '12345678'
+  if (lower.includes('name')) return 'Md. Nuruzzaman'
+  if (lower.includes('phone')) return '+8801973875893'
   if (lower.includes('country')) return 'BD'
   if (lower.includes('currency')) return 'BDT'
   if (lower.includes('title')) return 'Atomic Habits'

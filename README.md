@@ -192,7 +192,7 @@ pnpm dev:worker   # Terminal 2: Background worker
 
 **API Documentation:**
 - Interactive: http://localhost:5000/api/docs
-- OpenAPI: documentation/OpenAPI_v1.json
+- OpenAPI: docs/openAPI.json
 
 ---
 
@@ -275,8 +275,8 @@ pnpm dev:worker   # Terminal 2: Background worker
 
 | Command | Description |
 | --- | --- |
-| pnpm export:openapi | echo OpenAPI export available at documentation/OpenAPI_v1.json |
-| pnpm export:postman | echo Postman export available at documentation/Postman_Collection_v1.json |
+| pnpm export:openapi | echo OpenAPI export available at /docs/openAPI.json |
+| pnpm export:postman | echo Postman export available at /docs/postman-collection.json |
 
 ---
 
@@ -305,7 +305,7 @@ pnpm dev:worker   # Terminal 2: Background worker
 - Code snippets (cURL, JS, Python)
 - Full search
 
-**Postman Collection:** documentation/Postman_Collection_v1.json
+**Postman Collection:** docs/postman-collection.json
 
 ---
 
@@ -475,6 +475,6 @@ A: Create payment processor in src/modules/payments/, implement webhook handlers
 
 ---
 
-**Last Generated:** 3/22/2026, 1:34:00 PM
+**Last Generated:** 3/24/2026, 7:48:38 PM
 
 Built with ❤️ using Node.js • Express • TypeScript • MongoDB
