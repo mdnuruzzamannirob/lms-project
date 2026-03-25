@@ -18,6 +18,12 @@ export const requirePermission = (
     }
 
     const staffPermissions = request.auth.permissions ?? []
+
+    if (staffPermissions.includes('*')) {
+      next()
+      return
+    }
+
     const hasPermission = permissions.some((permission) =>
       staffPermissions.includes(permission),
     )

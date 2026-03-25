@@ -50,6 +50,16 @@ import {
   verifyUserTotp,
 } from './utils'
 
+const assertUserAccountAccessible = (user: {
+  isActive: boolean
+  isSuspended: boolean
+  deletedAt: Date | undefined
+}) => {
+  if (!user.isActive || user.isSuspended || user.deletedAt) {
+    throw new AppError('Account is inactive or suspended.', 403)
+  }
+}
+
 const register = async (
   payload: RegisterPayload,
 ): Promise<{
@@ -112,6 +122,8 @@ const login = async (
   if (!user || !user.passwordHash) {
     throw new AppError('Invalid email or password.', 401)
   }
+
+  assertUserAccountAccessible(user)
 
   const isPasswordValid = await compareScryptHash(
     payload.password,
@@ -562,6 +574,12 @@ const forgotPassword = async (email: string): Promise<{ sent: true }> => {
     return { sent: true }
   }
 
+  if (!user.isActive || user.isSuspended || user.deletedAt) {
+    return { sent: true }
+  }
+
+  await assertResendOtpWindow(user._id.toString(), 'user')
+
   const otp = await createEmailOtp(
     user._id.toString(),
     'user',
@@ -659,6 +677,8 @@ const resetPassword = async (
     throw new AppError('User not found.', 404)
   }
 
+  assertUserAccountAccessible(user)
+
   user.passwordHash = await hashWithScrypt(newPassword)
   await user.save()
 
@@ -684,6 +704,8 @@ const refreshSession = async (refreshToken: string): Promise<AuthTokens> => {
   if (!user) {
     throw new AppError('Unauthorized. Invalid refresh token.', 401)
   }
+
+  assertUserAccountAccessible(user)
 
   return issueUserAccessToken(user)
 }

@@ -29,6 +29,15 @@ import {
   verifyStaffTotp,
 } from './utils'
 
+const assertStaffAccountAccessible = (staff: {
+  isActive: boolean
+  deletedAt?: Date
+}) => {
+  if (!staff.isActive || staff.deletedAt) {
+    throw new AppError('Staff account not found or inactive.', 401)
+  }
+}
+
 const login = async (
   payload: { email: string; password: string },
   request?: Request,
@@ -49,6 +58,8 @@ const login = async (
   if (!staff || !staff.isActive) {
     throw new AppError('Invalid staff credentials.', 401)
   }
+
+  assertStaffAccountAccessible(staff)
 
   const isValidPassword = await compareScryptHash(
     payload.password,
@@ -289,6 +300,12 @@ const forgotStaffPassword = async (email: string): Promise<{ sent: true }> => {
     return { sent: true }
   }
 
+  if (!staff.isActive || staff.deletedAt) {
+    return { sent: true }
+  }
+
+  await assertStaffResendOtpWindow(staff._id.toString())
+
   const otp = await createEmailOtp(
     staff._id.toString(),
     'staff',
@@ -386,6 +403,8 @@ const resetStaffPassword = async (
     throw new AppError('Staff not found.', 404)
   }
 
+  assertStaffAccountAccessible(staff)
+
   staff.passwordHash = await hashWithScrypt(newPassword)
   await staff.save()
 
@@ -410,9 +429,11 @@ const refreshSession = async (
 
   const staff = await StaffModel.findById(staffId)
 
-  if (!staff || !staff.isActive) {
+  if (!staff) {
     throw new AppError('Unauthorized. Invalid refresh token.', 401)
   }
+
+  assertStaffAccountAccessible(staff)
 
   return issueStaffTokens(staff._id.toString())
 }

@@ -1,5 +1,6 @@
 import type { RequestHandler } from 'express'
 
+import { UserModel } from '../../modules/auth/model'
 import { RoleModel } from '../../modules/rbac/model'
 import { StaffModel } from '../../modules/staff/model'
 import { AppError } from '../errors/AppError'
@@ -34,7 +35,11 @@ const resolveTokenFromRequest = (
   return token
 }
 
-export const authenticateUser: RequestHandler = (request, _response, next) => {
+export const authenticateUser: RequestHandler = async (
+  request,
+  _response,
+  next,
+) => {
   try {
     const token = resolveTokenFromRequest(
       request.header('cookie'),
@@ -42,6 +47,21 @@ export const authenticateUser: RequestHandler = (request, _response, next) => {
       USER_SESSION_COOKIE_NAME,
     )
     const payload = verifyAccessToken(token, 'user')
+
+    const userId = payload.id ?? payload.sub
+
+    if (!userId) {
+      throw new AppError('Unauthorized. Invalid or expired user token.', 401)
+    }
+
+    const user = await UserModel.findById(userId)
+      .select('_id email isActive isSuspended deletedAt')
+      .lean()
+
+    if (!user || !user.isActive || user.isSuspended || user.deletedAt) {
+      throw new AppError('Unauthorized. Invalid or expired user token.', 401)
+    }
+
     request.auth = payload
     next()
   } catch (error) {
