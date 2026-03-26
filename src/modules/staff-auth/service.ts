@@ -20,6 +20,19 @@ import { config } from '../../config'
 import { EmailOtpModel } from '../auth/emailOtp.model'
 import { StaffModel } from '../staff/model'
 import { staffService } from '../staff/service'
+import type {
+  StaffAcceptInvitePayload,
+  StaffAccountAccessibleState,
+  StaffChangePasswordPayload,
+  StaffEnableTwoFactorPayload,
+  StaffLoginPayload,
+  StaffLoginResult,
+  StaffRefreshTokens,
+  StaffResetTokenResponse,
+  StaffSentResponse,
+  StaffSuccessResponse,
+  StaffVerifyTwoFactorPayload,
+} from './interface'
 import { StaffInviteTokenModel } from './model'
 import {
   assertStaffResendOtpWindow,
@@ -29,30 +42,16 @@ import {
   verifyStaffTotp,
 } from './utils'
 
-const assertStaffAccountAccessible = (staff: {
-  isActive: boolean
-  deletedAt?: Date
-}) => {
+const assertStaffAccountAccessible = (staff: StaffAccountAccessibleState) => {
   if (!staff.isActive || staff.deletedAt) {
     throw new AppError('Staff account not found or inactive.', 401)
   }
 }
 
 const login = async (
-  payload: { email: string; password: string },
+  payload: StaffLoginPayload,
   request?: Request,
-): Promise<
-  | {
-      requiresTwoFactor: false
-      mustSetup2FA: true
-      tempToken: string
-    }
-  | {
-      requiresTwoFactor: true
-      mustSetup2FA: false
-      tempToken: string
-    }
-> => {
+): Promise<StaffLoginResult> => {
   const staff = await StaffModel.findOne({ email: payload.email })
 
   if (!staff || !staff.isActive) {
@@ -111,7 +110,7 @@ const login = async (
   }
 }
 
-const acceptInvite = async (payload: { token: string; password: string }) => {
+const acceptInvite = async (payload: StaffAcceptInvitePayload) => {
   const tokenHash = hashStringSha256(payload.token)
   const invite = await StaffInviteTokenModel.findOne({ tokenHash })
 
@@ -147,7 +146,7 @@ const getMyProfile = async (staffId: string) => {
 
 const changeMyPassword = async (
   staffId: string,
-  payload: { currentPassword: string; newPassword: string },
+  payload: StaffChangePasswordPayload,
 ) => {
   const staff = await StaffModel.findById(staffId)
 
@@ -193,7 +192,10 @@ const setupTwoFactor = async (staffId: string) => {
   }
 }
 
-const enableTwoFactor = async (staffId: string, payload: { otp: string }) => {
+const enableTwoFactor = async (
+  staffId: string,
+  payload: StaffEnableTwoFactorPayload,
+) => {
   const staff = await StaffModel.findById(staffId)
 
   if (!staff || !staff.isActive) {
@@ -227,7 +229,7 @@ const enableTwoFactor = async (staffId: string, payload: { otp: string }) => {
 
 const verifyTwoFactor = async (
   staffId: string,
-  payload: { otp?: string; emailOtp?: string },
+  payload: StaffVerifyTwoFactorPayload,
 ) => {
   const staff = await StaffModel.findById(staffId)
 
@@ -293,7 +295,9 @@ const disableTwoFactor = async () => {
   )
 }
 
-const forgotStaffPassword = async (email: string): Promise<{ sent: true }> => {
+const forgotStaffPassword = async (
+  email: string,
+): Promise<StaffSentResponse> => {
   const staff = await StaffModel.findOne({ email })
 
   if (!staff) {
@@ -321,7 +325,9 @@ const forgotStaffPassword = async (email: string): Promise<{ sent: true }> => {
   return { sent: true }
 }
 
-const resendStaffResetOtp = async (email: string): Promise<{ sent: true }> => {
+const resendStaffResetOtp = async (
+  email: string,
+): Promise<StaffSentResponse> => {
   const staff = await StaffModel.findOne({ email })
 
   if (!staff) {
@@ -355,7 +361,7 @@ const resendStaffResetOtp = async (email: string): Promise<{ sent: true }> => {
 const verifyStaffResetOtp = async (
   email: string,
   otp: string,
-): Promise<{ resetToken: string }> => {
+): Promise<StaffResetTokenResponse> => {
   const staff = await StaffModel.findOne({ email })
 
   if (!staff) {
@@ -390,7 +396,7 @@ const verifyStaffResetOtp = async (
 const resetStaffPassword = async (
   resetToken: string,
   newPassword: string,
-): Promise<{ success: true }> => {
+): Promise<StaffSuccessResponse> => {
   const decoded = verifyTempToken(resetToken, config.jwt.staffSecret)
 
   if (decoded.actorType !== 'staff' || decoded.purpose !== 'password-reset') {
@@ -419,7 +425,7 @@ const resetStaffPassword = async (
 
 const refreshSession = async (
   refreshToken: string,
-): Promise<{ accessToken: string; refreshToken: string }> => {
+): Promise<StaffRefreshTokens> => {
   const payload = verifyStaffRefreshToken(refreshToken)
   const staffId = payload.id ?? payload.sub
 

@@ -24,3 +24,26 @@ export type PermissionSeed = {
   name: string
   module: string
 }
+
+export interface RoleResponse {
+  id: string
+  name: string
+  description: string
+  permissions: string[]
+  isSystem: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateRolePayload {
+  name: string
+  description: string
+  permissions: string[]
+  isSystem?: boolean
+}
+
+export interface UpdateRolePayload {
+  name?: string
+  description?: string
+  permissions?: string[]
+}

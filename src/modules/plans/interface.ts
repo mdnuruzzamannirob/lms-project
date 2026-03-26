@@ -18,3 +18,23 @@ export interface IPlan {
   createdAt: Date
   updatedAt: Date
 }
+
+export type PlanAccessLevel = 'free' | 'basic' | 'premium'
+
+export interface CreatePlanPayload {
+  code: string
+  name: string
+  description: string
+  price: number
+  currency: string
+  durationDays: number
+  maxDevices: number
+  downloadEnabled: boolean
+  accessLevel: PlanAccessLevel
+  features: string[]
+  isFree: boolean
+  isActive: boolean
+  sortOrder: number
+}
+
+export type UpdatePlanPayload = Partial<CreatePlanPayload>

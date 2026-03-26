@@ -5,17 +5,18 @@ import {
   createPaginationMeta,
   getPaginationState,
 } from '../../common/utils/pagination'
-import type { INotification } from './interface'
+import type {
+  CreateNotificationPayload,
+  INotification,
+  NotificationsBulkSendPayload,
+  NotificationsListQuery,
+} from './interface'
 import { NotificationModel } from './model'
 import { formatNotification } from './utils'
 
 const getMyNotifications = async (
   userId: string,
-  query: {
-    page: number
-    limit: number
-    read?: string
-  },
+  query: NotificationsListQuery,
 ) => {
   const paginationState = getPaginationState(query)
   const { skip, limit } = paginationState
@@ -98,14 +99,7 @@ const getUnreadCount = async (userId: string) => {
   return { unreadCount: count }
 }
 
-const bulkSend = async (payload: {
-  userIds: string[]
-  type: string
-  title: string
-  body: string
-  relatedEntityId?: string
-  relatedEntityType?: string
-}) => {
+const bulkSend = async (payload: NotificationsBulkSendPayload) => {
   const notifications = payload.userIds.map((userId) => ({
     userId: new Types.ObjectId(userId),
     type: payload.type,
@@ -127,14 +121,7 @@ const bulkSend = async (payload: {
   }
 }
 
-const createNotification = async (payload: {
-  userId: string
-  type: string
-  title: string
-  body: string
-  relatedEntityId?: string
-  relatedEntityType?: string
-}) => {
+const createNotification = async (payload: CreateNotificationPayload) => {
   const notification = await NotificationModel.create({
     userId: new Types.ObjectId(payload.userId),
     type: payload.type,

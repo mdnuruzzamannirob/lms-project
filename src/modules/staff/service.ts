@@ -12,17 +12,15 @@ import {
   StaffActivityLogModel,
   StaffInviteTokenModel,
 } from '../staff-auth/model'
+import type {
+  CreateStaffFromInvitePayload,
+  InviteStaffPayload,
+} from './interface'
 import { StaffModel } from './model'
 import { buildStaffSummary } from './utils'
 
 const inviteStaff = async (
-  payload: {
-    name: string
-    email: string
-    roleId: string
-    phone?: string
-    expiresInDays: number
-  },
+  payload: InviteStaffPayload,
   actorId?: string,
   requestId?: string,
 ) => {
@@ -346,13 +344,7 @@ const resetStaffTwoFactor = async (
   return buildStaffSummary(staff)
 }
 
-const createStaffFromInvite = async (payload: {
-  email: string
-  name: string
-  password: string
-  roleId: string
-  phone?: string
-}) => {
+const createStaffFromInvite = async (payload: CreateStaffFromInvitePayload) => {
   const existing = await StaffModel.findOne({ email: payload.email })
 
   if (existing) {

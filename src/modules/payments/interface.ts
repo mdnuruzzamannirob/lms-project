@@ -60,6 +60,14 @@ export interface PaymentVerificationInput {
   status: 'success' | 'failed' | 'pending'
 }
 
+export interface InitiatePaymentPayload {
+  userId: string
+  planId: string
+  gateway: PaymentGateway
+  couponCode?: string
+  autoRenew?: boolean
+}
+
 export interface GatewayInitiatePayload {
   amount: number
   currency: string

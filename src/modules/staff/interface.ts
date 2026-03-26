@@ -21,3 +21,19 @@ export interface IStaff {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface InviteStaffPayload {
+  name: string
+  email: string
+  roleId: string
+  phone?: string
+  expiresInDays: number
+}
+
+export interface CreateStaffFromInvitePayload {
+  email: string
+  name: string
+  password: string
+  roleId: string
+  phone?: string
+}

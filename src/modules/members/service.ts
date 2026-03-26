@@ -10,14 +10,10 @@ import { UserModel } from '../auth/model'
 import { PaymentModel } from '../payments/model'
 import { ReadingProgressModel } from '../reading/model'
 import { SubscriptionModel } from '../subscriptions/model'
+import type { MembersListQuery } from './interface'
 import { formatMember } from './utils'
 
-const listMembers = async (query: {
-  page: number
-  limit: number
-  search?: string
-  isSuspended?: string
-}) => {
+const listMembers = async (query: MembersListQuery) => {
   const paginationState = getPaginationState(query)
   const { skip, limit } = paginationState
 

@@ -22,3 +22,27 @@ export interface INotification {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface NotificationsListQuery {
+  page: number
+  limit: number
+  read?: string
+}
+
+export interface NotificationsBulkSendPayload {
+  userIds: string[]
+  type: string
+  title: string
+  body: string
+  relatedEntityId?: string
+  relatedEntityType?: string
+}
+
+export interface CreateNotificationPayload {
+  userId: string
+  type: string
+  title: string
+  body: string
+  relatedEntityId?: string
+  relatedEntityType?: string
+}

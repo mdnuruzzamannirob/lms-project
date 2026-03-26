@@ -32,3 +32,65 @@ export interface IStaffTwoFactorChallenge {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface StaffAccountAccessibleState {
+  isActive: boolean
+  deletedAt?: Date
+}
+
+export interface StaffLoginPayload {
+  email: string
+  password: string
+}
+
+export interface StaffAcceptInvitePayload {
+  token: string
+  password: string
+}
+
+export interface StaffChangePasswordPayload {
+  currentPassword: string
+  newPassword: string
+}
+
+export interface StaffEnableTwoFactorPayload {
+  otp: string
+}
+
+export interface StaffVerifyTwoFactorPayload {
+  otp?: string
+  emailOtp?: string
+}
+
+export interface StaffSentResponse {
+  sent: true
+}
+
+export interface StaffResetTokenResponse {
+  resetToken: string
+}
+
+export interface StaffSuccessResponse {
+  success: true
+}
+
+export interface StaffRefreshTokens {
+  accessToken: string
+  refreshToken: string
+}
+
+export interface StaffLoginTwoFactorSetupResult {
+  requiresTwoFactor: false
+  mustSetup2FA: true
+  tempToken: string
+}
+
+export interface StaffLoginTwoFactorChallengeResult {
+  requiresTwoFactor: true
+  mustSetup2FA: false
+  tempToken: string
+}
+
+export type StaffLoginResult =
+  | StaffLoginTwoFactorSetupResult
+  | StaffLoginTwoFactorChallengeResult

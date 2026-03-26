@@ -2,7 +2,14 @@ import mongoose, { ClientSession, Types } from 'mongoose'
 
 import { AppError } from '../../common/errors/AppError'
 import { PlanModel } from '../plans/model'
-import type { ISubscription } from './interface'
+import type {
+  ActivateSubscriptionFromPaymentPayload,
+  AdminUpdateSubscriptionPayload,
+  ChangePlanWithTransactionPayload,
+  CreatePendingSubscriptionPayload,
+  CreateSubscriptionPayload,
+  ISubscription,
+} from './interface'
 import { SubscriptionModel } from './model'
 import {
   computeEndAt,
@@ -52,11 +59,7 @@ const getSubscriptionById = async (id: string) => {
   return toSubscriptionSummary(subscription)
 }
 
-const createSubscription = async (payload: {
-  userId: string
-  planId: string
-  autoRenew: boolean
-}) => {
+const createSubscription = async (payload: CreateSubscriptionPayload) => {
   const plan = await PlanModel.findById(payload.planId)
 
   if (!plan || !plan.isActive) {
@@ -79,11 +82,7 @@ const createSubscription = async (payload: {
 }
 
 const createPendingSubscriptionForPlan = async (
-  payload: {
-    userId: string
-    planId: string
-    autoRenew?: boolean
-  },
+  payload: CreatePendingSubscriptionPayload,
   session?: ClientSession,
 ): Promise<ISubscription> => {
   const plan = await PlanModel.findById(payload.planId).session(session ?? null)
@@ -127,11 +126,7 @@ const createPendingSubscriptionForPlan = async (
 }
 
 const activateSubscriptionFromPayment = async (
-  payload: {
-    subscriptionId: string
-    paymentId: string
-    userId: string
-  },
+  payload: ActivateSubscriptionFromPaymentPayload,
   session?: ClientSession,
 ) => {
   const applyActivation = async (transactionSession: ClientSession) => {
@@ -270,11 +265,9 @@ const renewMySubscription = async (userId: string) => {
   }
 }
 
-const changePlanWithTransaction = async (payload: {
-  userId: string
-  newPlanId: string
-  mode: 'upgrade' | 'downgrade'
-}) => {
+const changePlanWithTransaction = async (
+  payload: ChangePlanWithTransactionPayload,
+) => {
   const session = await mongoose.startSession()
 
   try {
@@ -338,17 +331,7 @@ const changePlanWithTransaction = async (payload: {
 
 const adminUpdateSubscription = async (
   id: string,
-  payload: {
-    status?:
-      | 'pending'
-      | 'active'
-      | 'cancelled'
-      | 'expired'
-      | 'upgraded'
-      | 'downgraded'
-    autoRenew?: boolean
-    cancellationReason?: string
-  },
+  payload: AdminUpdateSubscriptionPayload,
 ) => {
   const subscription = await SubscriptionModel.findById(id)
 

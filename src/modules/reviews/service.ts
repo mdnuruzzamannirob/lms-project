@@ -5,6 +5,12 @@ import {
   createPaginationMeta,
   getPaginationState,
 } from '../../common/utils/pagination'
+import type {
+  ReviewAdminListQuery,
+  ReviewCreatePayload,
+  ReviewListQuery,
+  ReviewUpdatePayload,
+} from './interface'
 import { ReviewModel } from './model'
 import {
   ensureBookExists,
@@ -15,11 +21,7 @@ import {
 const createReview = async (
   userId: string,
   bookId: string,
-  payload: {
-    rating: number
-    title?: string
-    comment: string
-  },
+  payload: ReviewCreatePayload,
 ) => {
   await ensureBookExists(bookId)
 
@@ -50,11 +52,7 @@ const updateReview = async (
   userId: string,
   bookId: string,
   reviewId: string,
-  payload: Partial<{
-    rating: number
-    title: string
-    comment: string
-  }>,
+  payload: ReviewUpdatePayload,
 ) => {
   await ensureBookExists(bookId)
 
@@ -118,10 +116,7 @@ const deleteReview = async (
 
 const listPublicBookReviews = async (
   bookId: string,
-  query: {
-    page?: number
-    limit?: number
-  },
+  query: ReviewListQuery,
 ) => {
   await ensureBookExists(bookId)
 
@@ -145,13 +140,7 @@ const listPublicBookReviews = async (
   }
 }
 
-const listReviewsForAdmin = async (query: {
-  page?: number
-  limit?: number
-  bookId?: string
-  userId?: string
-  isVisible?: boolean
-}) => {
+const listReviewsForAdmin = async (query: ReviewAdminListQuery) => {
   const pagination = getPaginationState(query)
   const filter: Record<string, unknown> = {}
 

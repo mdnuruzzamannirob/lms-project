@@ -7,6 +7,7 @@ import { PlanModel } from '../plans/model'
 import { promotionsService } from '../promotions/service'
 import { subscriptionsService } from '../subscriptions/service'
 import type {
+  InitiatePaymentPayload,
   IPayment,
   PaymentGateway,
   PaymentVerificationInput,
@@ -53,13 +54,7 @@ const getPaymentById = async (id: string) => {
   return formatPayment(payment)
 }
 
-const initiatePayment = async (payload: {
-  userId: string
-  planId: string
-  gateway: PaymentGateway
-  couponCode?: string
-  autoRenew?: boolean
-}) => {
+const initiatePayment = async (payload: InitiatePaymentPayload) => {
   const user = await getUserCountryCode(payload.userId)
   const selectedGatewayConfig = ensureGatewayAvailableForCountry(
     payload.gateway,

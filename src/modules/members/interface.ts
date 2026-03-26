@@ -41,3 +41,10 @@ export interface IMemberDetail extends IMember {
     isActive: boolean
   }
 }
+
+export interface MembersListQuery {
+  page: number
+  limit: number
+  search?: string
+  isSuspended?: string
+}

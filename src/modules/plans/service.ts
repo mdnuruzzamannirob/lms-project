@@ -1,4 +1,5 @@
 import { AppError } from '../../common/errors/AppError'
+import type { CreatePlanPayload, UpdatePlanPayload } from './interface'
 import { PlanModel } from './model'
 import { formatPlan } from './utils'
 
@@ -30,21 +31,7 @@ const getPlanByCode = async (code: string) => {
   return formatPlan(plan)
 }
 
-const createPlan = async (payload: {
-  code: string
-  name: string
-  description: string
-  price: number
-  currency: string
-  durationDays: number
-  maxDevices: number
-  downloadEnabled: boolean
-  accessLevel: 'free' | 'basic' | 'premium'
-  features: string[]
-  isFree: boolean
-  isActive: boolean
-  sortOrder: number
-}) => {
+const createPlan = async (payload: CreatePlanPayload) => {
   const existing = await PlanModel.findOne({ code: payload.code })
 
   if (existing) {
@@ -61,24 +48,7 @@ const createPlan = async (payload: {
   return formatPlan(plan)
 }
 
-const updatePlan = async (
-  id: string,
-  payload: Partial<{
-    code: string
-    name: string
-    description: string
-    price: number
-    currency: string
-    durationDays: number
-    maxDevices: number
-    downloadEnabled: boolean
-    accessLevel: 'free' | 'basic' | 'premium'
-    features: string[]
-    isFree: boolean
-    isActive: boolean
-    sortOrder: number
-  }>,
-) => {
+const updatePlan = async (id: string, payload: UpdatePlanPayload) => {
   const plan = await PlanModel.findById(id)
 
   if (!plan) {

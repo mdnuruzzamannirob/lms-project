@@ -120,3 +120,69 @@ export interface UserLoginHistory {
   userAgent?: string
   createdAt: Date
 }
+
+export interface AccountAccessibleUserState {
+  isActive: boolean
+  isSuspended: boolean
+  deletedAt: Date | undefined
+}
+
+export interface UserTwoFactorChallengePayload {
+  tempToken: string
+  otp?: string
+  emailOtp?: string
+}
+
+export interface UserLoginHistoryItem {
+  id: string
+  ipAddress?: string
+  userAgent?: string
+  createdAt: string
+}
+
+export interface UpdateMePayload {
+  firstName?: string
+  lastName?: string
+  phone?: string
+  profilePicture?: string
+  countryCode?: string
+  notificationPreferences?: Partial<UserNotificationPreferences>
+}
+
+export interface ChangePasswordPayload {
+  currentPassword: string
+  newPassword: string
+}
+
+export interface SentResponse {
+  sent: true
+}
+
+export interface ResetTokenResponse {
+  resetToken: string
+}
+
+export interface SuccessResponse {
+  success: true
+}
+
+export interface UserLoginSuccessResult {
+  requiresTwoFactor: false
+  accessToken: string
+  refreshToken: string
+  user: SanitizedUser
+}
+
+export interface UserLoginTwoFactorRequiredResult {
+  requiresTwoFactor: true
+  tempToken: string
+}
+
+export type UserLoginResult =
+  | UserLoginSuccessResult
+  | UserLoginTwoFactorRequiredResult
+
+export interface UserWithTokensResult {
+  user: SanitizedUser
+  tokens: AuthTokens
+}

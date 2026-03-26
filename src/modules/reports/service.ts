@@ -8,7 +8,11 @@ import {
 import { auditService } from '../audit/service'
 import { reportsAggregationService } from './aggregation.service'
 import { MAX_REPORT_RETRIES } from './constants'
-import type { IReportArtifact, ReportCreatePayload } from './interface'
+import type {
+  IReportArtifact,
+  ReportCreatePayload,
+  ReportJobsListQuery,
+} from './interface'
 import { ReportArtifactModel, ReportJobModel } from './model'
 import { processSingleJob, toJobResponse } from './utils'
 
@@ -39,17 +43,7 @@ const createReportJob = async (payload: ReportCreatePayload) => {
   return toJobResponse(created)
 }
 
-const listReportJobs = async (query: {
-  page: number
-  limit: number
-  status?: 'queued' | 'processing' | 'completed' | 'failed' | 'expired'
-  type?:
-    | 'admin_overview'
-    | 'revenue_summary'
-    | 'popular_books'
-    | 'reading_stats'
-    | 'subscription_stats'
-}) => {
+const listReportJobs = async (query: ReportJobsListQuery) => {
   const filter: Record<string, unknown> = {}
 
   if (query.status) {

@@ -52,6 +52,13 @@ export type ReportCreatePayload = {
   filters?: Record<string, unknown>
 }
 
+export interface ReportJobsListQuery {
+  page: number
+  limit: number
+  status?: ReportStatus
+  type?: ReportType
+}
+
 export type AdminOverviewAggregation = {
   totals: {
     users: number

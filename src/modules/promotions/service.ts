@@ -2,7 +2,16 @@ import { ClientSession, Types } from 'mongoose'
 
 import { AppError } from '../../common/errors/AppError'
 import { PlanModel } from '../plans/model'
-import type { DiscountResolution } from './interface'
+import type {
+  CreateCouponPayload,
+  CreateFlashSalePayload,
+  DiscountResolution,
+  MarkCouponUsedPayload,
+  ResolvePaymentDiscountPayload,
+  UpdateCouponPayload,
+  UpdateFlashSalePayload,
+  ValidateCouponPayload,
+} from './interface'
 import { CouponModel, CouponUsageModel, FlashSaleModel } from './model'
 import {
   calculateCouponDiscount,
@@ -12,12 +21,7 @@ import {
   now,
 } from './utils'
 
-const validateCoupon = async (payload: {
-  code: string
-  planId: string
-  amount: number
-  userId?: string
-}) => {
+const validateCoupon = async (payload: ValidateCouponPayload) => {
   const coupon = await CouponModel.findOne({
     code: payload.code.toUpperCase(),
   })
@@ -66,12 +70,9 @@ const validateCoupon = async (payload: {
   }
 }
 
-const resolvePaymentDiscount = async (payload: {
-  planId: string
-  amount: number
-  couponCode?: string
-  userId?: string
-}): Promise<DiscountResolution> => {
+const resolvePaymentDiscount = async (
+  payload: ResolvePaymentDiscountPayload,
+): Promise<DiscountResolution> => {
   const plan = await PlanModel.findById(payload.planId)
 
   if (!plan || !plan.isActive) {
@@ -129,12 +130,7 @@ const resolvePaymentDiscount = async (payload: {
 }
 
 const markCouponUsed = async (
-  payload: {
-    couponId: string
-    userId: string
-    paymentId: string
-    amount: number
-  },
+  payload: MarkCouponUsedPayload,
   session?: ClientSession,
 ): Promise<void> => {
   const coupon = await CouponModel.findById(payload.couponId).session(
@@ -172,20 +168,7 @@ const getCouponById = async (id: string) => {
   return formatCoupon(coupon)
 }
 
-const createCoupon = async (payload: {
-  code: string
-  title: string
-  description: string
-  discountType: 'percentage' | 'fixed'
-  discountValue: number
-  maxDiscountAmount?: number
-  minOrderAmount: number
-  totalLimit?: number
-  applicablePlanIds: string[]
-  isActive: boolean
-  startsAt: Date
-  endsAt: Date
-}) => {
+const createCoupon = async (payload: CreateCouponPayload) => {
   if (payload.endsAt.getTime() <= payload.startsAt.getTime()) {
     throw new AppError('Coupon end date must be later than start date.', 400)
   }
@@ -209,21 +192,7 @@ const createCoupon = async (payload: {
   return formatCoupon(coupon)
 }
 
-const updateCoupon = async (
-  id: string,
-  payload: Partial<{
-    title: string
-    description: string
-    discountType: 'percentage' | 'fixed'
-    discountValue: number
-    maxDiscountAmount: number
-    minOrderAmount: number
-    totalLimit: number
-    applicablePlanIds: string[]
-    startsAt: Date
-    endsAt: Date
-  }>,
-) => {
+const updateCoupon = async (id: string, payload: UpdateCouponPayload) => {
   const coupon = await CouponModel.findById(id)
 
   if (!coupon) {
@@ -302,15 +271,7 @@ const getActiveFlashSales = async () => {
   return flashSales.map((flashSale) => formatFlashSale(flashSale))
 }
 
-const createFlashSale = async (payload: {
-  title: string
-  description: string
-  discountPercentage: number
-  applicablePlanIds: string[]
-  isActive: boolean
-  startsAt: Date
-  endsAt: Date
-}) => {
+const createFlashSale = async (payload: CreateFlashSalePayload) => {
   if (payload.endsAt.getTime() <= payload.startsAt.getTime()) {
     throw new AppError(
       'Flash sale end date must be later than start date.',
@@ -328,17 +289,7 @@ const createFlashSale = async (payload: {
   return formatFlashSale(flashSale)
 }
 
-const updateFlashSale = async (
-  id: string,
-  payload: Partial<{
-    title: string
-    description: string
-    discountPercentage: number
-    applicablePlanIds: string[]
-    startsAt: Date
-    endsAt: Date
-  }>,
-) => {
+const updateFlashSale = async (id: string, payload: UpdateFlashSalePayload) => {
   const flashSale = await FlashSaleModel.findById(id)
 
   if (!flashSale) {

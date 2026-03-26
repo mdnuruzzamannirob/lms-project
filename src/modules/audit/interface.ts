@@ -37,3 +37,22 @@ export type AuditLogCreatePayload = {
   userAgent?: string
   meta?: Record<string, unknown>
 }
+
+export interface AuditLogsListQuery {
+  page: number
+  limit: number
+  actorType?: AuditActorType
+  module?: string
+  action?: string
+  from?: Date
+  to?: Date
+}
+
+export interface AuditLogsExportQuery {
+  format: AuditExportFormat
+  actorType?: AuditActorType
+  module?: string
+  action?: string
+  from?: Date
+  to?: Date
+}

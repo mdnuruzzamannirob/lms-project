@@ -4,6 +4,11 @@ import {
 } from '../../common/constants/permissions'
 import { AppError } from '../../common/errors/AppError'
 import { StaffModel } from '../staff/model'
+import type {
+  CreateRolePayload,
+  RoleResponse,
+  UpdateRolePayload,
+} from './interface'
 import { PermissionModel, RoleModel } from './model'
 import { assertValidPermissions } from './utils'
 
@@ -36,17 +41,7 @@ const listPermissions = async (): Promise<PermissionSeed[]> => {
   }))
 }
 
-const listRoles = async (): Promise<
-  Array<{
-    id: string
-    name: string
-    description: string
-    permissions: string[]
-    isSystem: boolean
-    createdAt: string
-    updatedAt: string
-  }>
-> => {
+const listRoles = async (): Promise<RoleResponse[]> => {
   const roles = await RoleModel.find({}).sort({ name: 1 })
 
   return roles.map((role) => ({
@@ -60,17 +55,7 @@ const listRoles = async (): Promise<
   }))
 }
 
-const getRoleById = async (
-  roleId: string,
-): Promise<{
-  id: string
-  name: string
-  description: string
-  permissions: string[]
-  isSystem: boolean
-  createdAt: string
-  updatedAt: string
-}> => {
+const getRoleById = async (roleId: string): Promise<RoleResponse> => {
   const role = await RoleModel.findById(roleId)
 
   if (!role) {
@@ -88,12 +73,7 @@ const getRoleById = async (
   }
 }
 
-const createRole = async (payload: {
-  name: string
-  description: string
-  permissions: string[]
-  isSystem?: boolean
-}) => {
+const createRole = async (payload: CreateRolePayload) => {
   assertValidPermissions(payload.permissions)
 
   const existing = await RoleModel.findOne({ name: payload.name })
@@ -112,14 +92,7 @@ const createRole = async (payload: {
   return rbacService.getRoleById(role._id.toString())
 }
 
-const updateRole = async (
-  roleId: string,
-  payload: {
-    name?: string
-    description?: string
-    permissions?: string[]
-  },
-) => {
+const updateRole = async (roleId: string, payload: UpdateRolePayload) => {
   const role = await RoleModel.findById(roleId)
 
   if (!role) {

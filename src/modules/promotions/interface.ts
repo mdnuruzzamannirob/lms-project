@@ -53,3 +53,57 @@ export type DiscountResolution = {
     flashSaleAmount: number
   }
 }
+
+export interface ValidateCouponPayload {
+  code: string
+  planId: string
+  amount: number
+  userId?: string
+}
+
+export interface ResolvePaymentDiscountPayload {
+  planId: string
+  amount: number
+  couponCode?: string
+  userId?: string
+}
+
+export interface MarkCouponUsedPayload {
+  couponId: string
+  userId: string
+  paymentId: string
+  amount: number
+}
+
+export interface CreateCouponPayload {
+  code: string
+  title: string
+  description: string
+  discountType: CouponDiscountType
+  discountValue: number
+  maxDiscountAmount?: number
+  minOrderAmount: number
+  totalLimit?: number
+  applicablePlanIds: string[]
+  isActive: boolean
+  startsAt: Date
+  endsAt: Date
+}
+
+export type UpdateCouponPayload = Partial<
+  Omit<CreateCouponPayload, 'code' | 'isActive'>
+>
+
+export interface CreateFlashSalePayload {
+  title: string
+  description: string
+  discountPercentage: number
+  applicablePlanIds: string[]
+  isActive: boolean
+  startsAt: Date
+  endsAt: Date
+}
+
+export type UpdateFlashSalePayload = Partial<
+  Omit<CreateFlashSalePayload, 'isActive'>
+>

@@ -23,12 +23,22 @@ import { config } from '../../config'
 import { authConstants } from './constants'
 import { EmailOtpModel } from './emailOtp.model'
 import type {
+  AccountAccessibleUserState,
   AuthTokens,
+  ChangePasswordPayload,
   LoginPayload,
   RegisterPayload,
+  ResetTokenResponse,
   SanitizedUser,
+  SentResponse,
   SocialProfile,
+  SuccessResponse,
+  UpdateMePayload,
+  UserLoginHistoryItem,
+  UserLoginResult,
   UserNotificationPreferences,
+  UserTwoFactorChallengePayload,
+  UserWithTokensResult,
 } from './interface'
 import {
   UserEmailVerificationTokenModel,
@@ -50,11 +60,7 @@ import {
   verifyUserTotp,
 } from './utils'
 
-const assertUserAccountAccessible = (user: {
-  isActive: boolean
-  isSuspended: boolean
-  deletedAt: Date | undefined
-}) => {
+const assertUserAccountAccessible = (user: AccountAccessibleUserState) => {
   if (!user.isActive || user.isSuspended || user.deletedAt) {
     throw new AppError('Account is inactive or suspended.', 403)
   }
@@ -62,10 +68,7 @@ const assertUserAccountAccessible = (user: {
 
 const register = async (
   payload: RegisterPayload,
-): Promise<{
-  user: SanitizedUser
-  tokens: AuthTokens
-}> => {
+): Promise<UserWithTokensResult> => {
   const existingUser = await UserModel.findOne({ email: payload.email })
 
   if (existingUser) {
@@ -105,18 +108,7 @@ const register = async (
 const login = async (
   payload: LoginPayload,
   request?: Request,
-): Promise<
-  | {
-      requiresTwoFactor: false
-      accessToken: string
-      refreshToken: string
-      user: SanitizedUser
-    }
-  | {
-      requiresTwoFactor: true
-      tempToken: string
-    }
-> => {
+): Promise<UserLoginResult> => {
   const user = await UserModel.findOne({ email: payload.email })
 
   if (!user || !user.passwordHash) {
@@ -273,11 +265,7 @@ const disableTwoFactor = async (userId: string, otp: string) => {
   return { success: true }
 }
 
-const challengeTwoFactor = async (payload: {
-  tempToken: string
-  otp?: string
-  emailOtp?: string
-}) => {
+const challengeTwoFactor = async (payload: UserTwoFactorChallengePayload) => {
   const decoded = verifyTempToken(payload.tempToken, config.jwt.userSecret)
 
   if (decoded.actorType !== 'user' || !decoded.pending2FA) {
@@ -372,7 +360,7 @@ const getBackupCodesCount = async (userId: string, otp: string) => {
 const socialLogin = async (
   profile: SocialProfile,
   request?: Request,
-): Promise<{ user: SanitizedUser; tokens: AuthTokens }> => {
+): Promise<UserWithTokensResult> => {
   const nameParts = (profile.name ?? '').trim().split(/\s+/)
   const firstName = nameParts[0] ?? profile.name
   const lastName = nameParts.slice(1).join(' ') || undefined
@@ -423,14 +411,7 @@ const getMe = async (userId: string): Promise<SanitizedUser> => {
 
 const getMyLoginHistory = async (
   userId: string,
-): Promise<
-  Array<{
-    id: string
-    ipAddress?: string
-    userAgent?: string
-    createdAt: string
-  }>
-> => {
+): Promise<UserLoginHistoryItem[]> => {
   const rows = await UserLoginHistoryModel.find({ userId })
     .sort({ createdAt: -1 })
     .limit(20)
@@ -450,14 +431,7 @@ const getMyLoginHistory = async (
 
 const updateMe = async (
   userId: string,
-  payload: {
-    firstName?: string
-    lastName?: string
-    phone?: string
-    profilePicture?: string
-    countryCode?: string
-    notificationPreferences?: Partial<UserNotificationPreferences>
-  },
+  payload: UpdateMePayload,
 ): Promise<SanitizedUser> => {
   const user = await UserModel.findById(userId)
 
@@ -505,7 +479,7 @@ const updateNotificationPreferences = async (
 
 const changePassword = async (
   userId: string,
-  payload: { currentPassword: string; newPassword: string },
+  payload: ChangePasswordPayload,
 ): Promise<void> => {
   const user = await UserModel.findById(userId)
 
@@ -567,7 +541,7 @@ const resendVerification = async (email: string): Promise<void> => {
   })
 }
 
-const forgotPassword = async (email: string): Promise<{ sent: true }> => {
+const forgotPassword = async (email: string): Promise<SentResponse> => {
   const user = await UserModel.findOne({ email })
 
   if (!user) {
@@ -595,7 +569,7 @@ const forgotPassword = async (email: string): Promise<{ sent: true }> => {
   return { sent: true }
 }
 
-const resendResetOtp = async (email: string): Promise<{ sent: true }> => {
+const resendResetOtp = async (email: string): Promise<SentResponse> => {
   const user = await UserModel.findOne({ email })
 
   if (!user) {
@@ -629,7 +603,7 @@ const resendResetOtp = async (email: string): Promise<{ sent: true }> => {
 const verifyResetOtp = async (
   email: string,
   otp: string,
-): Promise<{ resetToken: string }> => {
+): Promise<ResetTokenResponse> => {
   const user = await UserModel.findOne({ email })
 
   if (!user) {
@@ -664,7 +638,7 @@ const verifyResetOtp = async (
 const resetPassword = async (
   resetToken: string,
   newPassword: string,
-): Promise<{ success: true }> => {
+): Promise<SuccessResponse> => {
   const decoded = verifyTempToken(resetToken, config.jwt.userSecret)
 
   if (decoded.actorType !== 'user' || decoded.purpose !== 'password-reset') {
