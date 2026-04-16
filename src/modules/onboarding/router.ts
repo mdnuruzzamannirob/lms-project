@@ -7,7 +7,7 @@ import { onboardingValidation } from './validation'
 
 const router = Router()
 
-router.get('/plans', onboardingController.getPlanOptions)
+router.get('/plans', authenticateUser, onboardingController.getPlanOptions)
 router.get(
   '/status',
   authenticateUser,

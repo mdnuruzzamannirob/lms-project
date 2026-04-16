@@ -33,6 +33,11 @@ router.patch(
   authenticateUser,
   subscriptionsController.renewMySubscription,
 )
+router.post(
+  '/my/retry-payment',
+  authenticateUser,
+  subscriptionsController.retryMySubscriptionPayment,
+)
 router.patch(
   '/my/upgrade',
   authenticateUser,

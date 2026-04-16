@@ -1,6 +1,7 @@
 import type { RequestHandler } from 'express'
 
 import { UserModel } from '../../modules/auth/model'
+import { OnboardingModel } from '../../modules/onboarding/model'
 import { RoleModel } from '../../modules/rbac/model'
 import { StaffModel } from '../../modules/staff/model'
 import { AppError } from '../errors/AppError'
@@ -73,6 +74,19 @@ export const authenticateUser: RequestHandler = async (
       payload.sessionVersion !== user.sessionVersion
     ) {
       throw new AppError('Unauthorized. Session has expired.', 401)
+    }
+
+    if (!request.originalUrl.includes('/onboarding')) {
+      const onboarding = await OnboardingModel.findOne({ userId }).select(
+        'status',
+      )
+
+      if (!onboarding || onboarding.status !== 'completed') {
+        throw new AppError(
+          'Onboarding must be completed before accessing this resource.',
+          403,
+        )
+      }
     }
 
     request.auth = payload

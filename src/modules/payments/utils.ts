@@ -353,6 +353,8 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
         eventType: event.type,
         raw: {
           eventType: event.type,
+          invoiceId:
+            typeof subscription.id === 'string' ? subscription.id : undefined,
           stripeCustomerId:
             typeof subscription.customer === 'string'
               ? subscription.customer
@@ -444,6 +446,7 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
         eventType: event.type,
         raw: {
           eventType: event.type,
+          invoiceId: typeof invoice.id === 'string' ? invoice.id : undefined,
           stripeCustomerId: invoiceCustomerId,
           stripeSubscriptionId: invoiceSubscriptionId,
           paymentIntentId,
@@ -884,6 +887,9 @@ export const findPaymentForVerification = async (
 export const applyVerificationTransaction = async (
   verification: PaymentVerificationInput,
   session: ClientSession,
+  options: {
+    trustedSource: boolean
+  },
 ) => {
   const payment = await findPaymentForVerification(verification, session)
 
@@ -903,6 +909,13 @@ export const applyVerificationTransaction = async (
     }
 
     return payment
+  }
+
+  if (verification.status === 'success' && !options.trustedSource) {
+    throw new AppError(
+      'Untrusted payment verification cannot mark payment as success.',
+      403,
+    )
   }
 
   payment.status =

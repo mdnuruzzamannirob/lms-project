@@ -42,7 +42,8 @@ router.post(
 )
 router.post(
   '/payments/verify',
-  authenticateUser,
+  authenticateStaff,
+  requirePermission(PERMISSIONS.PAYMENTS_MANAGE),
   validateRequest({ body: paymentsValidation.verifyBody }),
   verifyPayment,
 )

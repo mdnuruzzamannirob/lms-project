@@ -4,9 +4,13 @@ import mongoose, { Types } from 'mongoose'
 import Stripe from 'stripe'
 
 import { AppError } from '../../common/errors/AppError'
+import { emailService } from '../../common/services/email.service'
 import { config } from '../../config'
+import { logger } from '../../config/logger'
+import { UserModel } from '../auth/model'
 import { NotificationType } from '../notifications/interface'
 import { notificationsService } from '../notifications/service'
+import { OnboardingModel } from '../onboarding/model'
 import { PlanModel } from '../plans/model'
 import { promotionsService } from '../promotions/service'
 import { subscriptionsService } from '../subscriptions/service'
@@ -56,6 +60,89 @@ const getPaymentById = async (id: string) => {
   const payment = await PaymentModel.findById(id)
   if (!payment) throw new AppError('Payment not found.', 404)
   return formatPayment(payment)
+}
+
+const safeSendStripePaymentEmail = async (payload: {
+  userId?: string
+  status: 'success' | 'failed'
+  planId?: string
+  invoiceId?: string
+  paymentIntentId?: string
+  reason?: string
+}) => {
+  if (!payload.userId) {
+    return
+  }
+
+  try {
+    const user = await UserModel.findById(payload.userId).select('email')
+    if (!user?.email) {
+      return
+    }
+
+    const plan = payload.planId
+      ? await PlanModel.findById(payload.planId).select('name code').lean()
+      : null
+
+    await emailService.sendEmail({
+      to: user.email,
+      subject:
+        payload.status === 'success'
+          ? 'Subscription payment successful'
+          : 'Subscription payment failed',
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
+          <h2>${payload.status === 'success' ? 'Payment successful' : 'Payment failed'}</h2>
+          ${plan ? `<p><strong>Plan:</strong> ${plan.name} (${plan.code})</p>` : ''}
+          ${payload.invoiceId ? `<p><strong>Invoice:</strong> ${payload.invoiceId}</p>` : ''}
+          ${payload.paymentIntentId ? `<p><strong>Payment Intent:</strong> ${payload.paymentIntentId}</p>` : ''}
+          ${payload.reason ? `<p><strong>Reason:</strong> ${payload.reason}</p>` : ''}
+          <p>
+            ${
+              payload.status === 'success'
+                ? 'Your subscription payment has been processed successfully.'
+                : 'Your latest subscription payment failed. Please retry or update your payment method.'
+            }
+          </p>
+        </div>
+      `,
+    })
+  } catch (error) {
+    logger.warn('Failed to send Stripe payment email.', {
+      userId: payload.userId,
+      status: payload.status,
+      error: error instanceof Error ? error.message : String(error),
+    })
+  }
+}
+
+const safeCompleteOnboarding = async (userId?: string) => {
+  if (!userId) {
+    return
+  }
+
+  try {
+    const existing = await OnboardingModel.findOne({ userId })
+    if (existing?.status === 'completed' && existing.completedAt) {
+      return
+    }
+
+    await OnboardingModel.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          status: 'completed',
+          completedAt: new Date(),
+        },
+      },
+      { new: true, upsert: true },
+    )
+  } catch (error) {
+    logger.warn('Failed to mark onboarding completed after payment.', {
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+    })
+  }
 }
 
 const initiatePayment = async (payload: InitiatePaymentPayload) => {
@@ -143,11 +230,16 @@ const initiatePayment = async (payload: InitiatePaymentPayload) => {
   })
 
   if (gatewayResult.status === 'success') {
-    await paymentsService.verifyPayment({
-      reference,
-      providerPaymentId: gatewayResult.providerPaymentId,
-      status: 'success',
-    })
+    await paymentsService.verifyPayment(
+      {
+        reference,
+        providerPaymentId: gatewayResult.providerPaymentId,
+        status: 'success',
+      },
+      {
+        trustedSource: true,
+      },
+    )
   }
 
   return {
@@ -170,7 +262,12 @@ const initiatePayment = async (payload: InitiatePaymentPayload) => {
   }
 }
 
-const verifyPayment = async (verification: PaymentVerificationInput) => {
+const verifyPayment = async (
+  verification: PaymentVerificationInput,
+  options?: {
+    trustedSource?: boolean
+  },
+) => {
   const session = await mongoose.startSession()
   try {
     let verifiedPayment: IPayment | null = null
@@ -178,6 +275,9 @@ const verifyPayment = async (verification: PaymentVerificationInput) => {
       verifiedPayment = await applyVerificationTransaction(
         verification,
         session,
+        {
+          trustedSource: options?.trustedSource ?? false,
+        },
       )
     })
     if (!verifiedPayment) {
@@ -319,6 +419,10 @@ const processWebhook = async (
     signature,
     headers,
   )
+  const webhookRaw =
+    verification.raw && typeof verification.raw === 'object'
+      ? (verification.raw as Record<string, unknown>)
+      : undefined
 
   // Idempotency: skip if this event has already been processed.
   const existingLog = await WebhookLogModel.findOne({
@@ -351,36 +455,35 @@ const processWebhook = async (
 
     if (gateway === 'stripe' && eventType) {
       const stripeSubscriptionId = getRawWebhookField(
-        verification.raw,
+        webhookRaw,
         'stripeSubscriptionId',
       ) as string | undefined
       const stripeCustomerId = getRawWebhookField(
-        verification.raw,
+        webhookRaw,
         'stripeCustomerId',
       ) as string | undefined
       const paymentIntentId = getRawWebhookField(
-        verification.raw,
+        webhookRaw,
         'paymentIntentId',
       ) as string | undefined
-      const stripePriceId = getRawWebhookField(
-        verification.raw,
-        'stripePriceId',
-      ) as string | undefined
-      const userId = getRawWebhookField(verification.raw, 'userId') as
+      const stripePriceId = getRawWebhookField(webhookRaw, 'stripePriceId') as
         | string
         | undefined
-      const planId = getRawWebhookField(verification.raw, 'planId') as
+      const userId = getRawWebhookField(webhookRaw, 'userId') as
         | string
         | undefined
-      const stripeStatus = getRawWebhookField(verification.raw, 'status') as
+      const planId = getRawWebhookField(webhookRaw, 'planId') as
+        | string
+        | undefined
+      const stripeStatus = getRawWebhookField(webhookRaw, 'status') as
         | string
         | undefined
       const cancelAtPeriodEnd = getRawWebhookField(
-        verification.raw,
+        webhookRaw,
         'cancelAtPeriodEnd',
       ) as boolean | undefined
       const currentPeriodEnd = parseDate(
-        getRawWebhookField(verification.raw, 'currentPeriodEnd'),
+        getRawWebhookField(webhookRaw, 'currentPeriodEnd'),
       )
 
       if (
@@ -402,6 +505,8 @@ const processWebhook = async (
 
         const subscription =
           await subscriptionsService.syncSubscriptionFromStripe(syncPayload)
+
+        await safeCompleteOnboarding(subscription?.userId?.toString() ?? userId)
 
         webhookLog.processingStatus = 'processed'
         await webhookLog.save()
@@ -429,10 +534,16 @@ const processWebhook = async (
           )
 
         if (subscription) {
-          await subscriptionsService.downgradeUserToFreePlan(
-            subscription.userId.toString(),
-            subscription.planId.toString(),
-          )
+          if (subscription.scheduledPlanId) {
+            await subscriptionsService.finalizeScheduledPeriodEndTransition(
+              subscription._id.toString(),
+            )
+          } else {
+            await subscriptionsService.downgradeUserToFreePlan(
+              subscription.userId.toString(),
+              subscription.planId.toString(),
+            )
+          }
         }
 
         webhookLog.processingStatus = 'processed'
@@ -460,6 +571,41 @@ const processWebhook = async (
         const subscription =
           await subscriptionsService.syncSubscriptionFromStripe(paidSyncPayload)
 
+        await subscriptionsService.markStripeInvoicePaymentRetrySucceeded({
+          stripeSubscriptionId,
+          ...(typeof webhookRaw?.['invoiceId'] === 'string'
+            ? { stripeInvoiceId: webhookRaw['invoiceId'] }
+            : {}),
+        })
+
+        await safeCompleteOnboarding(subscription?.userId?.toString() ?? userId)
+
+        const successEmailPayload: Parameters<
+          typeof safeSendStripePaymentEmail
+        >[0] = {
+          status: 'success',
+        }
+
+        const successUserId = subscription?.userId?.toString() ?? userId
+        if (typeof successUserId === 'string') {
+          successEmailPayload.userId = successUserId
+        }
+
+        const successPlanId = subscription?.planId?.toString() ?? planId
+        if (typeof successPlanId === 'string') {
+          successEmailPayload.planId = successPlanId
+        }
+
+        if (typeof paymentIntentId === 'string') {
+          successEmailPayload.paymentIntentId = paymentIntentId
+        }
+
+        if (typeof webhookRaw?.['invoiceId'] === 'string') {
+          successEmailPayload.invoiceId = webhookRaw['invoiceId'] as string
+        }
+
+        await safeSendStripePaymentEmail(successEmailPayload)
+
         webhookLog.processingStatus = 'processed'
         await webhookLog.save()
 
@@ -472,6 +618,10 @@ const processWebhook = async (
       }
 
       if (eventType === 'invoice.payment_failed' && stripeSubscriptionId) {
+        const invoiceId =
+          typeof webhookRaw?.['invoiceId'] === 'string'
+            ? (webhookRaw['invoiceId'] as string)
+            : stripeSubscriptionId
         const failedSyncPayload = {
           stripeSubscriptionId,
           ...(stripeCustomerId ? { stripeCustomerId } : {}),
@@ -489,6 +639,12 @@ const processWebhook = async (
 
         await subscriptionsService.markStripeInvoicePaymentFailed({
           stripeSubscriptionId,
+          stripeInvoiceId: invoiceId,
+          ...(stripeCustomerId ? { stripeCustomerId } : {}),
+          ...(userId ? { userId } : {}),
+          ...(planId ? { planId } : {}),
+          ...(currentPeriodEnd ? { currentPeriodEnd } : {}),
+          reason: 'Latest invoice payment failed',
         })
 
         const notifyUserId =
@@ -511,6 +667,32 @@ const processWebhook = async (
             ...notificationPayload,
           })
         }
+
+        const failedEmailPayload: Parameters<
+          typeof safeSendStripePaymentEmail
+        >[0] = {
+          status: 'failed',
+          reason: 'Latest invoice payment failed',
+        }
+
+        if (notifyUserId) {
+          failedEmailPayload.userId = notifyUserId
+        }
+
+        const failedPlanId = subscription?.planId?.toString() ?? planId
+        if (typeof failedPlanId === 'string') {
+          failedEmailPayload.planId = failedPlanId
+        }
+
+        if (typeof paymentIntentId === 'string') {
+          failedEmailPayload.paymentIntentId = paymentIntentId
+        }
+
+        if (typeof invoiceId === 'string') {
+          failedEmailPayload.invoiceId = invoiceId
+        }
+
+        await safeSendStripePaymentEmail(failedEmailPayload)
 
         webhookLog.processingStatus = 'processed'
         await webhookLog.save()
@@ -570,49 +752,73 @@ const processWebhook = async (
       }
     }
 
-    const payment = await paymentsService.verifyPayment({
-      reference: reference ?? `fallback-${verification.eventId}`,
-      ...(providerPaymentId ? { providerPaymentId } : {}),
-      status: verification.status,
-      ...(verification.raw && typeof verification.raw === 'object'
-        ? {
-            metadata: {
-              ...(typeof (verification.raw as Record<string, unknown>)
-                .stripeCustomerId === 'string'
-                ? {
-                    stripeCustomerId: (
-                      verification.raw as Record<string, unknown>
-                    ).stripeCustomerId,
-                  }
-                : {}),
-              ...(typeof (verification.raw as Record<string, unknown>)
-                .stripeSubscriptionId === 'string'
-                ? {
-                    stripeSubscriptionId: (
-                      verification.raw as Record<string, unknown>
-                    ).stripeSubscriptionId,
-                  }
-                : {}),
-              ...(typeof (verification.raw as Record<string, unknown>)
-                .paymentIntentId === 'string'
-                ? {
-                    paymentIntentId: (
-                      verification.raw as Record<string, unknown>
-                    ).paymentIntentId,
-                  }
-                : {}),
-              ...(typeof (verification.raw as Record<string, unknown>)
-                .currentPeriodEnd === 'string'
-                ? {
-                    currentPeriodEnd: (
-                      verification.raw as Record<string, unknown>
-                    ).currentPeriodEnd,
-                  }
-                : {}),
-            },
-          }
-        : {}),
-    })
+    const payment = await paymentsService.verifyPayment(
+      {
+        reference: reference ?? `fallback-${verification.eventId}`,
+        ...(providerPaymentId ? { providerPaymentId } : {}),
+        status: verification.status,
+        ...(verification.raw && typeof verification.raw === 'object'
+          ? {
+              metadata: {
+                ...(typeof (verification.raw as Record<string, unknown>)
+                  .stripeCustomerId === 'string'
+                  ? {
+                      stripeCustomerId: (
+                        verification.raw as Record<string, unknown>
+                      ).stripeCustomerId,
+                    }
+                  : {}),
+                ...(typeof (verification.raw as Record<string, unknown>)
+                  .stripeSubscriptionId === 'string'
+                  ? {
+                      stripeSubscriptionId: (
+                        verification.raw as Record<string, unknown>
+                      ).stripeSubscriptionId,
+                    }
+                  : {}),
+                ...(typeof (verification.raw as Record<string, unknown>)
+                  .paymentIntentId === 'string'
+                  ? {
+                      paymentIntentId: (
+                        verification.raw as Record<string, unknown>
+                      ).paymentIntentId,
+                    }
+                  : {}),
+                ...(typeof (verification.raw as Record<string, unknown>)
+                  .currentPeriodEnd === 'string'
+                  ? {
+                      currentPeriodEnd: (
+                        verification.raw as Record<string, unknown>
+                      ).currentPeriodEnd,
+                    }
+                  : {}),
+              },
+            }
+          : {}),
+      },
+      {
+        trustedSource: true,
+      },
+    )
+
+    if (payment.gateway === 'stripe' && payment.status === 'success') {
+      await safeCompleteOnboarding(payment.userId)
+    }
+
+    if (
+      payment.gateway === 'stripe' &&
+      payment.status === 'success' &&
+      eventType !== 'checkout.session.completed' &&
+      eventType !== 'invoice.paid'
+    ) {
+      await safeSendStripePaymentEmail({
+        userId: payment.userId,
+        status: 'success',
+        ...(typeof payment.providerPaymentId === 'string'
+          ? { paymentIntentId: payment.providerPaymentId }
+          : {}),
+      })
+    }
 
     webhookLog.processingStatus = 'processed'
     webhookLog.processedPaymentId = new Types.ObjectId(payment.id)

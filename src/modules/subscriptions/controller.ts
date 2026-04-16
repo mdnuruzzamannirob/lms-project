@@ -82,6 +82,7 @@ const cancelMySubscription: RequestHandler = catchAsync(
     const data = await subscriptionsService.cancelMySubscription(
       getUserId(request),
       request.body.reason,
+      request.body.immediate,
     )
 
     sendResponse(response, {
@@ -103,6 +104,21 @@ const renewMySubscription: RequestHandler = catchAsync(
       statusCode: 200,
       success: true,
       message: 'Subscription renewed successfully.',
+      data,
+    })
+  },
+)
+
+const retryMySubscriptionPayment: RequestHandler = catchAsync(
+  async (request, response) => {
+    const data = await subscriptionsService.retryMyStripeInvoicePayment(
+      getUserId(request),
+    )
+
+    sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: 'Subscription payment retry started successfully.',
       data,
     })
   },
@@ -166,6 +182,7 @@ export const subscriptionsController = {
   createSubscription,
   cancelMySubscription,
   renewMySubscription,
+  retryMySubscriptionPayment,
   upgradeMySubscription,
   downgradeMySubscription,
   adminUpdateSubscription,

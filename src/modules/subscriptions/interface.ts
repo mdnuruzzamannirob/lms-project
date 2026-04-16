@@ -3,6 +3,7 @@ import type { Types } from 'mongoose'
 export type SubscriptionStatus =
   | 'pending'
   | 'active'
+  | 'past_due'
   | 'cancelled'
   | 'expired'
   | 'upgraded'
@@ -15,11 +16,19 @@ export interface ISubscription {
   previousPlanId: Types.ObjectId | undefined
   status: SubscriptionStatus
   startedAt: Date
-  endsAt: Date
-  currentPeriodEnd: Date | undefined
+  endsAt: Date | null
+  currentPeriodEnd: Date | null
   autoRenew: boolean
   cancelledAt: Date | undefined
   cancellationReason: string | undefined
+  pendingInvoiceId: string | null
+  retryStatus: 'scheduled' | 'processing' | 'succeeded' | 'exhausted' | null
+  retryAttemptCount: number
+  retryNextAt: Date | null
+  retryLastAttemptAt: Date | null
+  retryLastError: string | null
+  scheduledPlanId?: Types.ObjectId | null
+  scheduledEffectiveDate?: Date | null
   latestPaymentId: Types.ObjectId | undefined
   stripeSubscriptionId: string | undefined
   createdAt: Date
@@ -54,4 +63,14 @@ export interface AdminUpdateSubscriptionPayload {
   status?: SubscriptionStatus
   autoRenew?: boolean
   cancellationReason?: string
+}
+
+export interface ScheduleStripeRetryPayload {
+  stripeSubscriptionId: string
+  stripeInvoiceId: string
+  stripeCustomerId?: string
+  userId?: string
+  planId?: string
+  currentPeriodEnd?: Date | null
+  reason?: string
 }

@@ -5,19 +5,104 @@ import { SubscriptionModel } from '../subscriptions/model'
 import { subscriptionsService } from '../subscriptions/service'
 import { OnboardingModel } from './model'
 
-const getPlanOptions = async () => {
+const getCurrentPlanContext = async (userId: string) => {
+  const onboarding = await OnboardingModel.findOne({ userId })
+  const currentSubscription = await SubscriptionModel.findOne({
+    userId,
+    status: { $in: ['active', 'pending'] },
+  })
+    .sort({ createdAt: -1 })
+    .lean()
+
+  const selectedPlan = onboarding?.selectedPlanCode
+    ? await PlanModel.findOne({
+        code: onboarding.selectedPlanCode,
+        isActive: true,
+      }).lean()
+    : null
+
+  return {
+    onboarding,
+    currentSubscription,
+    selectedPlan,
+  }
+}
+
+const markOnboardingCompleted = async (userId: string) => {
+  const existing = await OnboardingModel.findOne({ userId })
+
+  if (existing?.status === 'completed' && existing.completedAt) {
+    return existing
+  }
+
+  const onboarding = await OnboardingModel.findOneAndUpdate(
+    { userId },
+    {
+      $set: {
+        status: 'completed',
+        completedAt: new Date(),
+      },
+    },
+    { new: true, upsert: true },
+  )
+
+  return onboarding
+}
+
+const getPlanOptions = async (userId: string) => {
   const plans = await PlanModel.find({ isActive: true })
     .sort({ sortOrder: 1, createdAt: 1 })
     .lean()
 
-  return plans.map((plan) => ({
-    code: plan.code,
-    name: plan.name,
-    price: plan.price,
-    currency: plan.currency,
-    billingCycle: 'monthly',
-    isPaid: !plan.isFree,
-  }))
+  const { onboarding, currentSubscription, selectedPlan } =
+    await getCurrentPlanContext(userId)
+
+  const currentPlanId =
+    currentSubscription?.planId?.toString() ?? selectedPlan?._id.toString()
+
+  const currentPlan = currentPlanId
+    ? (plans.find((plan) => plan._id.toString() === currentPlanId) ??
+      (selectedPlan && selectedPlan._id.toString() === currentPlanId
+        ? selectedPlan
+        : null))
+    : null
+
+  const scheduledDowngrade =
+    currentSubscription?.scheduledPlanId &&
+    currentSubscription.scheduledEffectiveDate
+      ? {
+          planId: currentSubscription.scheduledPlanId.toString(),
+          effectiveDate:
+            currentSubscription.scheduledEffectiveDate.toISOString(),
+        }
+      : null
+
+  return plans.map((plan) => {
+    const isCurrentPlan = plan._id.toString() === currentPlanId
+    const isPaid = !plan.isFree
+    const isHigherTier =
+      currentPlan != null && !plan.isFree && plan.price > currentPlan.price
+    const isLowerTier =
+      currentPlan != null && !plan.isFree && plan.price < currentPlan.price
+
+    return {
+      code: plan.code,
+      name: plan.name,
+      price: plan.price,
+      currency: plan.currency,
+      billingCycle: 'monthly',
+      isPaid,
+      isCurrentPlan,
+      canSelect: !isCurrentPlan,
+      canUpgrade: Boolean(currentPlan && isHigherTier),
+      canDowngrade: Boolean(currentPlan && isLowerTier),
+      canCancel: Boolean(currentSubscription && !currentPlan?.isFree),
+      canRenew: Boolean(currentSubscription && !currentPlan?.isFree),
+      scheduledDowngrade:
+        isCurrentPlan && scheduledDowngrade ? scheduledDowngrade : null,
+      onboardingStatus: onboarding?.status ?? 'pending',
+    }
+  })
 }
 
 const selectPlan = async (userId: string, planCode: string) => {
@@ -51,9 +136,7 @@ const selectPlan = async (userId: string, planCode: string) => {
       autoRenew: false,
     })
 
-    onboarding.status = 'completed'
-    onboarding.completedAt = new Date()
-    await onboarding.save()
+    await markOnboardingCompleted(userId)
 
     return {
       id: onboarding._id.toString(),
@@ -89,6 +172,7 @@ const selectPlan = async (userId: string, planCode: string) => {
     nextStep: 'redirect_to_payment',
     checkout_url: payment.checkout_url,
     paymentId: payment.payment.id,
+    sessionId: payment.sessionId,
   }
 }
 
@@ -125,9 +209,7 @@ const completeOnboarding = async (userId: string) => {
     }
   }
 
-  onboarding.status = 'completed'
-  onboarding.completedAt = new Date()
-  await onboarding.save()
+  await markOnboardingCompleted(userId)
 
   return {
     id: onboarding._id.toString(),
@@ -158,4 +240,5 @@ export const onboardingService = {
   selectPlan,
   completeOnboarding,
   getOnboardingStatus,
+  markOnboardingCompleted,
 }

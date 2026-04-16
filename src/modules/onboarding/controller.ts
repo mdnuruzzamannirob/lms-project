@@ -5,18 +5,18 @@ import { sendResponse } from '../../common/utils/sendResponse'
 import { onboardingService } from './service'
 import { getAuthenticatedUserId } from './utils'
 
-const getPlanOptions: RequestHandler = catchAsync(
-  async (_request, response) => {
-    const data = await onboardingService.getPlanOptions()
+const getPlanOptions: RequestHandler = catchAsync(async (request, response) => {
+  const data = await onboardingService.getPlanOptions(
+    getAuthenticatedUserId(request),
+  )
 
-    sendResponse(response, {
-      statusCode: 200,
-      success: true,
-      message: 'Onboarding plans retrieved successfully.',
-      data,
-    })
-  },
-)
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Onboarding plans retrieved successfully.',
+    data,
+  })
+})
 
 const selectPlan: RequestHandler = catchAsync(async (request, response) => {
   const data = await onboardingService.selectPlan(

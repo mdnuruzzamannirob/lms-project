@@ -16,6 +16,7 @@ export const subscriptionsValidation = {
   }),
   cancelBody: z.object({
     reason: z.string().trim().min(3).max(200),
+    immediate: z.boolean().default(false),
   }),
   changePlanBody: z.object({
     newPlanId: objectIdString,

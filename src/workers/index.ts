@@ -1,6 +1,7 @@
 import { schedulerService } from '../common/services/scheduler.service'
 import { config } from '../config'
 import { runNotificationWorker } from './notification.worker'
+import { runStripePaymentRetryWorker } from './stripe-payment-retry.worker'
 import { runReportGeneratorWorker } from './report-generator.worker'
 import { runSubscriptionDowngradeWorker } from './subscription-downgrade.worker'
 import { runSubscriptionWorker } from './subscription.worker'
@@ -18,6 +19,12 @@ export const registerBackgroundWorkers = () => {
     name: 'worker.notification',
     intervalMs,
     handler: runNotificationWorker,
+  })
+
+  schedulerService.registerJob({
+    name: 'worker.stripe-payment-retry',
+    intervalMs,
+    handler: runStripePaymentRetryWorker,
   })
 
   schedulerService.registerJob({

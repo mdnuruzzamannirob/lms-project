@@ -9,6 +9,7 @@ export const runSubscriptionWorker = async (): Promise<void> => {
         {
           status: 'active',
           endsAt: { $lt: new Date() },
+          scheduledPlanId: null,
         },
         {
           $set: {

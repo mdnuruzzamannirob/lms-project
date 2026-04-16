@@ -21,10 +21,48 @@ import {
   toSubscriptionSummary,
 } from './utils'
 
+const buildSubscriptionPeriod = (
+  startAt: Date,
+  durationDays: number,
+  isFree: boolean,
+) => {
+  if (isFree) {
+    return {
+      endsAt: null,
+      currentPeriodEnd: null,
+    }
+  }
+
+  const endsAt = computeEndAt(startAt, durationDays)
+  return {
+    endsAt,
+    currentPeriodEnd: endsAt,
+  }
+}
+
+const STRIPE_RETRY_DELAYS_MS = [
+  15 * 60 * 1000,
+  6 * 60 * 60 * 1000,
+  24 * 60 * 60 * 1000,
+]
+
+const getStripeRetryDelay = (attemptCount: number): number | null => {
+  return STRIPE_RETRY_DELAYS_MS[attemptCount] ?? null
+}
+
+const clearStripeRetryState = (subscription: ISubscription) => {
+  subscription.pendingInvoiceId = null
+  subscription.retryStatus = null
+  subscription.retryAttemptCount = 0
+  subscription.retryNextAt = null
+  subscription.retryLastAttemptAt = null
+  subscription.retryLastError = null
+}
+
 const getMyCurrentSubscription = async (userId: string) => {
   const subscription = await SubscriptionModel.findOne({
     userId,
-    status: { $in: ['active', 'pending'] },
+    status: { $in: ['active', 'pending', 'past_due'] },
   }).sort({ createdAt: -1 })
 
   if (!subscription) {
@@ -70,16 +108,26 @@ const createSubscription = async (payload: CreateSubscriptionPayload) => {
   }
 
   const startAt = new Date()
-  const endAt = computeEndAt(startAt, plan.durationDays)
+  const period = buildSubscriptionPeriod(
+    startAt,
+    plan.durationDays,
+    plan.isFree,
+  )
 
   const subscription = await SubscriptionModel.create({
     userId: new Types.ObjectId(payload.userId),
     planId: plan._id,
     status: plan.isFree ? 'active' : 'pending',
     startedAt: startAt,
-    endsAt: endAt,
-    currentPeriodEnd: endAt,
-    autoRenew: payload.autoRenew,
+    endsAt: period.endsAt,
+    currentPeriodEnd: period.currentPeriodEnd,
+    autoRenew: plan.isFree ? false : payload.autoRenew,
+    pendingInvoiceId: null,
+    retryStatus: null,
+    retryAttemptCount: 0,
+    retryNextAt: null,
+    retryLastAttemptAt: null,
+    retryLastError: null,
   })
 
   return toSubscriptionSummary(subscription)
@@ -96,7 +144,11 @@ const createPendingSubscriptionForPlan = async (
   }
 
   const startAt = new Date()
-  const endAt = computeEndAt(startAt, plan.durationDays)
+  const period = buildSubscriptionPeriod(
+    startAt,
+    plan.durationDays,
+    plan.isFree,
+  )
 
   const existingPending = await SubscriptionModel.findOne({
     userId: payload.userId,
@@ -115,9 +167,15 @@ const createPendingSubscriptionForPlan = async (
         planId: plan._id,
         status: plan.isFree ? 'active' : 'pending',
         startedAt: startAt,
-        endsAt: endAt,
-        currentPeriodEnd: endAt,
-        autoRenew: payload.autoRenew ?? true,
+        endsAt: period.endsAt,
+        currentPeriodEnd: period.currentPeriodEnd,
+        autoRenew: plan.isFree ? false : (payload.autoRenew ?? true),
+        pendingInvoiceId: null,
+        retryStatus: null,
+        retryAttemptCount: 0,
+        retryNextAt: null,
+        retryLastAttemptAt: null,
+        retryLastError: null,
       },
     ],
     { session },
@@ -164,6 +222,7 @@ const activateSubscriptionFromPayment = async (
     target.latestPaymentId = new Types.ObjectId(payload.paymentId)
     target.cancellationReason = undefined
     target.cancelledAt = undefined
+    clearStripeRetryState(target)
 
     const payment = await mongoose
       .model('Payment')
@@ -232,7 +291,11 @@ const activateSubscriptionFromPayment = async (
   }
 }
 
-const cancelMySubscription = async (userId: string, reason: string) => {
+const cancelMySubscription = async (
+  userId: string,
+  reason: string,
+  immediate = false,
+) => {
   const session = await mongoose.startSession()
 
   try {
@@ -248,34 +311,52 @@ const cancelMySubscription = async (userId: string, reason: string) => {
         throw new AppError('Active subscription not found.', 404)
       }
 
+      const plan = await PlanModel.findById(subscription.planId).session(
+        session,
+      )
+
+      if (plan?.isFree) {
+        throw new AppError('Free plan cannot be cancelled or renewed.', 400)
+      }
+
       if (subscription.stripeSubscriptionId) {
         if (!config.providers.stripeSecretKey) {
           throw new AppError('STRIPE_SECRET_KEY is not configured.', 500)
         }
 
         const stripe = new Stripe(config.providers.stripeSecretKey)
-        const updated = await stripe.subscriptions.update(
-          subscription.stripeSubscriptionId,
-          {
-            cancel_at_period_end: true,
-          },
-        )
+        if (immediate) {
+          await stripe.subscriptions.cancel(subscription.stripeSubscriptionId)
+          subscription.status = 'cancelled'
+          subscription.cancelledAt = new Date()
+          subscription.autoRenew = false
+          subscription.cancellationReason = reason
+          subscription.currentPeriodEnd = new Date()
+          subscription.endsAt = new Date()
+        } else {
+          const updated = await stripe.subscriptions.update(
+            subscription.stripeSubscriptionId,
+            {
+              cancel_at_period_end: true,
+            },
+          )
 
-        subscription.autoRenew = false
-        subscription.cancellationReason = reason
+          subscription.autoRenew = false
+          subscription.cancellationReason = reason
 
-        const updatedData = updated as unknown as {
-          current_period_end?: number
+          const updatedData = updated as unknown as {
+            current_period_end?: number
+          }
+
+          if (typeof updatedData.current_period_end === 'number') {
+            const periodEnd = new Date(updatedData.current_period_end * 1000)
+            subscription.currentPeriodEnd = periodEnd
+            subscription.endsAt = periodEnd
+          }
+
+          // Keep status as active and wait for customer.subscription.deleted webhook
+          // to finalize cancellation in the database.
         }
-
-        if (typeof updatedData.current_period_end === 'number') {
-          const periodEnd = new Date(updatedData.current_period_end * 1000)
-          subscription.currentPeriodEnd = periodEnd
-          subscription.endsAt = periodEnd
-        }
-
-        // Keep status as active and wait for customer.subscription.deleted webhook
-        // to finalize cancellation in the database.
         await subscription.save({ session })
       } else {
         subscription.status = 'cancelled'
@@ -318,6 +399,10 @@ const renewMySubscription = async (userId: string) => {
         session,
       )
 
+      if (plan?.isFree) {
+        throw new AppError('Free plan cannot be renewed.', 400)
+      }
+
       if (!plan || !plan.isActive) {
         throw new AppError('Plan not found or inactive.', 404)
       }
@@ -358,6 +443,10 @@ const changePlanWithTransaction = async (
         throw new AppError('Active subscription not found.', 404)
       }
 
+      const currentPlan = await PlanModel.findById(current.planId).session(
+        session,
+      )
+
       const newPlan = await PlanModel.findById(payload.newPlanId).session(
         session,
       )
@@ -366,32 +455,105 @@ const changePlanWithTransaction = async (
         throw new AppError('Requested plan not found or inactive.', 404)
       }
 
-      current.status = payload.mode === 'upgrade' ? 'upgraded' : 'downgraded'
-      await current.save({ session })
-
-      const startAt = new Date()
-      const endsAt = computeEndAt(startAt, newPlan.durationDays)
-
-      const [newSubscription] = await SubscriptionModel.create(
-        [
-          {
-            userId: current.userId,
-            planId: newPlan._id,
-            previousPlanId: current.planId,
-            status: newPlan.isFree ? 'active' : 'pending',
-            startedAt: startAt,
-            endsAt,
-            autoRenew: current.autoRenew,
-          },
-        ],
-        { session },
-      )
-
-      if (!newSubscription) {
-        throw new AppError('Failed to create changed subscription.', 500)
+      if (currentPlan?.isFree) {
+        throw new AppError('Free plan cannot be upgraded or downgraded.', 400)
       }
 
-      result = newSubscription
+      if (currentPlan?._id.toString() === newPlan._id.toString()) {
+        throw new AppError('Requested plan is already active.', 400)
+      }
+
+      const currentPeriodEnd = current.currentPeriodEnd ?? current.endsAt
+      if (payload.mode === 'downgrade') {
+        if (!currentPeriodEnd) {
+          throw new AppError(
+            'Current subscription period is not available for downgrade scheduling.',
+            400,
+          )
+        }
+
+        current.scheduledPlanId = newPlan._id
+        current.scheduledEffectiveDate = currentPeriodEnd
+        current.autoRenew = false
+
+        if (newPlan.isFree) {
+          current.cancellationReason = 'Scheduled downgrade to free plan.'
+        }
+
+        await current.save({ session })
+
+        result = current
+        return
+      }
+
+      const startAt = new Date()
+
+      let upgradedPeriodEnd: Date | null = null
+
+      if (
+        current.stripeSubscriptionId &&
+        config.providers.stripeSecretKey &&
+        newPlan.stripePriceId
+      ) {
+        const stripe = new Stripe(config.providers.stripeSecretKey)
+        const stripeSubscription = await stripe.subscriptions.retrieve(
+          current.stripeSubscriptionId,
+        )
+        const currentItemId = stripeSubscription.items.data[0]?.id
+
+        if (!currentItemId) {
+          throw new AppError(
+            'Stripe subscription item not found for upgrade.',
+            400,
+          )
+        }
+
+        const updatedSubscription = await stripe.subscriptions.update(
+          current.stripeSubscriptionId,
+          {
+            cancel_at_period_end: false,
+            proration_behavior: 'create_prorations',
+            items: [
+              {
+                id: currentItemId,
+                price: newPlan.stripePriceId,
+              },
+            ],
+          },
+        )
+
+        const updatedPeriodEnd = (
+          updatedSubscription as unknown as {
+            current_period_end?: number
+          }
+        ).current_period_end
+
+        if (typeof updatedPeriodEnd === 'number') {
+          upgradedPeriodEnd = new Date(updatedPeriodEnd * 1000)
+        }
+      }
+
+      current.planId = newPlan._id
+      current.previousPlanId = currentPlan?._id ?? current.previousPlanId
+      current.status = 'active'
+      current.startedAt = current.startedAt ?? startAt
+      current.scheduledPlanId = null
+      current.scheduledEffectiveDate = null
+      current.autoRenew = newPlan.isFree ? false : current.autoRenew
+
+      if (newPlan.isFree) {
+        current.endsAt = null
+        current.currentPeriodEnd = null
+      } else {
+        const endsAt =
+          upgradedPeriodEnd ?? computeEndAt(startAt, newPlan.durationDays)
+        current.endsAt = endsAt
+        current.currentPeriodEnd = endsAt
+      }
+
+      await current.save({ session })
+
+      result = current
     })
 
     if (!result) {
@@ -450,6 +612,10 @@ const mapStripeStatusToLocal = (
 
   if (stripeStatus === 'active' || stripeStatus === 'trialing') {
     return 'active'
+  }
+
+  if (stripeStatus === 'past_due') {
+    return 'past_due'
   }
 
   if (
@@ -561,6 +727,11 @@ const syncSubscriptionFromStripe = async (
       { new: true, upsert: true },
     )
 
+    if (synced && payload.status === 'active') {
+      clearStripeRetryState(synced)
+      await synced.save()
+    }
+
     return synced
   }
 
@@ -589,6 +760,9 @@ const syncSubscriptionFromStripe = async (
     existing.status = mapStripeStatusToLocal(payload.status)
     if (payload.status === 'canceled') {
       existing.cancelledAt = now
+    }
+    if (payload.status === 'active' || payload.status === 'trialing') {
+      clearStripeRetryState(existing)
     }
   }
 
@@ -640,6 +814,7 @@ const markStripeInvoicePaid = async (
   subscription.status = payload.status
     ? mapStripeStatusToLocal(payload.status)
     : 'active'
+  clearStripeRetryState(subscription)
 
   if (payload.currentPeriodEnd) {
     subscription.currentPeriodEnd = payload.currentPeriodEnd
@@ -650,9 +825,15 @@ const markStripeInvoicePaid = async (
   return subscription
 }
 
-const markStripeInvoicePaymentFailed = async (
-  payload: Pick<SyncStripeSubscriptionPayload, 'stripeSubscriptionId'>,
-) => {
+const markStripeInvoicePaymentFailed = async (payload: {
+  stripeSubscriptionId: string
+  stripeInvoiceId: string
+  stripeCustomerId?: string
+  userId?: string
+  planId?: string
+  currentPeriodEnd?: Date | null
+  reason?: string
+}) => {
   const subscription = await SubscriptionModel.findOne({
     stripeSubscriptionId: payload.stripeSubscriptionId,
   })
@@ -661,8 +842,157 @@ const markStripeInvoicePaymentFailed = async (
     return null
   }
 
-  // Keep history but flag that renewal is no longer healthy.
-  subscription.status = 'pending'
+  subscription.status = 'past_due'
+  subscription.pendingInvoiceId = payload.stripeInvoiceId
+  subscription.retryStatus = 'scheduled'
+  subscription.retryAttemptCount = (subscription.retryAttemptCount ?? 0) + 1
+  subscription.retryLastAttemptAt = new Date()
+  subscription.retryLastError =
+    payload.reason ?? 'Stripe invoice payment failed.'
+
+  const delay = getStripeRetryDelay(subscription.retryAttemptCount - 1)
+  if (delay === null) {
+    subscription.retryStatus = 'exhausted'
+    subscription.retryNextAt = null
+    subscription.status = 'expired'
+    subscription.autoRenew = false
+    subscription.cancelledAt = new Date()
+    subscription.pendingInvoiceId = null
+  } else {
+    subscription.retryNextAt = new Date(Date.now() + delay)
+  }
+
+  if (payload.userId) {
+    subscription.userId = new Types.ObjectId(payload.userId)
+  }
+
+  if (payload.planId) {
+    subscription.planId = new Types.ObjectId(payload.planId)
+  }
+
+  if (payload.stripeCustomerId) {
+    await UserModel.updateOne(
+      { _id: subscription.userId },
+      { $set: { stripeCustomerId: payload.stripeCustomerId } },
+    )
+  }
+
+  if (payload.currentPeriodEnd) {
+    subscription.currentPeriodEnd = payload.currentPeriodEnd
+    subscription.endsAt = payload.currentPeriodEnd
+  }
+
+  await subscription.save()
+  return subscription
+}
+
+const retryStripeInvoicePayment = async (subscriptionId: string) => {
+  const subscription = await SubscriptionModel.findById(subscriptionId)
+
+  if (!subscription) {
+    throw new AppError('Subscription not found.', 404)
+  }
+
+  if (!subscription.pendingInvoiceId) {
+    throw new AppError('No pending Stripe invoice retry found.', 400)
+  }
+
+  if (!config.providers.stripeSecretKey) {
+    throw new AppError('STRIPE_SECRET_KEY is not configured.', 500)
+  }
+
+  if (subscription.retryStatus === 'processing') {
+    throw new AppError('Stripe invoice retry is already processing.', 409)
+  }
+
+  const stripe = new Stripe(config.providers.stripeSecretKey)
+
+  subscription.retryStatus = 'processing'
+  subscription.retryLastAttemptAt = new Date()
+  subscription.retryLastError = null
+  await subscription.save()
+
+  try {
+    await stripe.invoices.pay(subscription.pendingInvoiceId)
+    return subscription
+  } catch (error) {
+    subscription.retryAttemptCount += 1
+    const delay = getStripeRetryDelay(subscription.retryAttemptCount - 1)
+    subscription.retryNextAt =
+      delay === null ? null : new Date(Date.now() + delay)
+    subscription.retryLastError =
+      error instanceof Error ? error.message : String(error)
+
+    if (delay === null) {
+      subscription.retryStatus = 'exhausted'
+      subscription.status = 'expired'
+      subscription.autoRenew = false
+      subscription.cancelledAt = new Date()
+      subscription.pendingInvoiceId = null
+    } else {
+      subscription.retryStatus = 'scheduled'
+    }
+
+    await subscription.save()
+    throw error
+  }
+}
+
+const retryMyStripeInvoicePayment = async (userId: string) => {
+  const subscription = await SubscriptionModel.findOne({
+    userId,
+    pendingInvoiceId: { $ne: null },
+  }).sort({ updatedAt: -1 })
+
+  if (!subscription) {
+    throw new AppError('No pending Stripe invoice retry found.', 404)
+  }
+
+  return retryStripeInvoicePayment(subscription._id.toString())
+}
+
+const processDueStripeInvoiceRetries = async () => {
+  const dueSubscriptions = await SubscriptionModel.find({
+    retryStatus: 'scheduled',
+    retryNextAt: { $lte: new Date() },
+    pendingInvoiceId: { $ne: null },
+  }).select('_id')
+
+  const attempted: string[] = []
+
+  for (const subscription of dueSubscriptions) {
+    try {
+      await retryStripeInvoicePayment(subscription._id.toString())
+      attempted.push(subscription._id.toString())
+    } catch {
+      // Keep the worker moving so one bad retry does not block the rest.
+    }
+  }
+
+  return { attempted: attempted.length }
+}
+
+const markStripeInvoicePaymentRetrySucceeded = async (payload: {
+  stripeSubscriptionId: string
+  stripeInvoiceId?: string
+}) => {
+  const subscription = await SubscriptionModel.findOne({
+    stripeSubscriptionId: payload.stripeSubscriptionId,
+  })
+
+  if (!subscription) {
+    return null
+  }
+
+  if (
+    payload.stripeInvoiceId &&
+    subscription.pendingInvoiceId !== payload.stripeInvoiceId
+  ) {
+    return subscription
+  }
+
+  clearStripeRetryState(subscription)
+  subscription.status = 'active'
   await subscription.save()
   return subscription
 }
@@ -699,9 +1029,64 @@ const downgradeUserToFreePlan = async (
     endsAt,
     currentPeriodEnd: endsAt,
     autoRenew: true,
+    pendingInvoiceId: null,
+    retryStatus: null,
+    retryAttemptCount: 0,
+    retryNextAt: null,
+    retryLastAttemptAt: null,
+    retryLastError: null,
   })
 
   return downgraded
+}
+
+const finalizeScheduledPeriodEndTransition = async (subscriptionId: string) => {
+  const current = await SubscriptionModel.findById(subscriptionId)
+
+  if (!current) {
+    return null
+  }
+
+  const targetPlan = current.scheduledPlanId
+    ? await PlanModel.findById(current.scheduledPlanId)
+    : await PlanModel.findOne({ isFree: true, isActive: true })
+
+  if (!targetPlan || !targetPlan.isActive) {
+    return null
+  }
+
+  current.status = 'expired'
+  current.autoRenew = false
+  current.cancelledAt = new Date()
+  current.scheduledPlanId = null
+  current.scheduledEffectiveDate = null
+  await current.save()
+
+  const startAt = new Date()
+  const period = buildSubscriptionPeriod(
+    startAt,
+    targetPlan.durationDays,
+    targetPlan.isFree,
+  )
+
+  const nextSubscription = await SubscriptionModel.create({
+    userId: current.userId,
+    planId: targetPlan._id,
+    previousPlanId: current.planId,
+    status: 'active',
+    startedAt: startAt,
+    endsAt: period.endsAt,
+    currentPeriodEnd: period.currentPeriodEnd,
+    autoRenew: !targetPlan.isFree,
+    pendingInvoiceId: null,
+    retryStatus: null,
+    retryAttemptCount: 0,
+    retryNextAt: null,
+    retryLastAttemptAt: null,
+    retryLastError: null,
+  })
+
+  return nextSubscription
 }
 
 export const subscriptionsService = {
@@ -720,5 +1105,10 @@ export const subscriptionsService = {
   markStripeSubscriptionCancelled,
   markStripeInvoicePaid,
   markStripeInvoicePaymentFailed,
+  retryStripeInvoicePayment,
+  retryMyStripeInvoicePayment,
+  processDueStripeInvoiceRetries,
+  markStripeInvoicePaymentRetrySucceeded,
   downgradeUserToFreePlan,
+  finalizeScheduledPeriodEndTransition,
 }

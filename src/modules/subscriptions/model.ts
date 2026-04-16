@@ -27,6 +27,7 @@ const subscriptionSchema = new Schema<ISubscription>(
       enum: [
         'pending',
         'active',
+        'past_due',
         'cancelled',
         'expired',
         'upgraded',
@@ -42,13 +43,14 @@ const subscriptionSchema = new Schema<ISubscription>(
     },
     endsAt: {
       type: Date,
-      required: true,
+      required: false,
+      default: null,
       index: true,
     },
     currentPeriodEnd: {
       type: Date,
       required: false,
-      default: undefined,
+      default: null,
       index: true,
     },
     autoRenew: {
@@ -66,6 +68,55 @@ const subscriptionSchema = new Schema<ISubscription>(
       required: false,
       trim: true,
       default: undefined,
+    },
+    pendingInvoiceId: {
+      type: String,
+      required: false,
+      default: null,
+      index: true,
+    },
+    retryStatus: {
+      type: String,
+      enum: ['scheduled', 'processing', 'succeeded', 'exhausted'],
+      required: false,
+      default: null,
+      index: true,
+    },
+    retryAttemptCount: {
+      type: Number,
+      required: false,
+      default: 0,
+      min: 0,
+    },
+    retryNextAt: {
+      type: Date,
+      required: false,
+      default: null,
+      index: true,
+    },
+    retryLastAttemptAt: {
+      type: Date,
+      required: false,
+      default: null,
+    },
+    retryLastError: {
+      type: String,
+      required: false,
+      default: null,
+      trim: true,
+    },
+    scheduledPlanId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Plan',
+      required: false,
+      default: null,
+      index: true,
+    },
+    scheduledEffectiveDate: {
+      type: Date,
+      required: false,
+      default: null,
+      index: true,
     },
     latestPaymentId: {
       type: Schema.Types.ObjectId,
