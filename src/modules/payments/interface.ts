@@ -94,6 +94,7 @@ export interface WebhookVerificationResult {
   providerPaymentId: string
   reference?: string
   status: 'success' | 'failed' | 'pending'
+  eventType?: string
   raw: unknown
 }
 
@@ -101,7 +102,7 @@ export interface PaymentGatewayAdapter {
   readonly gateway: PaymentGateway
   initiate(payload: GatewayInitiatePayload): Promise<GatewayInitResult>
   verifyWebhook(
-    rawBody: string,
+    rawBody: string | Buffer,
     parsedBody: unknown,
     signature: string | undefined,
     headers: Record<string, string | string[] | undefined>,

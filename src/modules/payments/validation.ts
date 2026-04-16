@@ -12,6 +12,7 @@ const gatewaySchema = z.enum(['bkash', 'nagad', 'stripe', 'paypal'])
 export const paymentsValidation = {
   idParam: idParamSchema,
   initiateBody: z.object({
+    userId: objectIdString.optional(),
     planId: objectIdString,
     gateway: gatewaySchema,
     couponCode: z.string().trim().min(2).max(40).toUpperCase().optional(),

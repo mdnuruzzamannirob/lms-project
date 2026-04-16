@@ -46,10 +46,10 @@ if (config.isDevelopment) {
       theme: 'purple',
       layout: 'modern',
       defaultHttpClient: {
-        targetKey: 'javascript',
+        targetKey: 'js',
         clientKey: 'fetch',
       },
-    }),
+    } as any),
   )
 }
 
@@ -89,6 +89,13 @@ app.use(`${config.apiPrefix}/admin`, adminRateLimiter)
 app.use(`${config.apiPrefix}/search`, searchRateLimiter)
 app.use(`${config.apiPrefix}/admin/reports`, reportsRateLimiter)
 app.use(`${config.apiPrefix}/webhooks`, webhookRateLimiter)
+app.use(
+  `${config.apiPrefix}/webhooks/stripe`,
+  express.raw({
+    type: 'application/json',
+    limit: '1mb',
+  }),
+)
 app.use(
   express.json({
     limit: '1mb',

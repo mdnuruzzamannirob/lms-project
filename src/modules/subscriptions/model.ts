@@ -45,6 +45,12 @@ const subscriptionSchema = new Schema<ISubscription>(
       required: true,
       index: true,
     },
+    currentPeriodEnd: {
+      type: Date,
+      required: false,
+      default: undefined,
+      index: true,
+    },
     autoRenew: {
       type: Boolean,
       required: true,

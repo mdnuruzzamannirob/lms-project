@@ -1,5 +1,6 @@
 import type { RequestHandler } from 'express'
 
+import { AppError } from '../../common/errors/AppError'
 import { catchAsync } from '../../common/utils/catchAsync'
 import { getUserId } from '../../common/utils/getId'
 import { getIdParam } from '../../common/utils/getParam'
@@ -79,8 +80,19 @@ export const getPaymentById: RequestHandler = catchAsync(
 
 export const initiatePayment: RequestHandler = catchAsync(
   async (request, response) => {
+    const authUserId = getUserId(request)
+    const bodyUserId: unknown = request.body.userId
+
+    if (
+      typeof bodyUserId === 'string' &&
+      bodyUserId.trim() !== '' &&
+      bodyUserId !== authUserId
+    ) {
+      throw new AppError('Body userId must match the authenticated user.', 400)
+    }
+
     const data = await paymentsService.initiatePayment({
-      userId: getUserId(request),
+      userId: typeof bodyUserId === 'string' ? bodyUserId : authUserId,
       planId: request.body.planId,
       gateway: request.body.gateway,
       couponCode: request.body.couponCode,
@@ -132,8 +144,14 @@ export const handleWebhook: RequestHandler = catchAsync(
     // For Stripe: rawBody is the exact bytes captured by express.json()'s verify
     // callback, required for stripe.webhooks.constructEvent(). For all other
     // gateways the parsed body (request.body) is used directly.
+    const stripeRawBody =
+      gateway === 'stripe' && Buffer.isBuffer(request.body)
+        ? request.body
+        : undefined
     const rawBody =
-      request.rawBody?.toString('utf8') ?? JSON.stringify(request.body ?? {})
+      stripeRawBody ??
+      request.rawBody?.toString('utf8') ??
+      JSON.stringify(request.body ?? {})
     const parsedBody: unknown = request.body
 
     // Use the gateway-specific signature header.

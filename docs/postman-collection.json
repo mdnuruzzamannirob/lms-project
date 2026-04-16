@@ -101,7 +101,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"actorType\": \"staff\",\n  \"action\": \"2026-04-15T08:55:04.781Z\",\n  \"module\": \"aa\",\n  \"description\": \"Brief description here.\",\n  \"targetId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"targetType\": \"a\",\n  \"meta\": {}\n}",
+              "raw": "{\n  \"actorType\": \"staff\",\n  \"action\": \"2026-04-16T03:31:42.464Z\",\n  \"module\": \"aa\",\n  \"description\": \"Brief description here.\",\n  \"targetId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"targetType\": \"a\",\n  \"meta\": {}\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -137,7 +137,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/audit/logs?page=1&limit=20&actorType=staff&module=a&action=2026-04-15T08%3A55%3A04.781Z&from=2026-04-15T08%3A55%3A04.781Z&to=2026-04-15T08%3A55%3A04.781Z",
+              "raw": "{{baseUrl}}/api/v1/admin/audit/logs?page=1&limit=20&actorType=staff&module=a&action=2026-04-16T03%3A31%3A42.464Z&from=2026-04-16T03%3A31%3A42.464Z&to=2026-04-16T03%3A31%3A42.464Z",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -175,19 +175,19 @@
                 },
                 {
                   "key": "action",
-                  "value": "2026-04-15T08:55:04.781Z",
+                  "value": "2026-04-16T03:31:42.464Z",
                   "disabled": true,
                   "description": "Filter by Action."
                 },
                 {
                   "key": "from",
-                  "value": "2026-04-15T08:55:04.781Z",
+                  "value": "2026-04-16T03:31:42.464Z",
                   "disabled": true,
                   "description": "Start of date range (ISO 8601)."
                 },
                 {
                   "key": "to",
-                  "value": "2026-04-15T08:55:04.781Z",
+                  "value": "2026-04-16T03:31:42.464Z",
                   "disabled": true,
                   "description": "End of date range (ISO 8601)."
                 }
@@ -222,7 +222,7 @@
               ]
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/admin/audit/logs/export?actorType=staff&module=a&action=2026-04-15T08%3A55%3A04.781Z&from=2026-04-15T08%3A55%3A04.781Z&to=2026-04-15T08%3A55%3A04.781Z&format=json",
+              "raw": "{{baseUrl}}/api/v1/admin/audit/logs/export?actorType=staff&module=a&action=2026-04-16T03%3A31%3A42.464Z&from=2026-04-16T03%3A31%3A42.464Z&to=2026-04-16T03%3A31%3A42.464Z&format=json",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -249,19 +249,19 @@
                 },
                 {
                   "key": "action",
-                  "value": "2026-04-15T08:55:04.781Z",
+                  "value": "2026-04-16T03:31:42.464Z",
                   "disabled": true,
                   "description": "Filter by Action."
                 },
                 {
                   "key": "from",
-                  "value": "2026-04-15T08:55:04.781Z",
+                  "value": "2026-04-16T03:31:42.464Z",
                   "disabled": true,
                   "description": "Start of date range (ISO 8601)."
                 },
                 {
                   "key": "to",
-                  "value": "2026-04-15T08:55:04.781Z",
+                  "value": "2026-04-16T03:31:42.464Z",
                   "disabled": true,
                   "description": "End of date range (ISO 8601)."
                 },
@@ -326,6 +326,62 @@
                   "description": "Filter by Otp."
                 }
               ]
+            }
+          }
+        },
+        {
+          "name": "POST /api/v1/auth/2fa/backup-codes/regenerate",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (!pm.collectionVariables.get(\"userToken\")) throw new Error(\"userToken not set.\");"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{userToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/2fa/backup-codes/regenerate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "2fa",
+                "backup-codes",
+                "regenerate"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           }
         },
@@ -409,7 +465,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"otp\": \"123456\"\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1465,7 +1521,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Sample Title\",\n  \"slug\": \"aa\",\n  \"isbn\": \"aaaaaaaa\",\n  \"summary\": \"Brief description here.\",\n  \"description\": \"Brief description here.\",\n  \"language\": \"bn\",\n  \"pageCount\": 1,\n  \"publicationDate\": \"2026-04-15T08:55:04.781Z\",\n  \"edition\": \"2026-04-15T08:55:04.781Z\",\n  \"coverImage\": \"https://example.com/images/sample.jpg\",\n  \"publisherId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"accessLevel\": \"free\",\n  \"featured\": true,\n  \"status\": \"draft\",\n  \"availabilityStatus\": \"available\",\n  \"authorIds\": [\n    \"65f19a9a6f8f4a2b3c4d5e6f\"\n  ],\n  \"categoryIds\": [\n    \"65f19a9a6f8f4a2b3c4d5e6f\"\n  ],\n  \"tags\": [\n    \"a\"\n  ]\n}",
+              "raw": "{\n  \"title\": \"Sample Title\",\n  \"slug\": \"aa\",\n  \"isbn\": \"aaaaaaaa\",\n  \"summary\": \"Brief description here.\",\n  \"description\": \"Brief description here.\",\n  \"language\": \"bn\",\n  \"pageCount\": 1,\n  \"publicationDate\": \"2026-04-16T03:31:42.464Z\",\n  \"edition\": \"2026-04-16T03:31:42.464Z\",\n  \"coverImage\": \"https://example.com/images/sample.jpg\",\n  \"publisherId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"accessLevel\": \"free\",\n  \"featured\": true,\n  \"status\": \"draft\",\n  \"availabilityStatus\": \"available\",\n  \"authorIds\": [\n    \"65f19a9a6f8f4a2b3c4d5e6f\"\n  ],\n  \"categoryIds\": [\n    \"65f19a9a6f8f4a2b3c4d5e6f\"\n  ],\n  \"tags\": [\n    \"a\"\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1883,7 +1939,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"books\": [\n    {\n      \"title\": \"Sample Title\",\n      \"slug\": \"aa\",\n      \"isbn\": \"aaaaaaaa\",\n      \"summary\": \"Brief description here.\",\n      \"description\": \"Brief description here.\",\n      \"language\": \"bn\",\n      \"pageCount\": 1,\n      \"publicationDate\": \"2026-04-15T08:55:04.781Z\",\n      \"edition\": \"2026-04-15T08:55:04.781Z\",\n      \"coverImage\": \"https://example.com/images/sample.jpg\",\n      \"publisherId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n      \"accessLevel\": \"free\",\n      \"featured\": true,\n      \"status\": \"draft\",\n      \"availabilityStatus\": \"available\",\n      \"authorIds\": [\n        \"65f19a9a6f8f4a2b3c4d5e6f\"\n      ],\n      \"categoryIds\": [\n        \"65f19a9a6f8f4a2b3c4d5e6f\"\n      ],\n      \"tags\": [\n        \"a\"\n      ]\n    }\n  ]\n}",
+              "raw": "{\n  \"books\": [\n    {\n      \"title\": \"Sample Title\",\n      \"slug\": \"aa\",\n      \"isbn\": \"aaaaaaaa\",\n      \"summary\": \"Brief description here.\",\n      \"description\": \"Brief description here.\",\n      \"language\": \"bn\",\n      \"pageCount\": 1,\n      \"publicationDate\": \"2026-04-16T03:31:42.464Z\",\n      \"edition\": \"2026-04-16T03:31:42.464Z\",\n      \"coverImage\": \"https://example.com/images/sample.jpg\",\n      \"publisherId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n      \"accessLevel\": \"free\",\n      \"featured\": true,\n      \"status\": \"draft\",\n      \"availabilityStatus\": \"available\",\n      \"authorIds\": [\n        \"65f19a9a6f8f4a2b3c4d5e6f\"\n      ],\n      \"categoryIds\": [\n        \"65f19a9a6f8f4a2b3c4d5e6f\"\n      ],\n      \"tags\": [\n        \"a\"\n      ]\n    }\n  ]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2940,7 +2996,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"2026-04-15T08:55:04.781Z\"\n}",
+              "raw": "{\n  \"reason\": \"2026-04-16T03:31:42.464Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3642,7 +3698,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"2026-04-15T08:55:04.781Z\"\n}",
+              "raw": "{\n  \"reason\": \"2026-04-16T03:31:42.464Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4039,7 +4095,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"123456\",\n  \"name\": \"John Doe\",\n  \"description\": \"Brief description here.\",\n  \"price\": 99.99,\n  \"currency\": \"BDT\",\n  \"durationDays\": 1,\n  \"maxDevices\": 1,\n  \"downloadEnabled\": true,\n  \"accessLevel\": \"free\",\n  \"features\": [\n    \"a\"\n  ],\n  \"isFree\": true,\n  \"isActive\": true,\n  \"sortOrder\": \"desc\"\n}",
+              "raw": "{\n  \"code\": \"123456\",\n  \"name\": \"John Doe\",\n  \"description\": \"Brief description here.\",\n  \"price\": 99.99,\n  \"currency\": \"BDT\",\n  \"durationDays\": 1,\n  \"maxDevices\": 1,\n  \"downloadEnabled\": true,\n  \"accessLevel\": \"free\",\n  \"features\": [\n    \"a\"\n  ],\n  \"isFree\": true,\n  \"stripeProductId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"stripePriceId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"isActive\": true,\n  \"sortOrder\": \"desc\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4282,7 +4338,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"123456\",\n  \"title\": \"Sample Title\",\n  \"description\": \"Brief description here.\",\n  \"discountType\": \"percentage\",\n  \"discountValue\": 0,\n  \"maxDiscountAmount\": 99.99,\n  \"minOrderAmount\": 99.99,\n  \"totalLimit\": 1,\n  \"applicablePlanIds\": [\n    \"65f19a9a6f8f4a2b3c4d5e6f\"\n  ],\n  \"isActive\": true,\n  \"startsAt\": \"2026-04-15T08:55:04.781Z\",\n  \"endsAt\": \"2026-04-15T08:55:04.781Z\"\n}",
+              "raw": "{\n  \"code\": \"123456\",\n  \"title\": \"Sample Title\",\n  \"description\": \"Brief description here.\",\n  \"discountType\": \"percentage\",\n  \"discountValue\": 0,\n  \"maxDiscountAmount\": 99.99,\n  \"minOrderAmount\": 99.99,\n  \"totalLimit\": 1,\n  \"applicablePlanIds\": [\n    \"65f19a9a6f8f4a2b3c4d5e6f\"\n  ],\n  \"isActive\": true,\n  \"startsAt\": \"2026-04-16T03:31:42.464Z\",\n  \"endsAt\": \"2026-04-16T03:31:42.464Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4614,7 +4670,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Sample Title\",\n  \"description\": \"Brief description here.\",\n  \"discountPercentage\": 0,\n  \"applicablePlanIds\": [\n    \"65f19a9a6f8f4a2b3c4d5e6f\"\n  ],\n  \"isActive\": true,\n  \"startsAt\": \"2026-04-15T08:55:04.781Z\",\n  \"endsAt\": \"2026-04-15T08:55:04.781Z\"\n}",
+              "raw": "{\n  \"title\": \"Sample Title\",\n  \"description\": \"Brief description here.\",\n  \"discountPercentage\": 0,\n  \"applicablePlanIds\": [\n    \"65f19a9a6f8f4a2b3c4d5e6f\"\n  ],\n  \"isActive\": true,\n  \"startsAt\": \"2026-04-16T03:31:42.464Z\",\n  \"endsAt\": \"2026-04-16T03:31:42.464Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5155,7 +5211,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"description\": \"Brief description here.\",\n  \"permissions\": [\n    \"2026-04-15T08:55:04.781Z\"\n  ],\n  \"isSystem\": true\n}",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"description\": \"Brief description here.\",\n  \"permissions\": [\n    \"2026-04-16T03:31:42.464Z\"\n  ],\n  \"isSystem\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5362,7 +5418,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fileId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"location\": \"2026-04-15T08:55:04.781Z\",\n  \"page\": 1,\n  \"note\": \"a\"\n}",
+              "raw": "{\n  \"fileId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"location\": \"2026-04-16T03:31:42.464Z\",\n  \"page\": 1,\n  \"note\": \"a\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5796,7 +5852,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fileId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"startedAt\": \"2026-04-15T08:55:04.781Z\",\n  \"endedAt\": \"2026-04-15T08:55:04.781Z\",\n  \"progressDelta\": 0,\n  \"device\": \"aa\"\n}",
+              "raw": "{\n  \"fileId\": \"65f19a9a6f8f4a2b3c4d5e6f\",\n  \"startedAt\": \"2026-04-16T03:31:42.464Z\",\n  \"endedAt\": \"2026-04-16T03:31:42.464Z\",\n  \"progressDelta\": 0,\n  \"device\": \"aa\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6943,7 +6999,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"providers\": {\n    \"email\": \"user@example.com\",\n    \"push\": {\n      \"enabled\": true\n    },\n    \"storage\": {\n      \"enabled\": true,\n      \"basePath\": \"a\"\n    },\n    \"payment\": {\n      \"enabled\": true,\n      \"currency\": \"BDT\"\n    }\n  },\n  \"templates\": {\n    \"email\": \"user@example.com\",\n    \"push\": {}\n  },\n  \"maintenance\": {\n    \"enabled\": true,\n    \"message\": \"aa\",\n    \"startsAt\": \"2026-04-15T08:55:04.781Z\",\n    \"endsAt\": \"2026-04-15T08:55:04.781Z\",\n    \"allowedIps\": [\n      \"aaa\"\n    ]\n  },\n  \"trial\": {\n    \"enabled\": true,\n    \"durationDays\": 0,\n    \"accessLevel\": \"free\",\n    \"autoActivate\": true\n  }\n}",
+              "raw": "{\n  \"providers\": {\n    \"email\": \"user@example.com\",\n    \"push\": {\n      \"enabled\": true\n    },\n    \"storage\": {\n      \"enabled\": true,\n      \"basePath\": \"a\"\n    },\n    \"payment\": {\n      \"enabled\": true,\n      \"currency\": \"BDT\"\n    }\n  },\n  \"templates\": {\n    \"email\": \"user@example.com\",\n    \"push\": {}\n  },\n  \"maintenance\": {\n    \"enabled\": true,\n    \"message\": \"aa\",\n    \"startsAt\": \"2026-04-16T03:31:42.464Z\",\n    \"endsAt\": \"2026-04-16T03:31:42.464Z\",\n    \"allowedIps\": [\n      \"aaa\"\n    ]\n  },\n  \"trial\": {\n    \"enabled\": true,\n    \"durationDays\": 0,\n    \"accessLevel\": \"free\",\n    \"autoActivate\": true\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -8160,7 +8216,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"2026-04-15T08:55:04.781Z\"\n}",
+              "raw": "{\n  \"reason\": \"2026-04-16T03:31:42.464Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

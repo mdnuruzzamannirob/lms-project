@@ -110,7 +110,7 @@ export class SslCommerzBangladeshAdapter implements PaymentGatewayAdapter {
   }
 
   async verifyWebhook(
-    rawBody: string,
+    rawBody: string | Buffer,
     parsedBody: unknown,
     _signature: string | undefined,
     _headers: Record<string, string | string[] | undefined>,
@@ -128,7 +128,10 @@ export class SslCommerzBangladeshAdapter implements PaymentGatewayAdapter {
     // Fallback: try parsing rawBody as form-encoded data
     if (!valId) {
       try {
-        valId = new URLSearchParams(rawBody).get('val_id') ?? undefined
+        const rawString = Buffer.isBuffer(rawBody)
+          ? rawBody.toString('utf8')
+          : rawBody
+        valId = new URLSearchParams(rawString).get('val_id') ?? undefined
       } catch {
         // ignore
       }
@@ -241,7 +244,7 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
   }
 
   async verifyWebhook(
-    rawBody: string,
+    rawBody: string | Buffer,
     _parsedBody: unknown,
     signature: string | undefined,
     _headers: Record<string, string | string[] | undefined>,
@@ -260,8 +263,11 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
     let event: Stripe.Event
 
     try {
+      const stripePayload = Buffer.isBuffer(rawBody)
+        ? rawBody
+        : Buffer.from(rawBody, 'utf8')
       event = stripe.webhooks.constructEvent(
-        rawBody,
+        stripePayload,
         signature,
         config.providers.stripeWebhookSecret,
       )
@@ -288,6 +294,7 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
           typeof session.id === 'string' ? session.id : event.id,
         ...(reference ? { reference } : {}),
         status,
+        eventType: event.type,
         raw: {
           eventType: event.type,
           stripeCustomerId:
@@ -295,6 +302,18 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
           stripeSubscriptionId:
             typeof session.subscription === 'string'
               ? session.subscription
+              : undefined,
+          paymentIntentId:
+            typeof session.payment_intent === 'string'
+              ? session.payment_intent
+              : undefined,
+          userId:
+            typeof session.metadata?.['userId'] === 'string'
+              ? session.metadata['userId']
+              : undefined,
+          planId:
+            typeof session.metadata?.['planId'] === 'string'
+              ? session.metadata['planId']
               : undefined,
         },
       }
@@ -305,6 +324,9 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
       event.type === 'customer.subscription.deleted'
     ) {
       const subscription = event.data.object as Stripe.Subscription
+      const subscriptionData = subscription as unknown as {
+        current_period_end?: number
+      }
       const reference =
         typeof subscription.metadata?.['reference'] === 'string'
           ? subscription.metadata['reference']
@@ -328,6 +350,7 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
         providerPaymentId: subscription.id,
         ...(reference ? { reference } : {}),
         status,
+        eventType: event.type,
         raw: {
           eventType: event.type,
           stripeCustomerId:
@@ -335,6 +358,132 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
               ? subscription.customer
               : undefined,
           stripeSubscriptionId: subscription.id,
+          stripePriceId: subscription.items.data[0]?.price?.id ?? undefined,
+          status: subscription.status,
+          currentPeriodEnd:
+            typeof subscriptionData.current_period_end === 'number'
+              ? new Date(
+                  subscriptionData.current_period_end * 1000,
+                ).toISOString()
+              : undefined,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          userId:
+            typeof subscription.metadata?.['userId'] === 'string'
+              ? subscription.metadata['userId']
+              : undefined,
+          planId:
+            typeof subscription.metadata?.['planId'] === 'string'
+              ? subscription.metadata['planId']
+              : undefined,
+        },
+      }
+    }
+
+    if (
+      event.type === 'invoice.paid' ||
+      event.type === 'invoice.payment_failed'
+    ) {
+      const invoice = event.data.object as Stripe.Invoice
+      const invoiceData = invoice as unknown as {
+        subscription_details?: {
+          subscription?: string | { id?: string }
+        }
+        payment_intent?: string | { id?: string } | null
+      }
+      const invoiceSubscriptionId =
+        typeof invoiceData.subscription_details?.subscription === 'string'
+          ? invoiceData.subscription_details.subscription
+          : typeof invoiceData.subscription_details?.subscription ===
+                'object' &&
+              invoiceData.subscription_details.subscription &&
+              typeof invoiceData.subscription_details.subscription.id ===
+                'string'
+            ? invoiceData.subscription_details.subscription.id
+            : undefined
+      const invoiceCustomerId =
+        typeof invoice.customer === 'string' ? invoice.customer : undefined
+      const paymentIntentId =
+        typeof invoiceData.payment_intent === 'string'
+          ? invoiceData.payment_intent
+          : typeof invoiceData.payment_intent === 'object' &&
+              invoiceData.payment_intent &&
+              typeof invoiceData.payment_intent.id === 'string'
+            ? invoiceData.payment_intent.id
+            : undefined
+      const firstLine = invoice.lines.data[0] as
+        | {
+            pricing?: {
+              price_details?: {
+                price?: string
+              }
+            }
+            period?: {
+              end?: number
+            }
+          }
+        | undefined
+      const stripePriceId =
+        typeof firstLine?.pricing?.price_details?.price === 'string'
+          ? firstLine.pricing.price_details.price
+          : undefined
+      const periodEndFromLine = firstLine?.period?.end
+      const currentPeriodEnd =
+        typeof periodEndFromLine === 'number'
+          ? new Date(periodEndFromLine * 1000).toISOString()
+          : undefined
+      const status: 'success' | 'failed' =
+        event.type === 'invoice.paid' ? 'success' : 'failed'
+
+      return {
+        provider: 'stripe',
+        eventId: event.id,
+        providerPaymentId:
+          paymentIntentId ??
+          (typeof invoice.id === 'string' ? invoice.id : event.id),
+        status,
+        eventType: event.type,
+        raw: {
+          eventType: event.type,
+          stripeCustomerId: invoiceCustomerId,
+          stripeSubscriptionId: invoiceSubscriptionId,
+          paymentIntentId,
+          stripePriceId,
+          currentPeriodEnd,
+          status:
+            typeof invoice.status === 'string' ? invoice.status : undefined,
+          userId:
+            typeof invoice.metadata?.['userId'] === 'string'
+              ? invoice.metadata['userId']
+              : undefined,
+          planId:
+            typeof invoice.metadata?.['planId'] === 'string'
+              ? invoice.metadata['planId']
+              : undefined,
+        },
+      }
+    }
+
+    if (event.type === 'charge.refunded') {
+      const charge = event.data.object as Stripe.Charge
+      const paymentIntentId =
+        typeof charge.payment_intent === 'string'
+          ? charge.payment_intent
+          : undefined
+
+      return {
+        provider: 'stripe',
+        eventId: event.id,
+        providerPaymentId: paymentIntentId ?? charge.id,
+        status: 'pending',
+        eventType: event.type,
+        raw: {
+          eventType: event.type,
+          paymentIntentId,
+          chargeId: charge.id,
+          refundReason:
+            typeof charge.refunds?.data?.[0]?.reason === 'string'
+              ? charge.refunds.data[0].reason
+              : undefined,
         },
       }
     }
@@ -358,8 +507,10 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
         providerPaymentId: pi.id,
         ...(reference ? { reference } : {}),
         status,
+        eventType: event.type,
         raw: {
           eventType: event.type,
+          paymentIntentId: pi.id,
         },
       }
     }
@@ -369,6 +520,7 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
       eventId: event.id,
       providerPaymentId: event.id,
       status: 'pending',
+      eventType: event.type,
       raw: {
         eventType: event.type,
       },
@@ -470,15 +622,18 @@ export class PaypalGatewayAdapter implements PaymentGatewayAdapter {
   }
 
   async verifyWebhook(
-    rawBody: string,
+    rawBody: string | Buffer,
     parsedBody: unknown,
     _signature: string | undefined,
     headers: Record<string, string | string[] | undefined>,
   ): Promise<WebhookVerificationResult> {
+    const rawString = Buffer.isBuffer(rawBody)
+      ? rawBody.toString('utf8')
+      : rawBody
     const webhookEvent: Record<string, unknown> =
       parsedBody != null && typeof parsedBody === 'object'
         ? (parsedBody as Record<string, unknown>)
-        : (JSON.parse(rawBody) as Record<string, unknown>)
+        : (JSON.parse(rawString) as Record<string, unknown>)
 
     // Verify signature via PayPal REST API if PAYPAL_WEBHOOK_ID is configured
     if (config.providers.paypalWebhookId) {
@@ -739,6 +894,14 @@ export const applyVerificationTransaction = async (
     throw new AppError('Refunded payment cannot be verified again.', 400)
   }
   if (payment.status === 'success') {
+    if (verification.metadata) {
+      payment.metadata = {
+        ...(payment.metadata ?? {}),
+        ...verification.metadata,
+      }
+      await payment.save({ session })
+    }
+
     return payment
   }
 

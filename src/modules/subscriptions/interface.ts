@@ -16,6 +16,7 @@ export interface ISubscription {
   status: SubscriptionStatus
   startedAt: Date
   endsAt: Date
+  currentPeriodEnd: Date | undefined
   autoRenew: boolean
   cancelledAt: Date | undefined
   cancellationReason: string | undefined

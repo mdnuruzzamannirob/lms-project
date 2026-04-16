@@ -11,6 +11,7 @@ export const toSubscriptionSummary = (subscription: ISubscription) => {
     status: subscription.status,
     startedAt: subscription.startedAt.toISOString(),
     endsAt: subscription.endsAt.toISOString(),
+    currentPeriodEnd: subscription.currentPeriodEnd?.toISOString(),
     autoRenew: subscription.autoRenew,
     cancelledAt: subscription.cancelledAt?.toISOString(),
     cancellationReason: subscription.cancellationReason,

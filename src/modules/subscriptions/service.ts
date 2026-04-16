@@ -1,6 +1,8 @@
 import mongoose, { ClientSession, Types } from 'mongoose'
+import Stripe from 'stripe'
 
 import { AppError } from '../../common/errors/AppError'
+import { config } from '../../config'
 import { UserModel } from '../auth/model'
 import { PlanModel } from '../plans/model'
 import type {
@@ -76,6 +78,7 @@ const createSubscription = async (payload: CreateSubscriptionPayload) => {
     status: plan.isFree ? 'active' : 'pending',
     startedAt: startAt,
     endsAt: endAt,
+    currentPeriodEnd: endAt,
     autoRenew: payload.autoRenew,
   })
 
@@ -113,6 +116,7 @@ const createPendingSubscriptionForPlan = async (
         status: plan.isFree ? 'active' : 'pending',
         startedAt: startAt,
         endsAt: endAt,
+        currentPeriodEnd: endAt,
         autoRenew: payload.autoRenew ?? true,
       },
     ],
@@ -174,9 +178,21 @@ const activateSubscriptionFromPayment = async (
       typeof payment?.metadata?.['stripeCustomerId'] === 'string'
         ? payment.metadata['stripeCustomerId']
         : undefined
+    const stripeCurrentPeriodEnd =
+      typeof payment?.metadata?.['currentPeriodEnd'] === 'string'
+        ? new Date(payment.metadata['currentPeriodEnd'])
+        : undefined
 
     if (stripeSubscriptionId) {
       target.stripeSubscriptionId = stripeSubscriptionId
+    }
+
+    if (
+      stripeCurrentPeriodEnd &&
+      !Number.isNaN(stripeCurrentPeriodEnd.getTime())
+    ) {
+      target.currentPeriodEnd = stripeCurrentPeriodEnd
+      target.endsAt = stripeCurrentPeriodEnd
     }
 
     await target.save({ session: transactionSession })
@@ -232,11 +248,42 @@ const cancelMySubscription = async (userId: string, reason: string) => {
         throw new AppError('Active subscription not found.', 404)
       }
 
-      subscription.status = 'cancelled'
-      subscription.cancelledAt = new Date()
-      subscription.cancellationReason = reason
-      subscription.autoRenew = false
-      await subscription.save({ session })
+      if (subscription.stripeSubscriptionId) {
+        if (!config.providers.stripeSecretKey) {
+          throw new AppError('STRIPE_SECRET_KEY is not configured.', 500)
+        }
+
+        const stripe = new Stripe(config.providers.stripeSecretKey)
+        const updated = await stripe.subscriptions.update(
+          subscription.stripeSubscriptionId,
+          {
+            cancel_at_period_end: true,
+          },
+        )
+
+        subscription.autoRenew = false
+        subscription.cancellationReason = reason
+
+        const updatedData = updated as unknown as {
+          current_period_end?: number
+        }
+
+        if (typeof updatedData.current_period_end === 'number') {
+          const periodEnd = new Date(updatedData.current_period_end * 1000)
+          subscription.currentPeriodEnd = periodEnd
+          subscription.endsAt = periodEnd
+        }
+
+        // Keep status as active and wait for customer.subscription.deleted webhook
+        // to finalize cancellation in the database.
+        await subscription.save({ session })
+      } else {
+        subscription.status = 'cancelled'
+        subscription.cancelledAt = new Date()
+        subscription.cancellationReason = reason
+        subscription.autoRenew = false
+        await subscription.save({ session })
+      }
 
       result = subscription
     })
@@ -385,6 +432,278 @@ const adminUpdateSubscription = async (
   return toSubscriptionSummary(subscription)
 }
 
+type SyncStripeSubscriptionPayload = {
+  stripeSubscriptionId: string
+  stripeCustomerId?: string
+  userId?: string
+  planId?: string
+  stripePriceId?: string
+  status?: string
+  currentPeriodEnd?: Date
+  cancelAtPeriodEnd?: boolean
+}
+
+const mapStripeStatusToLocal = (
+  stripeStatus: string | undefined,
+): ISubscription['status'] => {
+  if (!stripeStatus) return 'active'
+
+  if (stripeStatus === 'active' || stripeStatus === 'trialing') {
+    return 'active'
+  }
+
+  if (
+    stripeStatus === 'canceled' ||
+    stripeStatus === 'incomplete_expired' ||
+    stripeStatus === 'unpaid'
+  ) {
+    return 'cancelled'
+  }
+
+  return 'pending'
+}
+
+const resolvePlanIdForStripeSync = async (
+  payload: SyncStripeSubscriptionPayload,
+): Promise<Types.ObjectId | undefined> => {
+  if (payload.planId) {
+    const plan = await PlanModel.findById(payload.planId).select('_id').lean()
+    if (plan?._id) {
+      return plan._id
+    }
+  }
+
+  if (payload.stripePriceId) {
+    const plan = await PlanModel.findOne({
+      stripePriceId: payload.stripePriceId,
+      isActive: true,
+    })
+      .select('_id')
+      .lean()
+
+    if (plan?._id) {
+      return plan._id
+    }
+  }
+
+  return undefined
+}
+
+const resolveUserIdForStripeSync = async (
+  payload: SyncStripeSubscriptionPayload,
+): Promise<Types.ObjectId | undefined> => {
+  if (payload.userId) {
+    return new Types.ObjectId(payload.userId)
+  }
+
+  if (payload.stripeCustomerId) {
+    const user = await UserModel.findOne({
+      stripeCustomerId: payload.stripeCustomerId,
+    })
+      .select('_id')
+      .lean()
+
+    if (user?._id) {
+      return user._id
+    }
+  }
+
+  return undefined
+}
+
+const syncSubscriptionFromStripe = async (
+  payload: SyncStripeSubscriptionPayload,
+) => {
+  const userObjectId = await resolveUserIdForStripeSync(payload)
+  const planObjectId = await resolvePlanIdForStripeSync(payload)
+  const now = new Date()
+  const periodEnd = payload.currentPeriodEnd ?? now
+
+  if (userObjectId && payload.stripeCustomerId) {
+    await UserModel.updateOne(
+      { _id: userObjectId },
+      { $set: { stripeCustomerId: payload.stripeCustomerId } },
+    )
+  }
+
+  if (userObjectId && planObjectId) {
+    const synced = await SubscriptionModel.findOneAndUpdate(
+      { stripeSubscriptionId: payload.stripeSubscriptionId },
+      {
+        $set: {
+          userId: userObjectId,
+          planId: planObjectId,
+          stripeSubscriptionId: payload.stripeSubscriptionId,
+          ...(payload.currentPeriodEnd
+            ? { currentPeriodEnd: payload.currentPeriodEnd, endsAt: periodEnd }
+            : {}),
+          ...(typeof payload.cancelAtPeriodEnd === 'boolean'
+            ? { autoRenew: !payload.cancelAtPeriodEnd }
+            : {}),
+          ...(payload.status
+            ? { status: mapStripeStatusToLocal(payload.status) }
+            : {}),
+          ...(payload.status === 'canceled' ? { cancelledAt: now } : {}),
+        },
+        $setOnInsert: {
+          startedAt: now,
+          endsAt: periodEnd,
+          currentPeriodEnd: periodEnd,
+          autoRenew:
+            typeof payload.cancelAtPeriodEnd === 'boolean'
+              ? !payload.cancelAtPeriodEnd
+              : true,
+          status: payload.status
+            ? mapStripeStatusToLocal(payload.status)
+            : 'active',
+        },
+      },
+      { new: true, upsert: true },
+    )
+
+    return synced
+  }
+
+  const existing = await SubscriptionModel.findOne({
+    stripeSubscriptionId: payload.stripeSubscriptionId,
+  })
+
+  if (!existing) {
+    return null
+  }
+
+  if (planObjectId) {
+    existing.planId = planObjectId
+  }
+
+  if (payload.currentPeriodEnd) {
+    existing.currentPeriodEnd = payload.currentPeriodEnd
+    existing.endsAt = payload.currentPeriodEnd
+  }
+
+  if (typeof payload.cancelAtPeriodEnd === 'boolean') {
+    existing.autoRenew = !payload.cancelAtPeriodEnd
+  }
+
+  if (payload.status) {
+    existing.status = mapStripeStatusToLocal(payload.status)
+    if (payload.status === 'canceled') {
+      existing.cancelledAt = now
+    }
+  }
+
+  await existing.save()
+  return existing
+}
+
+const markStripeSubscriptionCancelled = async (
+  payload: Pick<
+    SyncStripeSubscriptionPayload,
+    'stripeSubscriptionId' | 'currentPeriodEnd'
+  >,
+) => {
+  const subscription = await SubscriptionModel.findOne({
+    stripeSubscriptionId: payload.stripeSubscriptionId,
+  })
+
+  if (!subscription) {
+    return null
+  }
+
+  subscription.status = 'cancelled'
+  subscription.autoRenew = false
+  subscription.cancelledAt = new Date()
+
+  if (payload.currentPeriodEnd) {
+    subscription.currentPeriodEnd = payload.currentPeriodEnd
+    subscription.endsAt = payload.currentPeriodEnd
+  }
+
+  await subscription.save()
+  return subscription
+}
+
+const markStripeInvoicePaid = async (
+  payload: Pick<
+    SyncStripeSubscriptionPayload,
+    'stripeSubscriptionId' | 'currentPeriodEnd' | 'status'
+  >,
+) => {
+  const subscription = await SubscriptionModel.findOne({
+    stripeSubscriptionId: payload.stripeSubscriptionId,
+  })
+
+  if (!subscription) {
+    return null
+  }
+
+  subscription.status = payload.status
+    ? mapStripeStatusToLocal(payload.status)
+    : 'active'
+
+  if (payload.currentPeriodEnd) {
+    subscription.currentPeriodEnd = payload.currentPeriodEnd
+    subscription.endsAt = payload.currentPeriodEnd
+  }
+
+  await subscription.save()
+  return subscription
+}
+
+const markStripeInvoicePaymentFailed = async (
+  payload: Pick<SyncStripeSubscriptionPayload, 'stripeSubscriptionId'>,
+) => {
+  const subscription = await SubscriptionModel.findOne({
+    stripeSubscriptionId: payload.stripeSubscriptionId,
+  })
+
+  if (!subscription) {
+    return null
+  }
+
+  // Keep history but flag that renewal is no longer healthy.
+  subscription.status = 'pending'
+  await subscription.save()
+  return subscription
+}
+
+const downgradeUserToFreePlan = async (
+  userId: string,
+  previousPlanId: string,
+) => {
+  const freePlan = await PlanModel.findOne({ isFree: true, isActive: true })
+
+  if (!freePlan) {
+    return null
+  }
+
+  const existingFree = await SubscriptionModel.findOne({
+    userId,
+    planId: freePlan._id,
+    status: 'active',
+  })
+
+  if (existingFree) {
+    return existingFree
+  }
+
+  const startAt = new Date()
+  const endsAt = computeEndAt(startAt, freePlan.durationDays)
+
+  const downgraded = await SubscriptionModel.create({
+    userId: new Types.ObjectId(userId),
+    planId: freePlan._id,
+    previousPlanId: new Types.ObjectId(previousPlanId),
+    status: 'active',
+    startedAt: startAt,
+    endsAt,
+    currentPeriodEnd: endsAt,
+    autoRenew: true,
+  })
+
+  return downgraded
+}
+
 export const subscriptionsService = {
   getMyCurrentSubscription,
   getMySubscriptionHistory,
@@ -397,4 +716,9 @@ export const subscriptionsService = {
   changePlanWithTransaction,
   activateSubscriptionFromPayment,
   adminUpdateSubscription,
+  syncSubscriptionFromStripe,
+  markStripeSubscriptionCancelled,
+  markStripeInvoicePaid,
+  markStripeInvoicePaymentFailed,
+  downgradeUserToFreePlan,
 }
