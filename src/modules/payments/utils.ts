@@ -320,8 +320,11 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
     }
 
     if (
+      event.type === 'customer.subscription.created' ||
       event.type === 'customer.subscription.updated' ||
-      event.type === 'customer.subscription.deleted'
+      event.type === 'customer.subscription.deleted' ||
+      event.type === 'customer.subscription.resumed' ||
+      event.type === 'customer.subscription.paused'
     ) {
       const subscription = event.data.object as Stripe.Subscription
       const subscriptionData = subscription as unknown as {

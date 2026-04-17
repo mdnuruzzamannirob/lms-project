@@ -770,8 +770,14 @@ const processWebhook = async (
       )
 
       if (
-        eventType === 'customer.subscription.updated' &&
-        stripeSubscriptionId
+        stripeSubscriptionId &&
+        typeof eventType === 'string' &&
+        [
+          'customer.subscription.created',
+          'customer.subscription.updated',
+          'customer.subscription.resumed',
+          'customer.subscription.paused',
+        ].includes(eventType)
       ) {
         const syncPayload = {
           stripeSubscriptionId,

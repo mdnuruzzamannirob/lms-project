@@ -6,7 +6,7 @@ export const authConstants = {
   loginMaxAttempts: 5,
   lockoutMinutes: 15,
   loginHistoryDefaultLimit: 10,
-  loginHistoryMaxLimit: 30,
+  loginHistoryMaxLimit: 10,
 } as const
 
 export const USER_REFRESH_COOKIE_NAME = 'stackread_refresh'

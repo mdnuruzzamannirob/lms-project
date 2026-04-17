@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { authConstants } from './constants'
+
 export const authValidation = {
   registerBody: z.object({
     firstName: z.string().trim().min(1).max(100),
@@ -98,10 +100,17 @@ export const authValidation = {
     currentPassword: z.string().min(8).max(72),
   }),
   updateMyProfilePictureBody: z.object({
-    profilePicture: z
-      .union([z.string().trim().url(), z.literal('')])
-      .optional(),
-  }),
+    profilePicture: z.union([z.string().trim().url(), z.literal('')]).optional(),
+    fileBase64: z.string().trim().min(16).optional(),
+    fileName: z.string().trim().min(1).max(160).optional(),
+  }).refine(
+    (value) =>
+      typeof value.profilePicture !== 'undefined' ||
+      typeof value.fileBase64 === 'string',
+    {
+      message: 'Either profilePicture or fileBase64 is required',
+    },
+  ),
   regenerateBackupCodesBody: z.object({
     otp: z
       .string()
@@ -111,7 +120,13 @@ export const authValidation = {
     currentPassword: z.string().min(8).max(72),
   }),
   loginHistoryQuery: z.object({
-    limit: z.coerce.number().int().min(1).max(30).optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(authConstants.loginHistoryMaxLimit)
+      .default(authConstants.loginHistoryDefaultLimit),
   }),
   updateMeBody: z
     .object({

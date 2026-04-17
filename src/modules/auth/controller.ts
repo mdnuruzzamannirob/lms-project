@@ -308,12 +308,21 @@ const getMe: RequestHandler = catchAsync(async (request, response) => {
 
 const getMyLoginHistory: RequestHandler = catchAsync(
   async (request, response) => {
+    const requestedPage =
+      typeof request.query.page === 'number' ? request.query.page : undefined
     const requestedLimit =
       typeof request.query.limit === 'number' ? request.query.limit : undefined
 
+    const pagination = {
+      ...(typeof requestedPage === 'number' ? { page: requestedPage } : {}),
+      ...(typeof requestedLimit === 'number'
+        ? { limit: requestedLimit }
+        : {}),
+    }
+
     const history = await authService.getMyLoginHistory(
       ensureAuthenticatedUser(request),
-      requestedLimit,
+      Object.keys(pagination).length ? pagination : undefined,
     )
 
     sendResponse(response, {

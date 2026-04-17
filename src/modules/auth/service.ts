@@ -4,6 +4,7 @@ import speakeasy from 'speakeasy'
 import { AppError } from '../../common/errors/AppError'
 import { auditService } from '../../common/services/audit.service'
 import { emailService } from '../../common/services/email.service'
+import { storageService } from '../../common/services/storage.service'
 import {
   compareScryptHash,
   generateRandomToken,
@@ -39,6 +40,7 @@ import type {
   SuccessResponse,
   UpdateMePayload,
   UpdateProfilePicturePayload,
+  UserLoginHistoryPage,
   UserLoginHistoryItem,
   UserLoginResult,
   UserNotificationPreferences,
@@ -90,6 +92,38 @@ const assertUserCurrentPassword = async (
 
   if (!isPasswordValid) {
     throw new AppError('Current password is incorrect.', 401)
+  }
+}
+
+const MAX_PROFILE_PICTURE_BYTES = 512 * 1024
+
+const parseBase64Upload = (value: string): {
+  buffer: Buffer
+  contentType: string
+  defaultFileName: string
+} => {
+  const trimmed = value.trim()
+  const dataUrlMatch = trimmed.match(/^data:([^;,]+);base64,(.+)$/)
+
+  const contentType = dataUrlMatch?.[1]?.trim() || 'application/octet-stream'
+  const encoded = dataUrlMatch?.[2] ?? trimmed
+  const buffer = Buffer.from(encoded, 'base64')
+
+  if (!buffer.length) {
+    throw new AppError('Invalid base64 file payload.', 400)
+  }
+
+  const extensionByMime: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'image/gif': 'gif',
+  }
+
+  return {
+    buffer,
+    contentType,
+    defaultFileName: `profile-picture.${extensionByMime[contentType] ?? 'bin'}`,
   }
 }
 
@@ -651,22 +685,37 @@ const getMe = async (userId: string): Promise<SanitizedUser> => {
 
 const getMyLoginHistory = async (
   userId: string,
-  limit?: number,
-): Promise<UserLoginHistoryItem[]> => {
+  pagination?: {
+    page?: number
+    limit?: number
+  },
+): Promise<UserLoginHistoryPage> => {
+  const requestedPage =
+    typeof pagination?.page === 'number' && Number.isInteger(pagination.page)
+      ? pagination.page
+      : 1
   const requestedLimit =
-    typeof limit === 'number' && Number.isInteger(limit)
-      ? limit
+    typeof pagination?.limit === 'number' &&
+    Number.isInteger(pagination.limit)
+      ? pagination.limit
       : authConstants.loginHistoryDefaultLimit
+  const safePage = Math.max(requestedPage, 1)
   const safeLimit = Math.min(
     Math.max(requestedLimit, 1),
     authConstants.loginHistoryMaxLimit,
   )
 
+  const total = await UserLoginHistoryModel.countDocuments({ userId })
+  const totalPages = Math.max(1, Math.ceil(total / safeLimit))
+  const boundedPage = Math.min(safePage, totalPages)
+  const skip = (boundedPage - 1) * safeLimit
+
   const rows = await UserLoginHistoryModel.find({ userId })
     .sort({ createdAt: -1 })
+    .skip(skip)
     .limit(safeLimit)
 
-  return rows.map((row, index) => {
+  const items: UserLoginHistoryItem[] = rows.map((row, index) => {
     const ipAddress = row.ipAddress
     const userAgent = row.userAgent
     const browser = row.browser
@@ -680,10 +729,22 @@ const getMyLoginHistory = async (
       ...(browser ? { browser } : {}),
       ...(device ? { device } : {}),
       ...(location ? { location } : {}),
-      status: index === 0 ? 'current' : 'successful',
+      status: boundedPage === 1 && index === 0 ? 'current' : 'successful',
       createdAt: row.createdAt.toISOString(),
     }
   })
+
+  return {
+    items,
+    pagination: {
+      page: boundedPage,
+      limit: safeLimit,
+      total,
+      totalPages,
+      hasNextPage: boundedPage < totalPages,
+      hasPreviousPage: boundedPage > 1,
+    },
+  }
 }
 
 const updateMe = async (
@@ -820,7 +881,35 @@ const updateProfilePicture = async (
     throw new AppError('User not found.', 404)
   }
 
-  user.profilePicture = payload.profilePicture || undefined
+  if (typeof payload.fileBase64 === 'string' && payload.fileBase64.trim()) {
+    const uploadPayload = parseBase64Upload(payload.fileBase64)
+
+    if (!uploadPayload.contentType.startsWith('image/')) {
+      throw new AppError('Profile picture must be an image.', 400)
+    }
+
+    if (uploadPayload.buffer.byteLength > MAX_PROFILE_PICTURE_BYTES) {
+      throw new AppError(
+        'Profile picture is too large. Maximum allowed size is 512KB.',
+        400,
+      )
+    }
+
+    const uploaded = await storageService.uploadFile({
+      fileName:
+        payload.fileName?.trim() ||
+        uploadPayload.defaultFileName ||
+        'profile-picture.bin',
+      contentType: uploadPayload.contentType,
+      buffer: uploadPayload.buffer,
+      folder: `users/${userId}/profile-picture`,
+    })
+
+    user.profilePicture = uploaded.url
+  } else {
+    user.profilePicture = payload.profilePicture?.trim() || undefined
+  }
+
   await user.save()
 
   return sanitizeUser(user)

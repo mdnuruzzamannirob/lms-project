@@ -169,6 +169,20 @@ export interface UserLoginHistoryItem {
   createdAt: string
 }
 
+export interface UserLoginHistoryPagination {
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
+}
+
+export interface UserLoginHistoryPage {
+  items: UserLoginHistoryItem[]
+  pagination: UserLoginHistoryPagination
+}
+
 export interface UpdateMePayload {
   firstName?: string
   lastName?: string
@@ -186,6 +200,8 @@ export interface DeleteMyAccountPayload {
 
 export interface UpdateProfilePicturePayload {
   profilePicture?: string
+  fileBase64?: string
+  fileName?: string
 }
 
 export interface VerifyTwoFactorPayload {
