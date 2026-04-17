@@ -124,6 +124,7 @@ export const buildUserJwtPayload = (
 
 export const sanitizeUser = (user: IUser): SanitizedUser => {
   const lastLoginAt = user.lastLoginAt?.toISOString()
+  const address = user.address
   const countryCode = user.countryCode
   const lastName = user.lastName
   const phone = user.phone
@@ -134,6 +135,7 @@ export const sanitizeUser = (user: IUser): SanitizedUser => {
     firstName: user.firstName,
     ...(lastName ? { lastName } : {}),
     email: user.email,
+    ...(address ? { address } : {}),
     ...(countryCode ? { countryCode } : {}),
     ...(phone ? { phone } : {}),
     ...(profilePicture ? { profilePicture } : {}),
@@ -177,14 +179,130 @@ export const createAndStoreToken = async (
   return rawToken
 }
 
+const normalizeHeaderValue = (
+  request: Request | undefined,
+  headerName: string,
+): string | undefined => {
+  const value = request?.header(headerName)
+  if (!value) {
+    return undefined
+  }
+
+  const trimmed = value.trim()
+  return trimmed ? trimmed : undefined
+}
+
+const resolveLocationFromRequest = (
+  request: Request | undefined,
+): string | undefined => {
+  const country =
+    normalizeHeaderValue(request, 'x-vercel-ip-country') ??
+    normalizeHeaderValue(request, 'cf-ipcountry') ??
+    normalizeHeaderValue(request, 'x-country-code') ??
+    normalizeHeaderValue(request, 'x-appengine-country')
+
+  const city =
+    normalizeHeaderValue(request, 'x-vercel-ip-city') ??
+    normalizeHeaderValue(request, 'cf-ipcity')
+
+  if (city && country) {
+    return `${city}, ${country}`
+  }
+
+  return country
+}
+
+const resolveBrowserFromUserAgent = (
+  userAgent: string | undefined,
+): string | undefined => {
+  if (!userAgent) {
+    return undefined
+  }
+
+  const normalized = userAgent.toLowerCase()
+
+  if (normalized.includes('edg/')) {
+    return 'Edge'
+  }
+
+  if (normalized.includes('opr/') || normalized.includes('opera')) {
+    return 'Opera'
+  }
+
+  if (normalized.includes('chrome/')) {
+    return 'Chrome'
+  }
+
+  if (normalized.includes('firefox/')) {
+    return 'Firefox'
+  }
+
+  if (normalized.includes('safari/') && !normalized.includes('chrome/')) {
+    return 'Safari'
+  }
+
+  if (normalized.includes('trident/') || normalized.includes('msie')) {
+    return 'Internet Explorer'
+  }
+
+  return undefined
+}
+
+const resolveDeviceFromUserAgent = (
+  userAgent: string | undefined,
+): string | undefined => {
+  if (!userAgent) {
+    return undefined
+  }
+
+  const normalized = userAgent.toLowerCase()
+
+  if (normalized.includes('iphone')) {
+    return 'iPhone'
+  }
+
+  if (normalized.includes('ipad')) {
+    return 'iPad'
+  }
+
+  if (normalized.includes('android')) {
+    return normalized.includes('mobile') ? 'Android Phone' : 'Android Tablet'
+  }
+
+  if (normalized.includes('macintosh') || normalized.includes('mac os')) {
+    return 'Mac'
+  }
+
+  if (normalized.includes('windows')) {
+    return 'Windows PC'
+  }
+
+  if (normalized.includes('linux')) {
+    return 'Linux'
+  }
+
+  return undefined
+}
+
 export const recordUserLogin = async (
   userId: string,
   request?: Request,
 ): Promise<void> => {
+  const userAgent = normalizeHeaderValue(request, 'user-agent')
+
   await UserLoginHistoryModel.create({
     userId,
     ipAddress: request?.ip,
-    userAgent: request?.header('user-agent'),
+    ...(userAgent ? { userAgent } : {}),
+    ...(resolveBrowserFromUserAgent(userAgent)
+      ? { browser: resolveBrowserFromUserAgent(userAgent) }
+      : {}),
+    ...(resolveDeviceFromUserAgent(userAgent)
+      ? { device: resolveDeviceFromUserAgent(userAgent) }
+      : {}),
+    ...(resolveLocationFromRequest(request)
+      ? { location: resolveLocationFromRequest(request) }
+      : {}),
   })
 }
 

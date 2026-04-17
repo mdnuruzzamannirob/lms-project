@@ -118,7 +118,9 @@ export const authValidation = {
     .object({
       firstName: z.string().trim().min(1).max(100).optional(),
       lastName: z.string().trim().min(1).max(100).optional(),
+      email: z.string().trim().email().optional(),
       phone: z.string().trim().min(6).max(32).optional(),
+      address: z.string().trim().min(2).max(240).optional(),
       profilePicture: z.string().trim().url().optional(),
       countryCode: z.string().trim().min(2).max(3).toUpperCase().optional(),
       notificationPreferences: z
@@ -132,7 +134,9 @@ export const authValidation = {
       (value) =>
         typeof value.firstName !== 'undefined' ||
         typeof value.lastName !== 'undefined' ||
+        typeof value.email !== 'undefined' ||
         typeof value.phone !== 'undefined' ||
+        typeof value.address !== 'undefined' ||
         typeof value.profilePicture !== 'undefined' ||
         typeof value.countryCode !== 'undefined' ||
         typeof value.notificationPreferences !== 'undefined',
@@ -140,6 +144,10 @@ export const authValidation = {
         message: 'At least one profile field is required',
       },
     ),
+  deleteMyAccountBody: z.object({
+    confirmText: z.literal('DELETE'),
+    currentPassword: z.string().min(8).max(72).optional(),
+  }),
   changePasswordBody: z.object({
     currentPassword: z.string().min(8).max(72),
     newPassword: z.string().min(8).max(72),

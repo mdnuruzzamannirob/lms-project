@@ -195,5 +195,11 @@ router.patch(
   validateRequest({ body: authValidation.updateNotificationPreferencesBody }),
   authController.updateMyNotificationPreferences,
 )
+router.delete(
+  '/me',
+  authenticateUser,
+  validateRequest({ body: authValidation.deleteMyAccountBody }),
+  authController.deleteMyAccount,
+)
 
 export const authRouter = router

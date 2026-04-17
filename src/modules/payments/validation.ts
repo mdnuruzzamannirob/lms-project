@@ -18,6 +18,9 @@ export const paymentsValidation = {
     couponCode: z.string().trim().min(2).max(40).toUpperCase().optional(),
     autoRenew: z.boolean().default(true),
   }),
+  paymentMethodPortalBody: z.object({
+    returnUrl: z.string().trim().url().optional(),
+  }),
   verifyBody: z.object({
     reference: z.string().trim().min(8).max(120),
     providerPaymentId: z.string().trim().min(2).max(200).optional(),

@@ -18,6 +18,8 @@ import type {
   InitiatePaymentPayload,
   IPayment,
   PaymentGateway,
+  PaymentMethodPortalSessionPayload,
+  PaymentMethodSummary,
   PaymentVerificationInput,
 } from './interface'
 import { PaymentModel, WebhookLogModel } from './model'
@@ -60,6 +62,156 @@ const getPaymentById = async (id: string) => {
   const payment = await PaymentModel.findById(id)
   if (!payment) throw new AppError('Payment not found.', 404)
   return formatPayment(payment)
+}
+
+const toTitleCase = (value: string): string => {
+  if (!value) {
+    return value
+  }
+
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+}
+
+const buildFallbackPaymentMethodSummary = (
+  latestPayment: IPayment | null,
+): PaymentMethodSummary => {
+  if (!latestPayment) {
+    return {
+      gateway: 'none',
+      label: 'No payment method on file',
+      status: 'missing',
+    }
+  }
+
+  return {
+    gateway: latestPayment.gateway,
+    label: `${toTitleCase(latestPayment.gateway)} payment method`,
+    status: 'missing',
+  }
+}
+
+const getMyPaymentMethodSummary = async (
+  userId: string,
+): Promise<PaymentMethodSummary> => {
+  const [user, latestPayment] = await Promise.all([
+    UserModel.findById(userId).select('stripeCustomerId'),
+    PaymentModel.findOne({ userId }).sort({ createdAt: -1 }),
+  ])
+
+  if (!user) {
+    throw new AppError('User not found.', 404)
+  }
+
+  if (!user.stripeCustomerId || !config.providers.stripeSecretKey) {
+    return buildFallbackPaymentMethodSummary(latestPayment)
+  }
+
+  try {
+    const stripe = new Stripe(config.providers.stripeSecretKey)
+    const customer = await stripe.customers.retrieve(user.stripeCustomerId, {
+      expand: ['invoice_settings.default_payment_method'],
+    })
+
+    if ('deleted' in customer && customer.deleted) {
+      return buildFallbackPaymentMethodSummary(latestPayment)
+    }
+
+    const defaultPaymentMethod =
+      customer.invoice_settings.default_payment_method
+
+    let cardPaymentMethod: Stripe.PaymentMethod | null = null
+
+    if (
+      defaultPaymentMethod &&
+      typeof defaultPaymentMethod === 'object' &&
+      defaultPaymentMethod.object === 'payment_method'
+    ) {
+      cardPaymentMethod = defaultPaymentMethod
+    } else if (
+      typeof defaultPaymentMethod === 'string' &&
+      defaultPaymentMethod
+    ) {
+      const resolvedPaymentMethod =
+        await stripe.paymentMethods.retrieve(defaultPaymentMethod)
+
+      cardPaymentMethod = resolvedPaymentMethod
+    }
+
+    if (
+      !cardPaymentMethod ||
+      cardPaymentMethod.type !== 'card' ||
+      !cardPaymentMethod.card
+    ) {
+      return buildFallbackPaymentMethodSummary(latestPayment)
+    }
+
+    const expMonth = cardPaymentMethod.card.exp_month
+    const expYear = cardPaymentMethod.card.exp_year
+    const expiryDate = new Date(expYear, expMonth, 0, 23, 59, 59, 999)
+    const isExpired = expiryDate.getTime() < Date.now()
+    const brand = toTitleCase(cardPaymentMethod.card.brand)
+    const last4 = cardPaymentMethod.card.last4
+
+    return {
+      gateway: 'stripe',
+      label: `${brand} ending in ${last4}`,
+      status: isExpired ? 'expired' : 'ok',
+      brand,
+      last4,
+      expMonth,
+      expYear,
+      ...(cardPaymentMethod.billing_details?.name
+        ? { holderName: cardPaymentMethod.billing_details.name }
+        : {}),
+      expiresAt: expiryDate.toISOString(),
+    }
+  } catch (error) {
+    logger.warn('Failed to resolve Stripe payment method summary.', {
+      userId,
+      error: error instanceof Error ? error.message : String(error),
+    })
+
+    return buildFallbackPaymentMethodSummary(latestPayment)
+  }
+}
+
+const createMyPaymentMethodPortalSession = async (
+  userId: string,
+  payload: PaymentMethodPortalSessionPayload,
+) => {
+  if (!config.providers.stripeSecretKey) {
+    throw new AppError('STRIPE_SECRET_KEY is not configured.', 500)
+  }
+
+  const user = await UserModel.findById(userId).select('stripeCustomerId')
+
+  if (!user) {
+    throw new AppError('User not found.', 404)
+  }
+
+  if (!user.stripeCustomerId) {
+    throw new AppError(
+      'No Stripe customer found for this account. Complete a Stripe payment first.',
+      400,
+    )
+  }
+
+  const safeDefaultReturnUrl = `${config.frontendUrl}`
+  const requestedReturnUrl = payload.returnUrl?.trim()
+  const returnUrl =
+    requestedReturnUrl && requestedReturnUrl.startsWith(config.frontendUrl)
+      ? requestedReturnUrl
+      : safeDefaultReturnUrl
+
+  const stripe = new Stripe(config.providers.stripeSecretKey)
+  const session = await stripe.billingPortal.sessions.create({
+    customer: user.stripeCustomerId,
+    return_url: returnUrl,
+  })
+
+  return {
+    url: session.url,
+  }
 }
 
 const safeSendStripePaymentEmail = async (payload: {
@@ -974,6 +1126,8 @@ export const paymentsService = {
   listAvailablePaymentGatewaysForUser,
   listMyPayments,
   getMyPaymentById,
+  getMyPaymentMethodSummary,
+  createMyPaymentMethodPortalSession,
   listPayments,
   getPaymentById,
   initiatePayment,

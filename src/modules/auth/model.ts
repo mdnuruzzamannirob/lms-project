@@ -45,6 +45,13 @@ const userSchema = new Schema<UserDocument>(
       lowercase: true,
       trim: true,
     },
+    address: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 240,
+      default: undefined,
+    },
     countryCode: {
       type: String,
       required: false,
@@ -116,6 +123,9 @@ const loginHistorySchema = new Schema<UserLoginHistory>(
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     ipAddress: { type: String, required: false },
     userAgent: { type: String, required: false },
+    browser: { type: String, required: false },
+    device: { type: String, required: false },
+    location: { type: String, required: false },
   },
   {
     timestamps: { createdAt: true, updatedAt: false },

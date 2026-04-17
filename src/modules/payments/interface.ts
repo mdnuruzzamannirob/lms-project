@@ -115,3 +115,23 @@ export interface PayPalOrderResult {
   links?: Array<{ rel: string; href: string }>
   purchase_units?: Array<{ reference_id?: string }>
 }
+
+export interface PaymentMethodSummary {
+  gateway: PaymentGateway | 'none'
+  label: string
+  status: 'ok' | 'expired' | 'missing'
+  brand?: string
+  last4?: string
+  expMonth?: number
+  expYear?: number
+  holderName?: string
+  expiresAt?: string
+}
+
+export interface PaymentMethodPortalSessionPayload {
+  returnUrl?: string
+}
+
+export interface PaymentMethodPortalSessionResult {
+  url: string
+}

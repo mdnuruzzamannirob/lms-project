@@ -21,6 +21,7 @@ export interface IUser {
   firstName: string
   lastName: string | undefined
   email: string
+  address: string | undefined
   countryCode?: string
   phone: string | undefined
   profilePicture: string | undefined
@@ -67,6 +68,7 @@ export type SanitizedUser = {
   firstName: string
   lastName?: string
   email: string
+  address?: string
   countryCode?: string
   phone?: string
   profilePicture?: string
@@ -137,6 +139,9 @@ export interface UserLoginHistory {
   userId: Types.ObjectId
   ipAddress?: string
   userAgent?: string
+  browser?: string
+  device?: string
+  location?: string
   createdAt: Date
 }
 
@@ -157,16 +162,26 @@ export interface UserLoginHistoryItem {
   id: string
   ipAddress?: string
   userAgent?: string
+  browser?: string
+  device?: string
+  location?: string
+  status: 'current' | 'successful'
   createdAt: string
 }
 
 export interface UpdateMePayload {
   firstName?: string
   lastName?: string
+  email?: string
   phone?: string
   profilePicture?: string
+  address?: string
   countryCode?: string
   notificationPreferences?: Partial<UserNotificationPreferences>
+}
+
+export interface DeleteMyAccountPayload {
+  currentPassword?: string
 }
 
 export interface UpdateProfilePicturePayload {

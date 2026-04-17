@@ -52,6 +52,39 @@ export const getMyPaymentById: RequestHandler = catchAsync(
   },
 )
 
+export const getMyPaymentMethod: RequestHandler = catchAsync(
+  async (request, response) => {
+    const data = await paymentsService.getMyPaymentMethodSummary(
+      getUserId(request),
+    )
+
+    sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: 'Payment method retrieved successfully.',
+      data,
+    })
+  },
+)
+
+export const createMyPaymentMethodPortalSession: RequestHandler = catchAsync(
+  async (request, response) => {
+    const data = await paymentsService.createMyPaymentMethodPortalSession(
+      getUserId(request),
+      {
+        returnUrl: request.body.returnUrl,
+      },
+    )
+
+    sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: 'Billing portal session created successfully.',
+      data,
+    })
+  },
+)
+
 export const listPayments: RequestHandler = catchAsync(
   async (_request, response) => {
     const data = await paymentsService.listPayments()
@@ -204,6 +237,8 @@ export const paymentsController = {
   listMyPayments,
   listAvailablePaymentGateways,
   getMyPaymentById,
+  getMyPaymentMethod,
+  createMyPaymentMethodPortalSession,
   listPayments,
   getPaymentById,
   initiatePayment,

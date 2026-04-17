@@ -9,7 +9,9 @@ import { requirePermission } from '../../common/middlewares/requirePermission'
 import { validateRequest } from '../../common/middlewares/validateRequest'
 import {
   confirmStripeCheckoutSession,
+  createMyPaymentMethodPortalSession,
   getMyPaymentById,
+  getMyPaymentMethod,
   getPaymentById,
   handleWebhook,
   initiatePayment,
@@ -29,6 +31,13 @@ router.get(
   listAvailablePaymentGateways,
 )
 router.get('/payments/my', authenticateUser, listMyPayments)
+router.get('/payments/my/method', authenticateUser, getMyPaymentMethod)
+router.post(
+  '/payments/my/method/portal',
+  authenticateUser,
+  validateRequest({ body: paymentsValidation.paymentMethodPortalBody }),
+  createMyPaymentMethodPortalSession,
+)
 router.get(
   '/payments/my/:id',
   authenticateUser,

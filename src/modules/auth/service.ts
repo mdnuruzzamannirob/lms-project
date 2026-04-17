@@ -27,6 +27,7 @@ import type {
   AccountAccessibleUserState,
   AuthTokens,
   ChangePasswordPayload,
+  DeleteMyAccountPayload,
   LoginPayload,
   RegisterPayload,
   RegisterResult,
@@ -642,14 +643,21 @@ const getMyLoginHistory = async (
     .sort({ createdAt: -1 })
     .limit(20)
 
-  return rows.map((row) => {
+  return rows.map((row, index) => {
     const ipAddress = row.ipAddress
     const userAgent = row.userAgent
+    const browser = row.browser
+    const device = row.device
+    const location = row.location
 
     return {
       id: row._id.toString(),
       ...(ipAddress ? { ipAddress } : {}),
       ...(userAgent ? { userAgent } : {}),
+      ...(browser ? { browser } : {}),
+      ...(device ? { device } : {}),
+      ...(location ? { location } : {}),
+      status: index === 0 ? 'current' : 'successful',
       createdAt: row.createdAt.toISOString(),
     }
   })
@@ -673,12 +681,33 @@ const updateMe = async (
     user.lastName = payload.lastName || undefined
   }
 
+  if (typeof payload.email !== 'undefined') {
+    const normalizedEmail = payload.email.trim().toLowerCase()
+
+    if (normalizedEmail !== user.email) {
+      const existingUser = await UserModel.findOne({
+        email: normalizedEmail,
+        _id: { $ne: user._id },
+      }).select('_id')
+
+      if (existingUser) {
+        throw new AppError('A user with this email already exists.', 409)
+      }
+
+      user.email = normalizedEmail
+    }
+  }
+
   if (typeof payload.phone !== 'undefined') {
     user.phone = payload.phone || undefined
   }
 
   if (typeof payload.profilePicture !== 'undefined') {
     user.profilePicture = payload.profilePicture || undefined
+  }
+
+  if (typeof payload.address !== 'undefined') {
+    user.address = payload.address || undefined
   }
 
   if (payload.countryCode) {
@@ -694,6 +723,61 @@ const updateMe = async (
 
   await user.save()
   return sanitizeUser(user)
+}
+
+const deleteMyAccount = async (
+  userId: string,
+  payload: DeleteMyAccountPayload,
+): Promise<SuccessResponse> => {
+  const user = await UserModel.findById(userId)
+
+  if (!user) {
+    throw new AppError('User not found.', 404)
+  }
+
+  if (user.passwordHash) {
+    if (!payload.currentPassword) {
+      throw new AppError(
+        'Current password is required to delete your account.',
+        400,
+      )
+    }
+
+    const isPasswordValid = await compareScryptHash(
+      payload.currentPassword,
+      user.passwordHash,
+    )
+
+    if (!isPasswordValid) {
+      throw new AppError('Current password is incorrect.', 401)
+    }
+  }
+
+  user.isActive = false
+  user.deletedAt = new Date()
+  user.sessionVersion = (user.sessionVersion ?? 1) + 1
+  user.twoFactor.enabled = false
+  user.twoFactor.secret = undefined
+  user.twoFactor.backupCodes = undefined
+  user.twoFactor.verifiedAt = undefined
+
+  await user.save()
+  pendingUserBackupCodes.delete(userId)
+
+  await auditService.logEvent({
+    actor: {
+      id: user._id.toString(),
+      type: 'system',
+      email: user.email,
+    },
+    action: 'user.delete-self',
+    module: 'auth',
+    targetId: user._id.toString(),
+    targetType: 'user',
+    description: 'User deleted their own account.',
+  })
+
+  return { success: true }
 }
 
 const updateNotificationPreferences = async (
@@ -976,6 +1060,7 @@ export const authService = {
   changePassword,
   updateNotificationPreferences,
   updateProfilePicture,
+  deleteMyAccount,
   enableTwoFactor,
   verifyTwoFactor,
   disableTwoFactor,

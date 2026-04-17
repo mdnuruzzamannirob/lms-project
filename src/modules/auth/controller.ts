@@ -4,6 +4,8 @@ import { AppError } from '../../common/errors/AppError'
 import { catchAsync } from '../../common/utils/catchAsync'
 import { sendResponse } from '../../common/utils/sendResponse'
 import {
+  clearUserRefreshCookie,
+  clearUserSessionCookie,
   extractBearerToken,
   getCookieValueFromHeader,
   setUserRefreshCookie,
@@ -380,6 +382,27 @@ const updateMyNotificationPreferences: RequestHandler = catchAsync(
   },
 )
 
+const deleteMyAccount: RequestHandler = catchAsync(
+  async (request, response) => {
+    const data = await authService.deleteMyAccount(
+      ensureAuthenticatedUser(request),
+      {
+        currentPassword: request.body.currentPassword,
+      },
+    )
+
+    clearUserSessionCookie(response)
+    clearUserRefreshCookie(response)
+
+    sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: 'Account deleted successfully.',
+      data,
+    })
+  },
+)
+
 const regenerateBackupCodes: RequestHandler = catchAsync(
   async (request, response) => {
     const data = await authService.regenerateBackupCodes(
@@ -421,5 +444,6 @@ export const authController = {
   updateMyProfilePicture,
   changeMyPassword,
   updateMyNotificationPreferences,
+  deleteMyAccount,
   regenerateBackupCodes,
 }
