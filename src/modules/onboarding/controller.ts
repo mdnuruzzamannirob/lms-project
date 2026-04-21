@@ -77,10 +77,40 @@ const getMyOnboardingStatus: RequestHandler = catchAsync(
   },
 )
 
+const storeInterests: RequestHandler = catchAsync(async (request, response) => {
+  const data = await onboardingService.storeInterests(
+    getAuthenticatedUserId(request),
+    request.body.interests,
+  )
+
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Interests stored successfully.',
+    data,
+  })
+})
+
+const storeLanguage: RequestHandler = catchAsync(async (request, response) => {
+  const data = await onboardingService.storeLanguage(
+    getAuthenticatedUserId(request),
+    request.body.language,
+  )
+
+  sendResponse(response, {
+    statusCode: 200,
+    success: true,
+    message: 'Language preference stored successfully.',
+    data,
+  })
+})
+
 export const onboardingController = {
   getPlanOptions,
   selectPlan,
   completeOnboarding,
   confirmPayment,
   getMyOnboardingStatus,
+  storeInterests,
+  storeLanguage,
 }

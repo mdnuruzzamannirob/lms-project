@@ -15,6 +15,12 @@ const onboardingSchema = new Schema<IOnboarding>(
     selectedPlanName: { type: String, required: false, trim: true },
     selectedPlanPrice: { type: Number, required: false },
     selectedAt: { type: Date, required: false },
+    interests: {
+      type: [String],
+      required: false,
+      default: undefined,
+    },
+    selectedLanguage: { type: String, required: false, trim: true },
     status: {
       type: String,
       enum: ['pending', 'selected', 'completed'] satisfies OnboardingStatus[],

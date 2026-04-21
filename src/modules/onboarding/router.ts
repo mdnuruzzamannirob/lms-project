@@ -31,5 +31,17 @@ router.post(
   validateRequest({ body: onboardingValidation.confirmPaymentBody }),
   onboardingController.confirmPayment,
 )
+router.patch(
+  '/interests',
+  authenticateUser,
+  validateRequest({ body: onboardingValidation.storeInterestsBody }),
+  onboardingController.storeInterests,
+)
+router.patch(
+  '/language',
+  authenticateUser,
+  validateRequest({ body: onboardingValidation.storeLanguageBody }),
+  onboardingController.storeLanguage,
+)
 
 export const onboardingRouter = router

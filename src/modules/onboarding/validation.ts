@@ -11,4 +11,10 @@ export const onboardingValidation = {
     sessionId: z.string().trim().min(3),
     reference: z.string().trim().min(3).optional(),
   }),
+  storeInterestsBody: z.object({
+    interests: z.array(z.string().trim()).min(1),
+  }),
+  storeLanguageBody: z.object({
+    language: z.string().trim().min(2).max(10),
+  }),
 }

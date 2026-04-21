@@ -9,6 +9,8 @@ export interface IOnboarding {
   selectedPlanName?: string
   selectedPlanPrice?: number
   selectedAt?: Date
+  interests?: string[]
+  selectedLanguage?: string
   status: OnboardingStatus
   completedAt?: Date
   createdAt: Date

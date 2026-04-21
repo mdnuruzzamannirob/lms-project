@@ -23,3 +23,12 @@ export const getFileIdParam = (
   return fileId
 }
 
+export const getStaffId = (request: any): string => {
+  const staffId = request.user?.id
+
+  if (typeof staffId !== 'string') {
+    throw new AppError('Unauthorized.', 401)
+  }
+
+  return staffId
+}

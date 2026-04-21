@@ -207,6 +207,8 @@ const register = async (payload: RegisterPayload): Promise<RegisterResult> => {
     firstName: payload.firstName,
     ...(payload.lastName ? { lastName: payload.lastName } : {}),
     email: payload.email,
+    phone: payload.phone,
+    address: payload.address,
     countryCode: payload.countryCode.toUpperCase(),
     passwordHash,
     provider: 'local',
@@ -310,7 +312,7 @@ const login = async (
     }
   }
 
-  const tokens = issueUserAccessToken(user)
+  const tokens = issueUserAccessToken(user, payload.rememberMe)
 
   return {
     requiresTwoFactor: false,

@@ -49,13 +49,17 @@ export type RegisterPayload = {
   firstName: string
   lastName?: string
   email: string
+  phone: string
+  address: string
   password: string
   countryCode: string
+  agreeToTerms: boolean
 }
 
 export type LoginPayload = {
   email: string
   password: string
+  rememberMe?: boolean
 }
 
 export type AuthTokens = {

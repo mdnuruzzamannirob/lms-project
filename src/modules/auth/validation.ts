@@ -4,15 +4,21 @@ import { authConstants } from './constants'
 
 export const authValidation = {
   registerBody: z.object({
-    firstName: z.string().trim().min(1).max(100),
+    firstName: z.string().trim().min(2).max(100),
     lastName: z.string().trim().min(1).max(100).optional(),
     email: z.string().trim().email(),
+    phone: z.string().trim().min(6).max(32),
+    address: z.string().trim().min(2).max(240),
     password: z.string().min(8).max(72),
     countryCode: z.string().trim().length(2).toUpperCase(),
+    agreeToTerms: z.boolean().refine((val) => val === true, {
+      message: 'You must agree to the terms and conditions',
+    }),
   }),
   loginBody: z.object({
     email: z.string().trim().email(),
     password: z.string().min(8).max(72),
+    rememberMe: z.boolean().optional(),
   }),
   twoFactorChallengeBody: z
     .object({

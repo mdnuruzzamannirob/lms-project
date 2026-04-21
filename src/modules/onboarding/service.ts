@@ -275,6 +275,46 @@ const getOnboardingStatus = async (userId: string) => {
   }
 }
 
+const storeInterests = async (
+  userId: string,
+  interests: string[],
+): Promise<{ success: boolean; interests: string[] }> => {
+  const onboarding = await OnboardingModel.findOneAndUpdate(
+    { userId },
+    {
+      $set: {
+        interests,
+      },
+    },
+    { upsert: true, new: true },
+  )
+
+  return {
+    success: true,
+    interests: onboarding.interests ?? [],
+  }
+}
+
+const storeLanguage = async (
+  userId: string,
+  language: string,
+): Promise<{ success: boolean; language: string }> => {
+  const onboarding = await OnboardingModel.findOneAndUpdate(
+    { userId },
+    {
+      $set: {
+        selectedLanguage: language,
+      },
+    },
+    { upsert: true, new: true },
+  )
+
+  return {
+    success: true,
+    language: onboarding.selectedLanguage ?? language,
+  }
+}
+
 export const onboardingService = {
   getPlanOptions,
   selectPlan,
@@ -282,4 +322,6 @@ export const onboardingService = {
   confirmPayment,
   getOnboardingStatus,
   markOnboardingCompleted,
+  storeInterests,
+  storeLanguage,
 }

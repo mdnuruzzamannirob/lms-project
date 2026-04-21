@@ -327,14 +327,17 @@ export const recordUserLogin = async (
   })
 }
 
-export const issueUserAccessToken = (user: IUser): AuthTokens => {
+export const issueUserAccessToken = (
+  user: IUser,
+  rememberMe?: boolean,
+): AuthTokens => {
   const tokenPayload = buildUserJwtPayload(user)
 
   return {
     accessToken: signAccessToken(
       tokenPayload,
       config.jwt.userSecret,
-      config.jwt.accessExpiresIn,
+      rememberMe ? config.jwt.refreshExpiresIn : config.jwt.accessExpiresIn,
     ),
     refreshToken: generateUserRefreshToken(tokenPayload),
   }
