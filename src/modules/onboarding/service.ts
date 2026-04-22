@@ -173,6 +173,7 @@ const selectPlan = async (
     paymentId: initiatedPayment.payment.id,
     sessionId: initiatedPayment.sessionId,
     url: initiatedPayment.url,
+    redirectUrl: initiatedPayment.redirectUrl ?? initiatedPayment.url,
     checkout_url: initiatedPayment.checkout_url,
   }
 }
