@@ -168,21 +168,28 @@ const assertValidPhoneForCountry = (
   }
 }
 
-const assertTwoFactorEmailOtpRateLimit = async (userId: string) => {
+const assertEmailOtpRateLimit = async (
+  actorId: string,
+  purpose: 'email-verification' | 'login',
+) => {
   const windowStart = new Date(
     Date.now() - authConstants.twoFactorEmailOtpWindowMinutes * 60 * 1000,
   )
 
   const recentCount = await EmailOtpModel.countDocuments({
-    actorId: userId,
+    actorId,
     actorType: 'user',
-    purpose: 'login',
+    purpose,
     createdAt: { $gte: windowStart },
   })
 
   if (recentCount >= authConstants.twoFactorEmailOtpMaxSendsPerWindow) {
     throw new AppError('Too many OTP requests. Please try again later.', 429)
   }
+}
+
+const assertTwoFactorEmailOtpRateLimit = async (userId: string) => {
+  return assertEmailOtpRateLimit(userId, 'login')
 }
 
 const issueSingleUseTempToken = async (
@@ -1061,6 +1068,8 @@ const resendVerification = async (email: string): Promise<void> => {
     return
   }
 
+  await assertEmailOtpRateLimit(user._id.toString(), 'email-verification')
+
   const emailVerificationOtp = await createEmailOtp(
     user._id.toString(),
     'user',
@@ -1119,13 +1128,6 @@ const resendResetOtp = async (email: string): Promise<SentResponse> => {
   }
 
   await assertResendOtpWindow(user._id.toString(), 'user')
-
-  await EmailOtpModel.deleteMany({
-    actorId: user._id,
-    actorType: 'user',
-    purpose: 'password-reset',
-    usedAt: null,
-  })
 
   const otp = await createEmailOtp(
     user._id.toString(),

@@ -35,13 +35,25 @@ const login: RequestHandler = catchAsync(async (request, response) => {
     setUserRefreshCookie(response, result.refreshToken)
   }
 
+  const publicResult = result.requiresTwoFactor
+    ? {
+        requiresTwoFactor: true as const,
+        tempToken: result.tempToken,
+        user: result.user,
+      }
+    : {
+        requiresTwoFactor: false as const,
+        token: result.token,
+        user: result.user,
+      }
+
   sendResponse(response, {
     statusCode: 200,
     success: true,
     message: result.requiresTwoFactor
       ? '2FA challenge required to complete login.'
       : 'User login successful.',
-    data: result,
+    data: publicResult,
   })
 })
 
@@ -100,11 +112,16 @@ const challengeTwoFactor: RequestHandler = catchAsync(
     setUserSessionCookie(response, data.accessToken)
     setUserRefreshCookie(response, data.refreshToken)
 
+    const publicResult = {
+      token: data.token,
+      user: data.user,
+    }
+
     sendResponse(response, {
       statusCode: 200,
       success: true,
       message: '2FA challenge completed successfully.',
-      data,
+      data: publicResult,
     })
   },
 )
@@ -175,7 +192,7 @@ const verifyEmail: RequestHandler = catchAsync(async (request, response) => {
   sendResponse(response, {
     statusCode: 200,
     success: true,
-    message: 'Email verified successfully.',
+    message: 'Email verified.',
     data: null,
   })
 })
@@ -199,7 +216,7 @@ const forgotPassword: RequestHandler = catchAsync(async (request, response) => {
   sendResponse(response, {
     statusCode: 200,
     success: true,
-    message: 'Password reset instructions sent if account exists.',
+    message: 'OTP sent to email.',
     data,
   })
 })
@@ -239,7 +256,7 @@ const resetPassword: RequestHandler = catchAsync(async (request, response) => {
   sendResponse(response, {
     statusCode: 200,
     success: true,
-    message: 'Password has been reset successfully.',
+    message: 'Password reset successfully.',
     data,
   })
 })

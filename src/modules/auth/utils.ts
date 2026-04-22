@@ -310,20 +310,17 @@ export const recordUserLogin = async (
   request?: Request,
 ): Promise<void> => {
   const userAgent = normalizeHeaderValue(request, 'user-agent')
+  const browser = resolveBrowserFromUserAgent(userAgent)
+  const device = resolveDeviceFromUserAgent(userAgent)
+  const location = resolveLocationFromRequest(request)
 
   await UserLoginHistoryModel.create({
     userId,
     ipAddress: request?.ip,
     ...(userAgent ? { userAgent } : {}),
-    ...(resolveBrowserFromUserAgent(userAgent)
-      ? { browser: resolveBrowserFromUserAgent(userAgent) }
-      : {}),
-    ...(resolveDeviceFromUserAgent(userAgent)
-      ? { device: resolveDeviceFromUserAgent(userAgent) }
-      : {}),
-    ...(resolveLocationFromRequest(request)
-      ? { location: resolveLocationFromRequest(request) }
-      : {}),
+    ...(browser ? { browser } : {}),
+    ...(device ? { device } : {}),
+    ...(location ? { location } : {}),
   })
 }
 
