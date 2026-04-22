@@ -8,6 +8,7 @@ const objectIdString = z
   .regex(/^[a-f\d]{24}$/i, 'Invalid ObjectId format')
 
 const gatewaySchema = z.enum(['bkash', 'nagad', 'stripe', 'paypal'])
+const billingCycleSchema = z.enum(['monthly', 'yearly']).default('monthly')
 
 export const paymentsValidation = {
   idParam: idParamSchema,
@@ -16,6 +17,7 @@ export const paymentsValidation = {
     planId: objectIdString,
     gateway: gatewaySchema,
     couponCode: z.string().trim().min(2).max(40).toUpperCase().optional(),
+    billingCycle: billingCycleSchema,
     autoRenew: z.boolean().default(true),
   }),
   paymentMethodPortalBody: z.object({

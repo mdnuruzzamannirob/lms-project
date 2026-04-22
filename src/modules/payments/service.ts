@@ -12,6 +12,7 @@ import { NotificationType } from '../notifications/interface'
 import { notificationsService } from '../notifications/service'
 import { OnboardingModel } from '../onboarding/model'
 import { PlanModel } from '../plans/model'
+import { getPlanBillingPrice } from '../plans/utils'
 import { promotionsService } from '../promotions/service'
 import { subscriptionsService } from '../subscriptions/service'
 import type {
@@ -309,15 +310,18 @@ const initiatePayment = async (payload: InitiatePaymentPayload) => {
     throw new AppError('Plan not found or inactive.', 404)
   }
 
+  const billingCycle = payload.billingCycle ?? 'monthly'
+  const billingAmount = getPlanBillingPrice(plan.price, billingCycle)
+
   const discountResolution = await promotionsService.resolvePaymentDiscount({
     planId: payload.planId,
-    amount: plan.price,
+    amount: billingAmount,
     ...(payload.couponCode ? { couponCode: payload.couponCode } : {}),
     userId: payload.userId,
   })
 
   const payableAmount = Number(
-    Math.max(0, plan.price - discountResolution.discountAmount).toFixed(2),
+    Math.max(0, billingAmount - discountResolution.discountAmount).toFixed(2),
   )
 
   const pendingSubscription =
@@ -332,13 +336,6 @@ const initiatePayment = async (payload: InitiatePaymentPayload) => {
   const reference = `PAY-${Date.now()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`
   const gatewayAdapter = resolveGatewayAdapter(selectedGatewayConfig.gateway)
 
-  if (payload.gateway === 'stripe' && !plan.stripePriceId) {
-    throw new AppError(
-      'Stripe plan is not synced yet. Please run plan Stripe sync first.',
-      400,
-    )
-  }
-
   const gatewayResult = await gatewayAdapter.initiate({
     amount: payableAmount,
     currency: plan.currency,
@@ -352,9 +349,10 @@ const initiatePayment = async (payload: InitiatePaymentPayload) => {
       gateway: payload.gateway,
       planId: plan._id.toString(),
       planCode: plan.code,
+        billingCycle,
       countryCode: user.countryCode ?? 'UNKNOWN',
     },
-    ...(plan.stripePriceId ? { stripePriceId: plan.stripePriceId } : {}),
+    billingCycle,
     ...(payload.successUrl ? { successUrl: payload.successUrl } : {}),
     ...(payload.cancelUrl ? { cancelUrl: payload.cancelUrl } : {}),
   })
@@ -365,7 +363,7 @@ const initiatePayment = async (payload: InitiatePaymentPayload) => {
     provider: gatewayResult.provider,
     gateway: payload.gateway,
     status: gatewayResult.status === 'success' ? 'success' : 'pending',
-    amount: plan.price,
+    amount: billingAmount,
     currency: plan.currency,
     discountAmount: discountResolution.discountAmount,
     payableAmount,
@@ -380,6 +378,7 @@ const initiatePayment = async (payload: InitiatePaymentPayload) => {
     metadata: {
       discountBreakdown: discountResolution.discountBreakdown,
       couponCode: discountResolution.couponCode,
+      billingCycle,
     },
   })
 

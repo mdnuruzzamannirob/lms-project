@@ -66,6 +66,11 @@ const planSchema = new Schema<IPlan>(
       default: false,
       index: true,
     },
+    recommended: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
     stripeProductId: {
       type: String,
       required: false,

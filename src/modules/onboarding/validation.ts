@@ -1,9 +1,12 @@
 import { z } from 'zod'
 
+const billingCycleSchema = z.enum(['monthly', 'yearly']).default('monthly')
+
 export const onboardingValidation = {
   selectPlanBody: z.object({
     planCode: z.string().trim().min(2).max(50),
     locale: z.enum(['en', 'bn']).optional(),
+    billingCycle: billingCycleSchema,
   }),
   completeBody: z.object({
     agreeToTerms: z.literal(true),

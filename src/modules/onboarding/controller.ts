@@ -36,6 +36,7 @@ const selectPlan: RequestHandler = catchAsync(async (request, response) => {
     getAuthenticatedUserId(request),
     request.body.planCode,
     request.body.locale,
+    request.body.billingCycle,
   )
 
   sendResponse(response, {
@@ -56,6 +57,21 @@ const completeOnboarding: RequestHandler = catchAsync(
       statusCode: 200,
       success: true,
       message: 'Onboarding completed successfully.',
+      data,
+    })
+  },
+)
+
+const startOnboarding: RequestHandler = catchAsync(
+  async (request, response) => {
+    const data = await onboardingService.startOnboarding(
+      getAuthenticatedUserId(request),
+    )
+
+    sendResponse(response, {
+      statusCode: 200,
+      success: true,
+      message: 'Onboarding started successfully.',
       data,
     })
   },
@@ -122,6 +138,7 @@ const storeLanguage: RequestHandler = catchAsync(async (request, response) => {
 export const onboardingController = {
   getPlanOptions,
   getInterestOptions,
+  startOnboarding,
   selectPlan,
   completeOnboarding,
   confirmPayment,

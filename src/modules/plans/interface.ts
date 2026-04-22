@@ -1,5 +1,7 @@
 import type { Types } from 'mongoose'
 
+export type PlanBillingCycle = 'monthly' | 'yearly'
+
 export interface IPlan {
   _id: Types.ObjectId
   code: string
@@ -13,6 +15,7 @@ export interface IPlan {
   accessLevel: 'free' | 'basic' | 'premium'
   features: string[]
   isFree: boolean
+  recommended: boolean
   stripeProductId?: string
   stripePriceId?: string
   isActive: boolean
@@ -35,6 +38,7 @@ export interface CreatePlanPayload {
   accessLevel: PlanAccessLevel
   features: string[]
   isFree: boolean
+  recommended: boolean
   stripeProductId?: string
   stripePriceId?: string
   isActive: boolean

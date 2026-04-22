@@ -43,6 +43,7 @@ const createPlan = async (payload: CreatePlanPayload) => {
     code: payload.code.toUpperCase(),
     currency: payload.currency.toUpperCase(),
     isFree: payload.isFree || payload.price === 0,
+    recommended: payload.recommended ?? false,
     stripeProductId: payload.stripeProductId,
     stripePriceId: payload.stripePriceId,
   })
@@ -99,6 +100,10 @@ const updatePlan = async (id: string, payload: UpdatePlanPayload) => {
 
   if (typeof payload.isFree === 'boolean') {
     plan.isFree = payload.isFree
+  }
+
+  if (typeof payload.recommended === 'boolean') {
+    plan.recommended = payload.recommended
   }
 
   if (typeof payload.stripeProductId === 'string') {

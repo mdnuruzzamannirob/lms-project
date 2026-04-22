@@ -129,6 +129,7 @@ export const initiatePayment: RequestHandler = catchAsync(
       planId: request.body.planId,
       gateway: request.body.gateway,
       couponCode: request.body.couponCode,
+      billingCycle: request.body.billingCycle,
       autoRenew: request.body.autoRenew,
     })
 

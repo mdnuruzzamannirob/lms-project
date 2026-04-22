@@ -18,6 +18,7 @@ router.get(
   authenticateUser,
   onboardingController.getMyOnboardingStatus,
 )
+router.post('/start', authenticateUser, onboardingController.startOnboarding)
 router.post(
   '/select',
   authenticateUser,

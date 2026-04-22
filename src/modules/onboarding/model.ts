@@ -11,9 +11,16 @@ const onboardingSchema = new Schema<IOnboarding>(
       unique: true,
       index: true,
     },
+    startedAt: { type: Date, required: false },
     selectedPlanCode: { type: String, required: false, trim: true },
     selectedPlanName: { type: String, required: false, trim: true },
     selectedPlanPrice: { type: Number, required: false },
+    selectedBillingCycle: {
+      type: String,
+      enum: ['monthly', 'yearly'],
+      required: false,
+      trim: true,
+    },
     selectedAt: { type: Date, required: false },
     interests: {
       type: [String],

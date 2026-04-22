@@ -7,6 +7,7 @@ import Stripe from 'stripe'
 import { AppError } from '../../common/errors/AppError'
 import { config } from '../../config'
 import { UserModel } from '../auth'
+import type { PlanBillingCycle } from '../plans/interface'
 import { promotionsService } from '../promotions'
 import { subscriptionsService } from '../subscriptions'
 import { paymentGatewayCountryConfig } from './gateway.config'
@@ -66,6 +67,7 @@ export class SslCommerzBangladeshAdapter implements PaymentGatewayAdapter {
     customerEmail: string
     customerCountry: string
     metadata: Record<string, string>
+    billingCycle?: PlanBillingCycle
     stripePriceId?: string
   }): Promise<GatewayInitResult> {
     const client = this.getClient()
@@ -186,6 +188,7 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
     customerEmail: string
     customerCountry: string
     metadata: Record<string, string>
+    billingCycle?: PlanBillingCycle
     stripePriceId?: string
     successUrl?: string
     cancelUrl?: string
@@ -216,28 +219,21 @@ export class StripeGatewayAdapter implements PaymentGatewayAdapter {
           ...payload.metadata,
         },
       },
-      line_items: payload.stripePriceId
-        ? [
-            {
-              quantity: 1,
-              price: payload.stripePriceId,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: payload.currency.toLowerCase(),
+            recurring: {
+              interval: payload.billingCycle === 'yearly' ? 'year' : 'month',
             },
-          ]
-        : [
-            {
-              quantity: 1,
-              price_data: {
-                currency: payload.currency.toLowerCase(),
-                recurring: {
-                  interval: 'month',
-                },
-                unit_amount: Math.round(payload.amount * 100),
-                product_data: {
-                  name: 'Stackread Subscription',
-                },
-              },
+            unit_amount: Math.round(payload.amount * 100),
+            product_data: {
+              name: 'Stackread Subscription',
             },
-          ],
+          },
+        },
+      ],
     })
 
     return {

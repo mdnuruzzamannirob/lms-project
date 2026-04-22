@@ -64,7 +64,7 @@ if (shouldEnableFacebook) {
         clientID: config.oauth.facebookAppId!,
         clientSecret: config.oauth.facebookAppSecret!,
         callbackURL: config.oauth.facebookCallbackUrl!,
-        profileFields: ['id', 'displayName', 'emails'],
+        profileFields: ['id', 'emails', 'name', 'photos'],
       },
       ((
         _accessToken: string,

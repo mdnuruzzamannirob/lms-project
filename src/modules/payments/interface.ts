@@ -1,5 +1,7 @@
 import type { Types } from 'mongoose'
 
+import type { PlanBillingCycle } from '../plans/interface'
+
 export type PaymentStatus =
   | 'initiated'
   | 'pending'
@@ -66,6 +68,7 @@ export interface InitiatePaymentPayload {
   planId: string
   gateway: PaymentGateway
   couponCode?: string
+  billingCycle?: PlanBillingCycle
   autoRenew?: boolean
   successUrl?: string
   cancelUrl?: string
@@ -79,6 +82,7 @@ export interface GatewayInitiatePayload {
   customerEmail: string
   customerCountry: string
   metadata: Record<string, string>
+  billingCycle?: PlanBillingCycle
   stripePriceId?: string
   successUrl?: string
   cancelUrl?: string

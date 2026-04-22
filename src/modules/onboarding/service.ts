@@ -1,7 +1,9 @@
 import { AppError } from '../../common/errors/AppError'
 import { config } from '../../config'
 import { paymentsService } from '../payments/service'
+import type { PlanBillingCycle } from '../plans/interface'
 import { PlanModel } from '../plans/model'
+import { formatPlan, getPlanBillingPrice } from '../plans/utils'
 import { SubscriptionModel } from '../subscriptions/model'
 import { subscriptionsService } from '../subscriptions/service'
 import { onboardingInterestCatalog } from './constants'
@@ -51,31 +53,38 @@ const markOnboardingCompleted = async (userId: string) => {
   return onboarding
 }
 
+const markOnboardingStarted = async (userId: string) => {
+  const existing = await OnboardingModel.findOne({ userId })
+
+  if (existing?.status === 'completed') {
+    return existing
+  }
+
+  const startedAt = existing?.startedAt ?? new Date()
+
+  return OnboardingModel.findOneAndUpdate(
+    { userId },
+    {
+      $setOnInsert: {
+        status: 'pending',
+      },
+      $set: {
+        startedAt,
+      },
+    },
+    { upsert: true, new: true },
+  )
+}
+
 const getPlanOptions = async (userId: string) => {
   void userId
 
-  const plans = await PlanModel.find({ isActive: true })
-    .sort({ sortOrder: 1, createdAt: 1 })
-    .lean()
-
-  return plans.map((plan) => {
-    return {
-      id: plan._id.toString(),
-      code: plan.code,
-      name: plan.name,
-      description: plan.description,
-      price: plan.price,
-      currency: plan.currency,
-      durationDays: plan.durationDays,
-      maxDevices: plan.maxDevices,
-      downloadEnabled: plan.downloadEnabled,
-      accessLevel: plan.accessLevel,
-      features: plan.features,
-      isFree: plan.isFree,
-      isActive: plan.isActive,
-      sortOrder: plan.sortOrder,
-    }
+  const plans = await PlanModel.find({ isActive: true }).sort({
+    sortOrder: 1,
+    createdAt: 1,
   })
+
+  return plans.map((plan) => formatPlan(plan))
 }
 
 const getInterestOptions = async () => {
@@ -89,6 +98,7 @@ const selectPlan = async (
   userId: string,
   planCode: string,
   locale?: 'en' | 'bn',
+  billingCycle: PlanBillingCycle = 'monthly',
 ) => {
   const selectedPlan = await PlanModel.findOne({
     code: planCode.toUpperCase(),
@@ -99,18 +109,63 @@ const selectPlan = async (
     throw new AppError('Requested plan does not exist.', 404)
   }
 
-  const onboarding = await OnboardingModel.findOneAndUpdate(
+  const onboarding = await OnboardingModel.findOne({ userId })
+
+  if (onboarding?.status === 'completed') {
+    const completedPlan = onboarding.selectedPlanCode
+      ? await PlanModel.findOne({
+          code: onboarding.selectedPlanCode,
+          isActive: true,
+        })
+      : selectedPlan
+
+    if (!completedPlan) {
+      throw new AppError('Completed plan not found.', 404)
+    }
+
+    return {
+      id: onboarding._id.toString(),
+      success: true,
+      subscriptionCreated: false,
+      selectedPlanCode: completedPlan.code,
+      plan: {
+        code: completedPlan.code,
+        name: completedPlan.name,
+        price: completedPlan.price,
+      },
+      status: 'completed',
+      nextStep: 'onboarding_completed' as const,
+    }
+  }
+
+  const updatedOnboarding = await OnboardingModel.findOneAndUpdate(
     { userId },
     {
       $set: {
         selectedPlanCode: selectedPlan.code,
         selectedPlanName: selectedPlan.name,
-        selectedPlanPrice: selectedPlan.price,
+        selectedPlanPrice: getPlanBillingPrice(
+          selectedPlan.price,
+          billingCycle,
+        ),
+        selectedBillingCycle: selectedPlan.isFree ? 'monthly' : billingCycle,
         selectedAt: new Date(),
         status: selectedPlan.isFree ? 'completed' : 'selected',
       },
     },
     { upsert: true, new: true },
+  )
+
+  if (!updatedOnboarding) {
+    throw new AppError('Unable to store onboarding selection.', 500)
+  }
+
+  const normalizedBillingCycle: PlanBillingCycle = selectedPlan.isFree
+    ? 'monthly'
+    : billingCycle
+  const billingAmount = getPlanBillingPrice(
+    selectedPlan.price,
+    normalizedBillingCycle,
   )
 
   if (selectedPlan.isFree) {
@@ -123,7 +178,7 @@ const selectPlan = async (
     await markOnboardingCompleted(userId)
 
     return {
-      id: onboarding._id.toString(),
+      id: updatedOnboarding._id.toString(),
       success: true,
       subscriptionCreated: true,
       subscriptionId: subscription.id,
@@ -131,7 +186,8 @@ const selectPlan = async (
       plan: {
         code: selectedPlan.code,
         name: selectedPlan.name,
-        price: selectedPlan.price,
+        price: billingAmount,
+        billingCycle: normalizedBillingCycle,
       },
       status: 'completed',
       nextStep: 'onboarding_completed' as const,
@@ -142,8 +198,9 @@ const selectPlan = async (
   const planQuery = new URLSearchParams({
     plan_id: selectedPlan.code,
     plan_name: selectedPlan.name,
-    price: selectedPlan.price.toFixed(2),
+    price: billingAmount.toFixed(2),
     currency: selectedPlan.currency,
+    billing_cycle: normalizedBillingCycle,
   })
   const successUrl = `${config.frontendUrl}/${resolvedLocale}/onboarding/payment/success?${planQuery.toString()}&session_id={CHECKOUT_SESSION_ID}`
   const cancelUrl = `${config.frontendUrl}/${resolvedLocale}/onboarding/payment/failed?${planQuery.toString()}`
@@ -152,13 +209,14 @@ const selectPlan = async (
     userId,
     planId: selectedPlan._id.toString(),
     gateway: 'stripe',
+    billingCycle: normalizedBillingCycle,
     autoRenew: true,
     successUrl,
     cancelUrl,
   })
 
   return {
-    id: onboarding._id.toString(),
+    id: updatedOnboarding._id.toString(),
     success: true,
     subscriptionCreated: false,
     subscriptionId: initiatedPayment.payment.subscriptionId,
@@ -166,9 +224,10 @@ const selectPlan = async (
     plan: {
       code: selectedPlan.code,
       name: selectedPlan.name,
-      price: selectedPlan.price,
+      price: billingAmount,
+      billingCycle: normalizedBillingCycle,
     },
-    status: onboarding.status,
+    status: updatedOnboarding.status,
     nextStep: 'redirect_to_payment' as const,
     paymentId: initiatedPayment.payment.id,
     sessionId: initiatedPayment.sessionId,
@@ -274,14 +333,21 @@ const getOnboardingStatus = async (userId: string) => {
 
   return {
     status: onboarding.status,
+    startedAt: onboarding.startedAt?.toISOString(),
     selectedPlanCode: onboarding.selectedPlanCode,
     selectedPlanName: onboarding.selectedPlanName,
     selectedPlanPrice: onboarding.selectedPlanPrice,
+    selectedBillingCycle: onboarding.selectedBillingCycle,
     selectedAt: onboarding.selectedAt?.toISOString(),
     interests: onboarding.interests ?? [],
     selectedLanguage: onboarding.selectedLanguage,
     completedAt: onboarding.completedAt?.toISOString(),
   }
+}
+
+const startOnboarding = async (userId: string) => {
+  await markOnboardingStarted(userId)
+  return getOnboardingStatus(userId)
 }
 
 const storeInterests = async (
@@ -331,6 +397,7 @@ export const onboardingService = {
   completeOnboarding,
   confirmPayment,
   getOnboardingStatus,
+  startOnboarding,
   markOnboardingCompleted,
   storeInterests,
   storeLanguage,
